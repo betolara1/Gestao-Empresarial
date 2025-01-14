@@ -1,0 +1,115 @@
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.card li {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+#mapa {
+    height: 300px;
+    border-radius: 8px;
+}
+
+canvas {
+    max-width: 100%;
+    margin: 20px auto;
+}
+
+.titulo {
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+
+.lista-faturamento {
+    list-style: none;
+    padding: 0;
+}
+
+.item-faturamento {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    margin: 8px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.item-faturamento:hover {
+    background: #e9ecef;
+}
+
+.valor {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.total {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: right;
+}
+
+.grafico {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#map {
+    height: 400px; /* Altura do mapa */
+    width: 100%; /* Largura do mapa */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+
+.filtros-dashboard {
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.form-filtros {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.form-filtros select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 150px;
+} 
