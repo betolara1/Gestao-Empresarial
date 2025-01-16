@@ -1,44 +1,39 @@
 <?php
 include 'conexao.php';
 
-// Função para limpar dados de entrada
-function limparEntrada($data) {
-    return htmlspecialchars(stripslashes(trim($data)));
-}
-
-// Configurar cabeçalhos para resposta JSON
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = limparEntrada($_POST['nome_despesa']);
-    $valor = limparEntrada($_POST['valor_despesa']);
-    $proposta = limparEntrada($_POST['numero_proposta']);
-
-    // Validação simples
-    if (empty($nome) || $valor <= 0 || empty($proposta)) {
-        echo json_encode(['success' => false, 'message' => 'Dados inválidos.']);
-        exit;
+try {
+    // Validar dados recebidos
+    if (empty($_POST['nome_despesa']) || !isset($_POST['valor_despesa'])) {
+        throw new Exception('Dados incompletos');
     }
 
-    $sql = "INSERT INTO despesas (proposta, nome_despesa, valor) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isd", $proposta, $nome, $valor);
+    $nome_despesa = $_POST['nome_despesa'];
+    $valor_despesa = floatval(str_replace(',', '.', $_POST['valor_despesa']));
+    $numero_proposta = $_POST['numero_proposta'] ?? null;
+
+    // Inserir no banco de dados
+    $stmt = $conn->prepare("INSERT INTO despesas (nome_despesa, valor, numero_proposta) VALUES (?, ?, ?)");
+    $stmt->bind_param("sds", $nome_despesa, $valor_despesa, $numero_proposta);
 
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,
-            'id' => $stmt->insert_id,
-            'proposta' => $proposta,
-            'nome_despesa' => $nome,
-            'valor_despesa' => $valor
+            'id' => $conn->insert_id,
+            'nome_despesa' => $nome_despesa,
+            'valor_despesa' => $valor_despesa
         ]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao salvar despesa.']);
+        throw new Exception('Erro ao salvar no banco de dados');
     }
 
-    $stmt->close();
-    $conn->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Método de requisição inválido.']);
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
+
+$conn->close();
 ?>

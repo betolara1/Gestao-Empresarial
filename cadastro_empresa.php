@@ -15,7 +15,7 @@ if ($result_empresa->num_rows > 0) {
 }
 
 
-if ($empresa == 0) {
+if ($empresa === 0) {
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -37,119 +37,130 @@ if ($empresa == 0) {
                 <h1>Cadastrar Empresa</h1>
                 
                 <form id="cadastroForm" action="salvar_empresa.php" method="POST" enctype="multipart/form-data">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="razao_social" class="required">Razão Social:</label>
-                            <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Digite a razão social" required>
+                    <!-- Seção: Informações Principais -->
+                    <div class="form-section">
+                        <h2>Informações Principais</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="razao_social" class="required">Razão Social</label>
+                                <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Digite a razão social" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cnpj" class="required">CNPJ</label>
+                                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
+                            </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="cnpj" class="required">CNPJ:</label>
-                            <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nome">Nome Fantasia</label>
+                                <input type="text" id="nome" name="nome" placeholder="Digite o nome fantasia">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cpf">CPF</label>
+                                <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nome">Nome Fantasia:</label>
-                            <input type="text" id="nome" name="nome" placeholder="Digite o nome fantasia">
+                    <!-- Seção: Endereço -->
+                    <div class="form-section">
+                        <h2>Endereço</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cep" class="required">CEP</label>
+                                <div class="input-with-feedback">
+                                    <input type="text" id="cep" name="cep" required placeholder="00000-000">
+                                    <small id="cep-feedback" class="form-text"></small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rua">Rua</label>
+                                <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="numero" class="required">Número</label>
+                                <input type="text" id="numero" name="numero" required placeholder="Número">
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="cpf">CPF:</label>
-                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="complemento">Complemento</label>
+                                <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bairro">Bairro</label>
+                                <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cidade">Cidade</label>
+                                <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estado">Estado</label>
+                                <input type="text" id="estado" name="estado" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="coordenada">Coordenadas</label>
+                                <div class="input-with-map">
+                                    <input type="text" id="coordenada" name="coordenada" readonly placeholder="Latitude, Longitude">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="cep" class="required">CEP:</label>
-                            <input type="text" id="cep" name="cep" required placeholder="00000-000">
-                            <small id="cep-feedback" class="form-text"></small>
-                        </div>
+                    <!-- Seção: Contato -->
+                    <div class="form-section">
+                        <h2>Contato</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email" class="required">E-mail</label>
+                                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="rua">Rua:</label>
-                            <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
-                        </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="numero" class="required">Número:</label>
-                            <input type="text" id="numero" name="numero" required placeholder="Número">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="complemento">Complemento:</label>
-                            <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
+                            <div class="form-group">
+                                <label for="celular" class="required">Celular</label>
+                                <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bairro">Bairro:</label>
-                            <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
+                    <!-- Seção: Atividades -->
+                    <div class="form-section">
+                        <h2>Atividades</h2>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="atividade_principal" class="required">Atividade Principal (CNAE)</label>
+                                <select name="atividade_principal" id="atividade_principal" required onchange="atualizarDescricaoCNAE(this)">
+                                    <option value="">Selecione uma atividade principal</option>
+                                    <?php foreach ($cnae_data as $cnae) { ?>
+                                        <option value="<?= $cnae['id'] ?>" data-descricao="<?= htmlspecialchars($cnae['descricao']) ?>">
+                                            <?= $cnae['id'] ?> - <?= $cnae['descricao'] ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                                <input type="hidden" name="descricao_cnae" id="descricao_cnae">
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="cidade">Cidade:</label>
-                            <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="estado">Estado:</label>
-                            <input type="text" id="estado" name="estado" readonly>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email" class="required">E-mail:</label>
-                            <input type="email" id="email" name="email" required placeholder="seu@email.com">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="coordenada">Coordenada:</label>
-                            <input type="text" id="coordenada" name="coordenada" 
-                                value="" placeholder="Latitude, Longitude">
-                                <small id="coordenadas-feedback" class="form-text"></small>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="telefone">Telefone:</label>
-                            <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="celular" class="required">Celular:</label>
-                            <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="atividade_principal">Atividade Principal (CNAE e atividade)</label>
-                            <select name="atividade_principal" id="atividade_principal" required onchange="atualizarDescricaoCNAE(this)">
-                                <option value="">Selecione uma atividade principal</option>
-                                <?php
-                                foreach ($cnae_data as $cnae) {
-                                    $codigo = $cnae['id'];
-                                    $descricao = $cnae['descricao'];
-                                    $selected = ($codigo == $empresa['codigo_cnae']) ? 'selected' : '';
-                                    echo "<option value=\"$codigo\" data-descricao=\"" . htmlspecialchars($descricao) . "\" $selected>$codigo - $descricao</option>";
-                                }
-                                ?>
-                            </select>
-                            <input type="hidden" name="descricao_cnae" id="descricao_cnae" value="<?php echo htmlspecialchars($empresa['descricao_cnae'] ?? ''); ?>">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="atividades_secundarias">Atividades Secundárias (CNAE e atividade)</label>
-                            <div class="d-flex gap-2">
-                                <select name="cnae_select" id="cnae_select" class="form-control">
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="atividades_secundarias">Atividades Secundárias (CNAE)</label>
+                                <select name="cnae_select" id="cnae_select">
                                     <option value="">Selecione um CNAE</option>
                                     <?php
                                     foreach ($cnae_data as $cnae) {
@@ -159,38 +170,43 @@ if ($empresa == 0) {
                                     }
                                     ?>
                                 </select>
-                                <button type="button" id="adicionar_cnae" class="btn btn-primary">Adicionar</button>
-                            </div>
-                            
-                            <!-- Lista de CNAEs selecionados -->
-                            <div id="cnaes_selecionados" class="mt-3">
-                                <h6>CNAEs Selecionados:</h6>
-                                <ul class="list-group" id="lista_cnaes">
-                                    <?php
-                                    // Exibe CNAEs já selecionados anteriormente
-                                    if (!empty($atividades_secundarias_selecionadas)) {
-                                        foreach ($atividades_secundarias_selecionadas as $cnae_id) {
-                                            $cnae = array_filter($cnae_data, function($item) use ($cnae_id) {
-                                                return $item['id'] == $cnae_id;
-                                            });
-                                            $cnae = reset($cnae);
-                                            if ($cnae) {
-                                                echo "<li class='list-group-item d-flex justify-content-between align-items-center' data-id='{$cnae['id']}'>";
-                                                echo "{$cnae['id']} - {$cnae['descricao']}";
-                                                echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'>Remover</button>";
-                                                echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
-                                                echo "</li>";
+                                <button type="button" id="adicionar_cnae" class="btn btn-secondary">
+                                    <i class="fas fa-plus"></i> Adicionar
+                                </button>
+                               
+                                <label></label> <label></label> <label></label> <label></label>
+                                <div id="cnaes_selecionados" class="mt-3">
+                                    <h6>CNAEs Selecionados:</h6>
+                                    <ul class="list-group" id="lista_cnaes">
+                                        <?php
+                                        // Exibe CNAEs já selecionados anteriormente
+                                        if (!empty($atividades_secundarias_selecionadas)) {
+                                            foreach ($atividades_secundarias_selecionadas as $cnae_id) {
+                                                $cnae = array_filter($cnae_data, function($item) use ($cnae_id) {
+                                                    return $item['id'] == $cnae_id;
+                                                });
+                                                $cnae = reset($cnae);
+                                                if ($cnae) {
+                                                    echo "<li class='list-group-item d-flex justify-content-between align-items-center' data-id='{$cnae['id']}'>";
+                                                    echo "{$cnae['id']} - {$cnae['descricao']}";
+                                                    echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'>Remover</button>";
+                                                    echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
+                                                    echo "</li>";
+                                                }
                                             }
                                         }
-                                    }
-                                    ?>
-                                </ul>
+                                        ?>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <label></label><label></label>
-                    <button class='btn' type="submit">Cadastrar</button>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-save"></i> Salvar Empresa
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -372,10 +388,17 @@ if ($empresa == 0) {
                 const select = document.getElementById('atividade_principal');
                 atualizarDescricaoCNAE(select);
             });
+
+            // Evento para remover CNAE
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remover-cnae')) {
+                    e.target.closest('li').remove();
+                }
+            });
             
         </script>
         <script src="js/cep.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=="></script>
+        <script src="js/coordenadas.js"></script>
     </body>
     </html>
 <?php

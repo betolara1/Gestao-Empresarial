@@ -1,57 +1,99 @@
 $(document).ready(function() {
-    let isRequesting = false;
+    function limpaFormularioCep() {
+        // Limpa valores do formulário de cep.
+        $("#rua").val("");
+        $("#bairro").val("");
+        $("#cidade").val("");
+        $("#estado").val("");
+        $("#coordenada").val("");
+    }
 
-    $('#cep').on('blur', function() {
-        if (isRequesting) return;
+    function preencheCamposEndereco(dados) {
+        $("#rua").val(dados.street || dados.logradouro);
+        $("#bairro").val(dados.neighborhood || dados.bairro);
+        $("#cidade").val(dados.city || dados.cidade || dados.localidade);
+        $("#estado").val(dados.state || dados.uf);
+    }
 
-        let cep = $(this).val().replace(/\D/g, '');
-        if (cep !== '') {
-            let validacep = /^[0-9]{8}$/;
-            if (validacep.test(cep)) {
-                isRequesting = true;
-                $('#cep-feedback').text('Buscando CEP...').removeClass('text-danger').addClass('text-info');
+    function buscarCoordenadas(endereco) {
+        $('#coordenada').val("Buscando coordenadas...");
+        
+        // Monta o endereço completo para busca
+        const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+        
+        // Usa a API do OpenStreetMap (Nominatim)
+        $.ajax({
+            url: 'https://nominatim.openstreetmap.org/search',
+            type: 'GET',
+            data: {
+                q: enderecoCompleto,
+                format: 'json',
+                limit: 1
+            },
+            headers: {
+                'Accept-Language': 'pt-BR'
+            },
+            success: function(response) {
+                if (response && response.length > 0) {
+                    const lat = response[0].lat;
+                    const lon = response[0].lon;
+                    $('#coordenada').val(`${lat}, ${lon}`);
+                } else {
+                    $('#coordenada').val('');
+                    console.log('Coordenadas não encontradas');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#coordenada').val('');
+                console.log('Erro ao buscar coordenadas:', error);
+            }
+        });
+    }
 
-                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`)
-                    .done(function(dados) {
-                        if (!('erro' in dados)) {
-                            $('#rua').val(dados.logradouro);
-                            $('#bairro').val(dados.bairro);
-                            $('#cidade').val(dados.localidade);
-                            $('#estado').val(dados.uf);
-                            $('#cep-feedback').text('CEP encontrado!').removeClass('text-info text-danger').addClass('text-success');
+    //Quando o campo cep perde o foco.
+    $("#cep").on('blur change', function() {
+        // Nova variável "cep" somente com dígitos.
+        var cep = $(this).val().replace(/\D/g, '');
 
-                            // Buscar coordenadas
-                            buscarCoordenadas(dados.logradouro + ', ' + dados.localidade + ' - ' + dados.uf);
-                        } else {
-                            limpaCamposEndereco();
-                            $('#cep-feedback').text('CEP não encontrado.').removeClass('text-info text-success').addClass('text-danger');
-                        }
-                    })
-                    .fail(function() {
-                        limpaCamposEndereco();
-                        $('#cep-feedback').text('Erro na busca do CEP.').removeClass('text-info text-success').addClass('text-danger');
-                    })
-                    .always(function() {
-                        isRequesting = false;
-                    });
+        //Verifica se campo cep possui valor informado.
+        if (cep.length === 8) {
+            //Expressão regular para validar o CEP.
+            var validacep = /^[0-9]{8}$/;
+
+            //Valida o formato do CEP.
+            if(validacep.test(cep)) {
+                //Preenche os campos com "..." enquanto consulta webservice.
+                $("#rua").val("...");
+                $("#bairro").val("...");
+                $("#cidade").val("...");
+                $("#estado").val("...");
+                $("#coordenada").val("Buscando coordenadas...");
+
+                //Consulta o webservice viacep.com.br/
+                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
+                    if (!("erro" in dados)) {
+                        preencheCamposEndereco(dados);
+                        // Busca coordenadas após preencher o endereço
+                        buscarCoordenadas(dados);
+                    } else {
+                        //CEP pesquisado não foi encontrado.
+                        limpaFormularioCep();
+                        alert("CEP não encontrado.");
+                    }
+                }).fail(function() {
+                    limpaFormularioCep();
+                    alert("Erro ao buscar CEP. Tente novamente mais tarde.");
+                });
             } else {
-                limpaCamposEndereco();
-                $('#cep-feedback').text('Formato de CEP inválido.').removeClass('text-info text-success').addClass('text-danger');
+                //cep é inválido.
+                limpaFormularioCep();
+                alert("Formato de CEP inválido.");
             }
         } else {
-            limpaCamposEndereco();
-            $('#cep-feedback').text('');
+            //cep sem valor, limpa formulário.
+            limpaFormularioCep();
         }
     });
-
-    function limpaCamposEndereco() {
-        $('#cep').val('');
-        $('#rua').val('');
-        $('#bairro').val('');
-        $('#cidade').val('');
-        $('#estado').val('');
-        $('#coordenada').val('');
-    }
 });
     
     

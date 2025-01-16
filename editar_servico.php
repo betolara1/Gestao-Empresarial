@@ -18,175 +18,195 @@ include 'php/editar_servico.php'
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="main-content">
-    <div class="container">
-        <h1>Editar Serviço</h1>
-        <form action="atualizar_servico.php" method="POST">
-            
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cliente">Número da Proposta</label>
-                    <input type="text" name="numero_proposta" value="<?php echo $servico['numero_proposta']; ?>">
-                </div>
-                <div class="form-group">
-                    <label for="cliente">Cliente</label>
-                    <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($servico['cliente_id']); ?>" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="cnpj_cpf">CNPJ/CPF</label>
-                    <input type="text" id="cnpj_cpf" name="cnpj_cpf" value="<?php echo htmlspecialchars($servico['cnpj_cpf']); ?>" readonly>
-                </div>
+        <div class="container">
+            <div class="header-content">
+                <h2>Editar Serviço</h2>
             </div>
 
-            <label>Tipos de Serviço:</label>
-            <div class="checkbox-group">
-                <?php
-                    while($row = $resultTipos->fetch_assoc()) {
-                        $checked = $row['is_selected'] ? 'checked' : '';
-                        echo "<div class='form-check'>";
-                        echo "<input class='form-check-input' type='checkbox' 
-                            name='tipo_servico[]' 
-                            id='servico_" . $row['id'] . "' 
-                            value='" . $row['id'] . "' 
-                            " . $checked . ">";
-                        echo "<label class='form-check-label' for='servico_" . $row['id'] . "'>";
-                        echo htmlspecialchars($row['tipo_servico']);
-                        echo "</label>";
-                        echo "</div>";
-                    }
-                ?>
+            <div class="card">
+                <form action="atualizar_servico.php" method="POST">
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cliente">Número da Proposta</label>
+                                <input type="text" name="numero_proposta" value="<?php echo $servico['numero_proposta']; ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="cliente">Cliente</label>
+                                <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($servico['cliente_id']); ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="cnpj_cpf">CNPJ/CPF</label>
+                                <input type="text" id="cnpj_cpf" name="cnpj_cpf" value="<?php echo htmlspecialchars($servico['cnpj_cpf']); ?>" readonly class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>
+                            <i class="fas fa-tasks"></i>
+                            Tipos de Serviço
+                        </h3>
+                        <div class="checkbox-group">
+                            <?php
+                            while($row = $resultTipos->fetch_assoc()) {
+                                $checked = $row['is_selected'] ? 'checked' : '';
+                                echo "<label class='form-check' for='servico_" . $row['id'] . "'>";
+                                echo "<input class='form-check-input' type='checkbox' 
+                                    name='tipo_servico[]' 
+                                    id='servico_" . $row['id'] . "' 
+                                    value='" . $row['id'] . "' 
+                                    " . $checked . ">";
+                                echo "<span class='form-check-label'>";
+                                echo htmlspecialchars($row['tipo_servico']);
+                                echo "</span>";
+                                echo "</label>";
+                            }
+                            ?>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="data_inicio">Data de Início</label>
+                                <input type="date" id="data_inicio" name="data_inicio" 
+                                       value="<?php echo htmlspecialchars($servico['data_inicio']); ?>" 
+                                       required class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="data_termino">Data de Término</label>
+                                <input type="date" id="data_termino" name="data_termino" 
+                                       value="<?php echo htmlspecialchars($servico['data_termino']); ?>" 
+                                       class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="status_servico">Status do Serviço</label>
+                                <input type="text" id="status_servico" name="status_servico" 
+                                       value="<?php echo htmlspecialchars($servico['status_servico']); ?>" 
+                                       readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="data_pagamento">Vencimento</label>
+                                <input type="date" id="data_pagamento" name="data_pagamento" value="<?php echo htmlspecialchars($servico['data_pagamento']); ?>" required class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="responsavel_execucao">Responsável pelo Serviço</label>
+                                <input type="text" id="responsavel_execucao" name="responsavel_execucao" value="<?php echo htmlspecialchars($servico['responsavel_execucao']); ?>" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="forma_pagamento">Forma de Pagamento</label>
+                                <select id="forma_pagamento" name="forma_pagamento" required class="form-control">
+                                    <option value="">Selecione a forma de pagamento</option>
+                                    <option value="CARTÃO DE CRÉDITO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'CARTÃO DE CRÉDITO' ? 'selected' : ''; ?>>Cartão de Crédito</option>
+                                    <option value="CARTÃO DE DÉBITO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'CARTÃO DE DÉBITO' ? 'selected' : ''; ?>>Cartão de Débito</option>
+                                    <option value="PIX" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'PIX' ? 'selected' : ''; ?>>PIX</option>
+                                    <option value="DINHEIRO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'DINHEIRO' ? 'selected' : ''; ?>>Dinheiro</option>
+                                    <option value="BOLETO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'BOLETO' ? 'selected' : ''; ?>>Boleto</option>
+                                </select>
+                            </div>
+
+                            <div id="editarServicoForm" class="form-group">
+                                <label for="parcelamento">Quatidade de Parcelas</label>
+                                <input type="number" id="parcelamento" name="parcelamento" step="0.01" value="<?php echo htmlspecialchars($servico['parcelamento']); ?>" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div>
+                                <label for="valor_total">Valor Total</label>
+                                <input type="number" id="valor_total" name="valor_total" step="0.01" value="<?php echo htmlspecialchars($servico['valor_total']); ?>" class="form-control">
+                            </div>
+
+                            <div>
+                                <label for="valor_entrada">Valor Entrada</label>
+                                <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" 
+                                    value="<?php echo isset($servico['valor_entrada']) && $servico['valor_entrada'] !== '' ? htmlspecialchars($servico['valor_entrada']) : '0'; ?>" class="form-control">
+                            </div>
+
+                            <div>
+                                <label for="valor_pago">Valor Pago</label>
+                                <input type="number" id="valor_pago" name="valor_pago" step="0.01" 
+                                    value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly class="form-control">
+                            </div>
+
+                            <div>
+                                <label for="valor_pagar">Valor A Ser Pago</label>
+                                <input type="number" id="valor_pagar" name="valor_pagar" step="0.01" 
+                                    value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label>Endereço do Serviço</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cep" class="required">CEP:</label>
+                                <input type="text" id="cep" name="cep" required placeholder="00000-000" 
+                                    value="<?php echo htmlspecialchars($servico['cep']); ?>" class="form-control">
+                                <small id="cep-feedback" class="form-text"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="rua">Rua:</label>
+                                <input type="text" id="rua" name="rua" placeholder="Endereço" 
+                                    value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="numero" class="required">Número:</label>
+                                <input type="text" id="numero" name="numero" required placeholder="Número" 
+                                    value="<?php echo htmlspecialchars($servico['numero']); ?>" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="complemento">Complemento:</label>
+                                <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
+                                    value="<?php echo htmlspecialchars($servico['complemento']); ?>" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="bairro">Bairro:</label>
+                                <input type="text" id="bairro" name="bairro" placeholder="Bairro" 
+                                    value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="cidade">Cidade:</label>
+                                <input type="text" id="cidade" name="cidade" placeholder="Cidade" 
+                                    value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="estado">Estado:</label>
+                                <input type="text" id="estado" name="estado" placeholder="Estado" 
+                                    value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="coordenada">Coordenada:</label>
+                                <div class="input-with-map">
+                                    <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
+                                        value="<?php echo htmlspecialchars($servico['coordenada']); ?>" class="form-control">
+                                    <small id="coordenadas-feedback" class="form-text"></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                        <a href="gerenciar_relatorio.php" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="data_inicio">Data de Início</label>
-                    <input type="date" id="data_inicio" name="data_inicio" value="<?php echo htmlspecialchars($servico['data_inicio']); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="data_termino">Data de Término</label>
-                    <input type="date" id="data_termino" name="data_termino" value="<?php echo htmlspecialchars($servico['data_termino']); ?>">
-                </div>
-
-                <div class="form-group">
-                    <label for="status_servico">Status do Serviço</label>
-                    <input type="text" id="status_servico" name="status_servico" value="<?php echo htmlspecialchars($servico['status_servico']); ?>" readonly>
-                </div>
-
-
-                
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="data_pagamento">Vencimento</label>
-                    <input type="date" id="data_pagamento" name="data_pagamento" value="<?php echo htmlspecialchars($servico['data_pagamento']); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label for="responsavel_execucao">Responsável pelo Serviço</label>
-                    <input type="text" id="responsavel_execucao" name="responsavel_execucao" value="<?php echo htmlspecialchars($servico['responsavel_execucao']); ?>">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="forma_pagamento">Forma de Pagamento</label>
-                    <select id="forma_pagamento" name="forma_pagamento" required>
-                        <option value="">Selecione a forma de pagamento</option>
-                        <option value="CARTÃO DE CRÉDITO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'CARTÃO DE CRÉDITO' ? 'selected' : ''; ?>>Cartão de Crédito</option>
-                        <option value="CARTÃO DE DÉBITO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'CARTÃO DE DÉBITO' ? 'selected' : ''; ?>>Cartão de Débito</option>
-                        <option value="PIX" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'PIX' ? 'selected' : ''; ?>>PIX</option>
-                        <option value="DINHEIRO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'DINHEIRO' ? 'selected' : ''; ?>>Dinheiro</option>
-                        <option value="BOLETO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'BOLETO' ? 'selected' : ''; ?>>Boleto</option>
-                    </select>
-                </div>
-
-                <div id="editarServicoForm" class="form-group">
-                    <label for="parcelamento">Quatidade de Parcelas</label>
-                    <input type="number" id="parcelamento" name="parcelamento" step="0.01" value="<?php echo htmlspecialchars($servico['parcelamento']); ?>" readonly>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div>
-                    <label for="valor_total">Valor Total</label>
-                    <input type="number" id="valor_total" name="valor_total" step="0.01" value="<?php echo htmlspecialchars($servico['valor_total']); ?>">
-                </div>
-
-                <div>
-                    <label for="valor_entrada">Valor Entrada</label>
-                    <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" 
-                        value="<?php echo isset($servico['valor_entrada']) && $servico['valor_entrada'] !== '' ? htmlspecialchars($servico['valor_entrada']) : '0'; ?>">
-                </div>
-
-                <div>
-                    <label for="valor_pago">Valor Pago</label>
-                    <input type="number" id="valor_pago" name="valor_pago" step="0.01" 
-                        value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly>
-                </div>
-
-                <div>
-                    <label for="valor_pagar">Valor A Ser Pago</label>
-                    <input type="number" id="valor_pagar" name="valor_pagar" step="0.01" 
-                        value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly>
-                </div>
-            </div>
-
-
-            <label>Endereço do Serviço</label>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cep" class="required">CEP:</label>
-                    <input type="text" id="cep" name="cep" required placeholder="00000-000" 
-                        value="<?php echo htmlspecialchars($servico['cep']); ?>">
-                    <small id="cep-feedback" class="form-text"></small>
-                </div>
-                <div class="form-group">
-                    <label for="rua">Rua:</label>
-                    <input type="text" id="rua" name="rua" placeholder="Endereço" 
-                        value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="numero" class="required">Número:</label>
-                    <input type="text" id="numero" name="numero" required placeholder="Número" 
-                        value="<?php echo htmlspecialchars($servico['numero']); ?>">
-                </div>
-                <div class="form-group">
-                    <label for="complemento">Complemento:</label>
-                    <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
-                        value="<?php echo htmlspecialchars($servico['complemento']); ?>">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="bairro">Bairro:</label>
-                    <input type="text" id="bairro" name="bairro" placeholder="Bairro" 
-                        value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="cidade">Cidade:</label>
-                    <input type="text" id="cidade" name="cidade" placeholder="Cidade" 
-                        value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="estado">Estado:</label>
-                    <input type="text" id="estado" name="estado" placeholder="Estado" 
-                        value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="coordenada">Coordenada:</label>
-                    <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
-                        value="<?php echo htmlspecialchars($servico['coordenada']); ?>">
-                    <small id="coordenadas-feedback" class="form-text"></small>
-                </div>
-            </div>
-
-
-            <button class="btn" type="submit">Salvar Alterações</button>
-        </form>
-    </div>
+        </div>
     </div>
 
     <script>
@@ -236,8 +256,6 @@ include 'php/editar_servico.php'
             });
         });
 
-        // Adicionar evento de submit ao formulário
-        document.getElementById('despesaForm').addEventListener('submit', cadastrarDespesa);
 
         $(document).ready(function() {
             let isRequesting = false;
@@ -341,6 +359,10 @@ include 'php/editar_servico.php'
 
 
     </script>
+    <script src="js/coordenadas.js"></script>
+    <script src="js/busca_cpfcnpj.js"></script>
+    <script src="js/cep.js"></script>
+    <script src="js/despesas.js"></script>
     <script src="js/status_servico.js"></script>
 </body>
 </html>

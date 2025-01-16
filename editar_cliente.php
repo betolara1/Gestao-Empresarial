@@ -15,7 +15,6 @@ include 'php/editar_cliente.php'
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
 </head>
-
 <body>
     <!-- Sidebar -->
     <?php include 'sidebar.php'; ?>
@@ -23,134 +22,153 @@ include 'php/editar_cliente.php'
     <div class="main-content">
         <div class="container">
             <h1>Editar Cliente</h1>
-            <form action="atualizar_cliente.php" method="POST">
+            <form action="atualizar_cliente.php" method="POST" id="formEditarCliente">
                 <!-- Campo oculto com ID -->
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
                 <input type="hidden" id="tipo_pessoa" name="tipo_pessoa" readonly value="<?php echo htmlspecialchars($cliente['tipo_pessoa']); ?>">
 
-                <div id="pessoaJuridica" class="hidden">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="razaoSocial" class="required">Razão Social:</label>
-                            <input type="text" name="razao_social" id="razaoSocial" name="razaoSocial" placeholder="Digite a razão social"value="<?php echo htmlspecialchars($cliente['razao_social']); ?>">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="cnpj" class="required">CNPJ:</label>
-                            <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" value="<?php echo htmlspecialchars($cliente['cnpj']); ?>">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="atividade_principal" class="required">Atividade Principal (CNAE e atividade)</label>
-                            <select name="atividade_principal" id="atividade_principal">
-                                <option value="">Selecione uma atividade</option>
-                                <?php
-                                if ($cnae_data) {
-                                    foreach ($cnae_data as $cnae) {
-                                        $codigo = htmlspecialchars($cnae['id']);
-                                        $descricao = htmlspecialchars($cnae['descricao']);
-                                        
-                                        // Verifica se o código atual é igual ao código do cliente
-                                        $selected = ($codigo == $cliente['codigo_cnae']) ? 'selected' : '';
-
-                                        echo '<option value="' . $codigo . '" ' . $selected . '>' . 
-                                            $codigo . ' - ' . $descricao . 
-                                            '</option>';
-                                    }
-                                }
-                                ?>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="pessoaFisica" class="hidden">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nomeCliente" class="required">Nome do Cliente:</label>
-                            <input type="text" id="nomeCliente" name="nomeCliente" placeholder="Digite o nome completo" value="<?php echo htmlspecialchars($cliente['nome']); ?>">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="cpf" class="required">CPF:</label>
-                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" value="<?php echo htmlspecialchars($cliente['cpf']); ?>">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cep" class="required">CEP:</label>
-                        <input type="text" id="cep" name="cep"
-                            value="<?php echo htmlspecialchars($cliente['cep'] ?? ''); ?>" required placeholder="00000-000">
-                        <small id="cep-feedback" class="form-text"></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="rua">Rua:</label>
-                        <input type="text" id="rua" name="rua" readonly placeholder="Endereço" value="<?php echo htmlspecialchars($cliente['rua']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="numero" class="required">Número:</label>
-                        <input type="text" id="numero" name="numero" required placeholder="Número" value="<?php echo htmlspecialchars($cliente['numero']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="complemento">Complemento:</label>
-                        <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." value="<?php echo htmlspecialchars($cliente['complemento']); ?>">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bairro">Bairro:</label>
-                        <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro" value="<?php echo htmlspecialchars($cliente['bairro']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cidade">Cidade:</label>
-                        <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade" value="<?php echo htmlspecialchars($cliente['cidade']); ?>">
-                    </div>
-                
-                    <div class="form-group">
-                        <label for="estado">Estado:</label>
-                        <input type="text" id="estado" name="estado" readonly placeholder="Estado" value="<?php echo htmlspecialchars($cliente['estado']); ?>">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="email" class="required">E-mail:</label>
-                        <input type="email" id="email" name="email" required placeholder="seu@email.com" value="<?php echo htmlspecialchars($cliente['email']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="coordenada">Coordenada:</label>
-                        <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
-                            value="<?php echo htmlspecialchars($cliente['coordenada'] ?? ''); ?>">
-                            <small id="coordenadas-feedback" class="form-text"></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="celular" class="required">Celular:</label>
-                        <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000" value="<?php echo htmlspecialchars($cliente['celular']); ?>">
-                    </div>
-                </div>
-
-                <div id="pessoaJuridica2" class='hidden'>
-
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn" type="submit" style="margin-right: 10px;">Atualizar Cliente</button>
+                <!-- Seção: Informações do Cliente -->
+                <div class="form-section">
+                    <h2>Informações do Cliente</h2>
                     
-                    <a href="excluir_cliente.php?id=<?php echo $id; ?>" 
-                    onclick="return confirm('Tem certeza de que deseja excluir este cliente?');" 
-                    class="btn-excluir">
-                        Excluir
+                    <div id="pessoaJuridica" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="razaoSocial" class="required">Razão Social:</label>
+                                <input type="text" name="razao_social" id="razaoSocial" placeholder="Digite a razão social" 
+                                       value="<?php echo htmlspecialchars($cliente['razao_social']); ?>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cnpj" class="required">CNPJ:</label>
+                                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" 
+                                       value="<?php echo htmlspecialchars($cliente['cnpj']); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="atividade_principal" class="required">Atividade Principal (CNAE)</label>
+                                <select name="atividade_principal" id="atividade_principal">
+                                    <option value="">Selecione uma atividade</option>
+                                    <?php
+                                    if ($cnae_data) {
+                                        foreach ($cnae_data as $cnae) {
+                                            $codigo = htmlspecialchars($cnae['id']);
+                                            $descricao = htmlspecialchars($cnae['descricao']);
+                                            $selected = ($codigo == $cliente['codigo_cnae']) ? 'selected' : '';
+                                            echo "<option value='$codigo' $selected>$codigo - $descricao</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pessoaFisica" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nomeCliente" class="required">Nome do Cliente:</label>
+                                <input type="text" id="nomeCliente" name="nomeCliente" placeholder="Digite o nome completo" 
+                                       value="<?php echo htmlspecialchars($cliente['nome']); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cpf" class="required">CPF:</label>
+                                <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" 
+                                       value="<?php echo htmlspecialchars($cliente['cpf']); ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Endereço -->
+                <div class="form-section">
+                    <h2>Endereço</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cep" class="required">CEP:</label>
+                            <div class="input-with-feedback">
+                                <input type="text" id="cep" name="cep" required placeholder="00000-000" 
+                                       value="<?php echo htmlspecialchars($cliente['cep']); ?>">
+                                <small id="cep-feedback" class="form-text"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rua">Rua:</label>
+                            <input type="text" id="rua" name="rua" readonly placeholder="Endereço" 
+                                   value="<?php echo htmlspecialchars($cliente['rua']); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numero" class="required">Número:</label>
+                            <input type="text" id="numero" name="numero" required placeholder="Número" 
+                                   value="<?php echo htmlspecialchars($cliente['numero']); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="complemento">Complemento:</label>
+                            <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
+                                   value="<?php echo htmlspecialchars($cliente['complemento']); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bairro">Bairro:</label>
+                            <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro" 
+                                   value="<?php echo htmlspecialchars($cliente['bairro']); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cidade">Cidade:</label>
+                            <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade" 
+                                   value="<?php echo htmlspecialchars($cliente['cidade']); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estado">Estado:</label>
+                            <input type="text" id="estado" name="estado" readonly placeholder="Estado" 
+                                   value="<?php echo htmlspecialchars($cliente['estado']); ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Contato -->
+                <div class="form-section">
+                    <h2>Contato</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email" class="required">E-mail:</label>
+                            <input type="email" id="email" name="email" required placeholder="seu@email.com" 
+                                   value="<?php echo htmlspecialchars($cliente['email']); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="coordenada">Coordenada:</label>
+                            <div class="input-with-feedback">
+                                <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
+                                       value="<?php echo htmlspecialchars($cliente['coordenada']); ?>">
+                                <small id="coordenadas-feedback" class="form-text"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="celular" class="required">Celular:</label>
+                            <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000" 
+                                   value="<?php echo htmlspecialchars($cliente['celular']); ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Alterar
+                    </button>
+                    <a href="gerenciar_clientes.php" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>
             </form>

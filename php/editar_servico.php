@@ -27,7 +27,6 @@ if (isset($_GET['id'])) {
 $sqlTipoDespesa = "SELECT * FROM despesas";
 $resultTipoDespesa = $conn->query($sqlTipoDespesa);
 
-
 // ID do serviço sendo editado
 $servico_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -37,18 +36,30 @@ if ($servico_id > 0) {
         SELECT 
             ts.*,
             CASE 
-                WHEN sts.servico_id IS NOT NULL THEN 1
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM servico_tipo_servico sts 
+                    WHERE sts.tipo_servico_id = ts.id 
+                    AND sts.servico_id = (
+                        SELECT id 
+                        FROM servicos 
+                        WHERE numero_proposta = ?
+                    )
+                ) THEN 1
                 ELSE 0
             END as is_selected
         FROM tipos_servicos ts
-        LEFT JOIN servico_tipo_servico sts ON ts.id = sts.tipo_servico_id 
-            AND sts.servico_id = ? -- Substitua 1 pelo ID do serviço em teste
         ORDER BY ts.tipo_servico";
 
     $stmtTipos = $conn->prepare($queryTiposServicos);
-    $stmtTipos->bind_param("i", $servico_id);
+    $stmtTipos->bind_param("i", $id); // $id é o número da proposta
     $stmtTipos->execute();
     $resultTipos = $stmtTipos->get_result();
+
+    // Adicione este código para debug
+    if ($stmtTipos->error) {
+        echo "Erro na consulta: " . $stmtTipos->error;
+    }
 } else {
     echo "ID do serviço não informado.";
     exit;
@@ -158,4 +169,14 @@ $totais = $result_totais->fetch_assoc();
 $total_pago = $totais['total_pago'];
 $total_pendente = $totais['total_pendente'];
 
+
+// Modifique a consulta SQL para incluir um JOIN com a tabela cliente
+$sql = "SELECT s.*, c.nome as nome_cliente, c.cpf, c.cnpj 
+        FROM servicos s 
+        LEFT JOIN cliente c ON s.cliente_id = c.id 
+        WHERE s.numero_proposta = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>

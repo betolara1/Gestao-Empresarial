@@ -37,7 +37,7 @@ include 'php/sidebar.php'
         <ul class="nav-menu">
             <li class="nav-item">
                 <a href="index.php" class="nav-link">
-                    <i class="fas fa-building"></i>
+                    <i class="fas fa-home"></i>
                     <span>Página Inicial</span>
                 </a>
             </li>
@@ -51,42 +51,42 @@ include 'php/sidebar.php'
 
             <li class="nav-item">
                 <a href="cadastro_cliente.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-user-plus"></i>
                     <span>Cadastrar Clientes</span>
                 </a>
             </li>
             
             <li class="nav-item">
                 <a href="cadastro_servicos.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-tools"></i>
                     <span>Cadastrar Serviços</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="cadastro_despesas_fixas.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-money-bill-wave"></i>
                     <span>Despesas Fixas</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="gerenciar_clientes.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-users"></i>
                     <span>Gerenciar Clientes</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="gerenciar_relatorio.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-file-alt"></i>
                     <span>Gerenciar Relatórios</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="dashboard.php" class="nav-link">
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="fas fa-chart-line"></i>
                     <span>Dashboard</span>
                 </a>
             </li>

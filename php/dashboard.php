@@ -368,10 +368,6 @@ if ($empresa) {
     $coordenada = explode(",", $empresa['coordenada']); // Separar latitude e longitude
     $latitude = $coordenada[0];
     $longitude = $coordenada[1];
-} else {
-    // Caso não haja coordenadas para a empresa
-    $latitude = -23.5505; // Valor padrão (ex: São Paulo)
-    $longitude = -46.6333; // Valor padrão (ex: São Paulo)
 }
 
 // Consulta para quantidade de serviços mensais
@@ -392,6 +388,73 @@ while ($row = $resultServicosQuantidadeMensal->fetch_assoc()) {
     $servicosQuantidadeMensal[(int)$row['mes']] = (int)$row['quantidade_servicos'];
 }
 
+// Ano atual
+$anoAtual = date('Y');
+$mesAtual = date('m');
+
+// Entrada total do ano
+$sqlEntradaAno = "
+    SELECT COALESCE(SUM(valor_total), 0) as total 
+    FROM servicos 
+    WHERE YEAR(data_inicio) = ?";
+$stmtEntradaAno = $conn->prepare($sqlEntradaAno);
+$stmtEntradaAno->bind_param("i", $anoAtual);
+$stmtEntradaAno->execute();
+$entradaAnoTotal = $stmtEntradaAno->get_result()->fetch_assoc()['total'];
+
+// Entrada do mês
+$sqlEntradaMes = "
+    SELECT COALESCE(SUM(valor_total), 0) as total 
+    FROM servicos 
+    WHERE YEAR(data_inicio) = ? AND MONTH(data_inicio) = ?";
+$stmtEntradaMes = $conn->prepare($sqlEntradaMes);
+$stmtEntradaMes->bind_param("ii", $anoAtual, $mesAtual);
+$stmtEntradaMes->execute();
+$entradaMesTotal = $stmtEntradaMes->get_result()->fetch_assoc()['total'];
+
+// Saída total do ano (despesas fixas + despesas gerais)
+$sqlSaidaAno = "
+    SELECT (
+        COALESCE((SELECT SUM(valor) FROM despesas_fixas WHERE YEAR(data) = ?), 0) +
+        COALESCE((SELECT SUM(valor) FROM despesas WHERE YEAR(data) = ?), 0)
+    ) as total";
+$stmtSaidaAno = $conn->prepare($sqlSaidaAno);
+$stmtSaidaAno->bind_param("ii", $anoAtual, $anoAtual);
+$stmtSaidaAno->execute();
+$saidaAnoTotal = $stmtSaidaAno->get_result()->fetch_assoc()['total'];
+
+// Saída do mês
+$sqlSaidaMes = "
+    SELECT (
+        COALESCE((SELECT SUM(valor) FROM despesas_fixas WHERE YEAR(data) = ? AND MONTH(data) = ?), 0) +
+        COALESCE((SELECT SUM(valor) FROM despesas WHERE YEAR(data) = ? AND MONTH(data) = ?), 0)
+    ) as total";
+$stmtSaidaMes = $conn->prepare($sqlSaidaMes);
+$stmtSaidaMes->bind_param("iiii", $anoAtual, $mesAtual, $anoAtual, $mesAtual);
+$stmtSaidaMes->execute();
+$saidaMesTotal = $stmtSaidaMes->get_result()->fetch_assoc()['total'];
+
+// Entrada futura (parcelas a receber)
+$sqlEntradaFutura = "
+    SELECT COALESCE(SUM(valor_parcela), 0) as total 
+    FROM pagamentos 
+    WHERE status_pagamento = 'Aberto' 
+    AND data_pagamento > CURRENT_DATE";
+$resultEntradaFutura = $conn->query($sqlEntradaFutura);
+$entradaFutura = $resultEntradaFutura->fetch_assoc()['total'];
+
+// Saída futura (despesas futuras)
+$sqlSaidaFutura = "
+    SELECT COALESCE(SUM(valor), 0) as total 
+    FROM despesas_fixas 
+    WHERE data > CURRENT_DATE";
+$resultSaidaFutura = $conn->query($sqlSaidaFutura);
+$saidaFutura = $resultSaidaFutura->fetch_assoc()['total'];
+
+// Cálculo dos saldos
+$saldoMes = $entradaMesTotal - $saidaMesTotal;
+$saldoFuturo = $entradaFutura - $saidaFutura;
+$saldoAnoTotal = $entradaAnoTotal - $saidaAnoTotal;
 
 $conn->close();
 ?>

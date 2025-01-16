@@ -17,7 +17,6 @@ CREATE TABLE cliente (
     cidade VARCHAR(50) NOT NULL,
     estado CHAR(2) NOT NULL,
     coordenada VARCHAR(50),
-    telefone VARCHAR(25),
     celular VARCHAR(25) NOT NULL,
     email VARCHAR(100) NOT NULL,
     codigo_cnae VARCHAR(255),
@@ -167,4 +166,12 @@ CREATE TABLE IF NOT EXISTS retiradas_socios (
     ano INT NOT NULL,
     data_retirada DATE NOT NULL,
     FOREIGN KEY (socio_id) REFERENCES socios(id)
+);
+
+CREATE TABLE favoritos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    card_id VARCHAR(50) NOT NULL,
+    ordem INT NOT NULL,
+    UNIQUE KEY unique_favorito (usuario_id, card_id)
 );

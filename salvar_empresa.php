@@ -31,17 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $atividades_secundarias = isset($_POST['atividades_secundarias']) ? $_POST['atividades_secundarias'] : [];
     $descricoes_secundarias = isset($_POST['descricoes_secundarias']) ? $_POST['descricoes_secundarias'] : [];
 
+    // Limpa os arrays de CNAEs secundários
+    $atividades_secundarias = array_map('limparEntrada', $atividades_secundarias);
+    $descricoes_secundarias = array_map('limparEntrada', $descricoes_secundarias);
+
     // Converte arrays em strings para salvar no banco
     $atividades_secundarias_string = implode(',', $atividades_secundarias);
     $descricoes_secundarias_string = implode('|||', $descricoes_secundarias);
-
-        // Busca a descrição do CNAE principal
-        foreach ($cnae_data as $cnae) {
-            if ($cnae['id'] == $codigo_cnae) {
-                $descricao_cnae = $cnae['descricao'];
-                break;
-            }
-        }
 
     // SQL para inserção
     $sql = "INSERT INTO empresa (

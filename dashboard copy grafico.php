@@ -203,26 +203,24 @@ include 'php/dashboard.php';
                 <div class="card card-grafico card-wide">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Dashboard de Sócios - <span id="periodoSelecionado"></span></h3>
+                            <h3>Dashboard de Sócios</h3>
                             <div class="filtros-socios">
                                 <select name="ano" id="anoSelectSocios" class="select-periodo">
                                     <option value="">Selecione o Ano</option>
-                                    <?php 
-                                    $anoAtual = date('Y');
-                                    for($ano = $anoAtual; $ano >= 2024; $ano--) {
-                                        echo "<option value='$ano'" . ($ano == $anoAtual ? " selected" : "") . ">$ano</option>";
-                                    }
-                                    ?>
                                 </select>
                                 <select name="mes" id="mesSelectSocios" class="select-periodo">
                                     <option value="">Selecione o Mês</option>
-                                    <?php foreach($meses as $num => $nome): ?>
+                                    <?php 
+                                    $meses = [
+                                        1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março',
+                                        4 => 'Abril', 5 => 'Maio', 6 => 'Junho',
+                                        7 => 'Julho', 8 => 'Agosto', 9 => 'Setembro',
+                                        10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+                                    ];
+                                    foreach($meses as $num => $nome): ?>
                                         <option value="<?= $num ?>"><?= $nome ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                <button id="btnVisualizacao" class="toggle-btn">
-                                    Alternar Visualização
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -868,16 +866,7 @@ include 'php/dashboard.php';
 
         const anoSelectSocios = document.getElementById('anoSelectSocios');
         const mesSelectSocios = document.getElementById('mesSelectSocios');
-        const btnVisualizacao = document.getElementById('btnVisualizacao');
-        const periodoSelecionado = document.getElementById('periodoSelecionado');
         let sociosChart = null;
-        let tipoVisualizacao = 'geral';
-
-        function atualizarPeriodoSelecionado() {
-            const ano = anoSelectSocios.value;
-            const mes = mesSelectSocios.options[mesSelectSocios.selectedIndex].text;
-            periodoSelecionado.textContent = `${mes}/${ano}`;
-        }
 
         function criarGraficoSocios(data) {
             const ctx = document.getElementById('sociosChart').getContext('2d');
@@ -886,61 +875,41 @@ include 'php/dashboard.php';
                 sociosChart.destroy();
             }
 
+            // Preparar dados para o gráfico
             const socios = data.socios;
             const labels = socios.map(s => s.nome);
             
-            let datasets = [];
-            
-            if (tipoVisualizacao === 'geral') {
-                datasets = [
-                    {
-                        label: 'Pró-Labore Retirado',
-                        data: socios.map(s => s.pro_labore_retirado),
-                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                        borderColor: 'rgba(231, 76, 60, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5
-                    },
-                    {
-                        label: 'Comissão',
-                        data: socios.map(s => s.comissao),
-                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                        borderColor: 'rgba(46, 204, 113, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5
-                    },
-                    {
-                        label: 'Valor Disponível',
-                        data: socios.map(s => s.valor_disponivel),
-                        backgroundColor: 'rgba(155, 89, 182, 0.7)',
-                        borderColor: 'rgba(155, 89, 182, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5
-                    }
-                ];
-            } else {
-                const mesesLabels = [
-                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-                ];
-                
-                datasets = socios.map(socio => ({
-                    label: socio.nome,
-                    data: socio.retiradas_mensais || Array(12).fill(0),
-                    borderColor: gerarCor(socio.id),
-                    backgroundColor: gerarCor(socio.id, 0.1),
-                    fill: true,
-                    tension: 0.4
-                }));
-
-                labels = mesesLabels;
-            }
-
             sociosChart = new Chart(ctx, {
-                type: tipoVisualizacao === 'geral' ? 'bar' : 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: datasets
+                    datasets: [
+                        {
+                            label: 'Pró-Labore Base',
+                            data: socios.map(s => s.pro_labore_base),
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Comissão',
+                            data: socios.map(s => s.comissao),
+                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Valor Disponível',
+                            data: socios.map(s => s.valor_disponivel),
+                            backgroundColor: 'rgba(155, 89, 182, 0.7)',
+                            borderColor: 'rgba(155, 89, 182, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            type: 'bar'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -976,52 +945,55 @@ include 'php/dashboard.php';
                     }
                 }
             });
+
+            // Atualizar o faturamento total
+            document.getElementById('faturamentoTotal').textContent = 
+                data.periodo.faturamento_total.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
         }
 
-        function gerarCor(seed, alpha = 0.7) {
-            const cores = [
-                `rgba(52, 152, 219, ${alpha})`,
-                `rgba(46, 204, 113, ${alpha})`,
-                `rgba(155, 89, 182, ${alpha})`,
-                `rgba(231, 76, 60, ${alpha})`,
-                `rgba(241, 196, 15, ${alpha})`
-            ];
-            return cores[seed % cores.length];
+        function carregarAnosSocios() {
+            const anoAtual = new Date().getFullYear();
+            anoSelectSocios.innerHTML = '<option value="">Selecione o Ano</option>';
+            
+            for (let ano = anoAtual; ano >= 2023; ano--) {
+                const option = document.createElement('option');
+                option.value = ano;
+                option.textContent = ano;
+                if (ano === anoAtual) option.selected = true;
+                anoSelectSocios.appendChild(option);
+            }
+            
+            atualizarDashboardSocios();
         }
 
         function atualizarDashboardSocios() {
             const ano = anoSelectSocios.value || new Date().getFullYear();
             const mes = mesSelectSocios.value || (new Date().getMonth() + 1);
             
-            atualizarPeriodoSelecionado();
-            
-            fetch(`dashboard_socios.php?ano=${ano}&mes=${mes}&tipo=${tipoVisualizacao}`)
+            fetch(`dashboard_socios.php?ano=${ano}&mes=${mes}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         criarGraficoSocios(data);
-                        document.getElementById('faturamentoTotal').textContent = 
-                            data.periodo.faturamento_total.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            });
+                    } else {
+                        console.error('Erro:', data.message);
                     }
                 })
-                .catch(error => console.error('Erro:', error));
+                .catch(error => {
+                    console.error('Erro:', error);
+                });
         }
 
         // Event listeners
         anoSelectSocios.addEventListener('change', atualizarDashboardSocios);
         mesSelectSocios.addEventListener('change', atualizarDashboardSocios);
-        btnVisualizacao.addEventListener('click', function() {
-            tipoVisualizacao = tipoVisualizacao === 'geral' ? 'retiradas' : 'geral';
-            this.textContent = tipoVisualizacao === 'geral' ? 'Ver Retiradas Mensais' : 'Ver Visão Geral';
-            atualizarDashboardSocios();
-        });
-
+        
         // Inicialização
         mesSelectSocios.value = new Date().getMonth() + 1;
-        atualizarDashboardSocios();
+        carregarAnosSocios();
     });
     </script>
 
@@ -1176,72 +1148,6 @@ include 'php/dashboard.php';
         border-radius: 4px;
         font-weight: bold;
         font-size: 1.1em;
-    }
-
-    .toggle-btn {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #fff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .toggle-btn:hover {
-        background: #f8f9fa;
-    }
-
-    .periodo-selector {
-        display: flex;
-        gap: 0.8rem;
-        margin-top: 1rem;
-    }
-
-    .periodo-btn {
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 6px;
-        background: #f1f1f1;
-        color: #666;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .periodo-btn:hover {
-        background: #e4e4e4;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    }
-
-    .periodo-btn.active {
-        background: #3498db;
-        color: white;
-        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
-    }
-
-    .periodo-btn.active:hover {
-        background: #2980b9;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
-        .periodo-selector {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .periodo-btn {
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-        }
     }
     </style>
 </body>
