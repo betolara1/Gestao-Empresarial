@@ -3,41 +3,44 @@ include 'conexao.php';
 
 // Verifica se o ID foi fornecido
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-  header('Location: index.php');
-  exit;
+    header('Location: index.php');
+    exit;
 }
 
 $id = $_GET['id'];
 
-// Verifica se existem retiradas associadas a este sócio
-$sql = "SELECT COUNT(*) as total FROM retiradas_socios WHERE socio_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
+try {
+    // Inicia a transação
+    $conn->begin_transaction();
 
-if ($row['total'] > 0) {
-  // Se existirem retiradas, não permite a exclusão
-  header('Location: index.php?erro=1');
-  exit;
+    // Primeiro exclui as retiradas associadas
+    $sql_retiradas = "DELETE FROM retiradas_socios WHERE socio_id = ?";
+    $stmt = $conn->prepare($sql_retiradas);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    // Depois exclui o sócio
+    $sql_socio = "DELETE FROM socios WHERE id = ?";
+    $stmt = $conn->prepare($sql_socio);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    // Confirma as alterações
+    $conn->commit();
+
+    echo "<script>
+            alert('Sócio excluído com sucesso!');
+            window.location.href = 'gerenciar_empresa.php';
+          </script>";
+
+} catch (Exception $e) {
+    // Em caso de erro, desfaz as alterações
+    $conn->rollback();
+    echo "<script>
+            alert('Erro ao excluir sócio: " . $e->getMessage() . "');
+            window.location.href = 'gerenciar_empresa.php';
+          </script>";
 }
 
-// Procede com a exclusão
-$sql = "DELETE FROM socios WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-
-if ($stmt->execute()) {
-  echo "<script>
-        alert('Sócio cadastrado com sucesso!');
-        window.location.href = 'gerenciar_empresa.php';
-      </script>";
-} else {
-  echo "<script>
-  alert('Sócio cadastrado com sucesso!');
-  window.location.href = 'gerenciar_empresa.php';
-</script>";
-}
-exit;
+$conn->close();
 ?>

@@ -159,7 +159,10 @@ include 'php/editar_empresa.php'
                                 value="<?php echo htmlspecialchars($empresa['descricao_cnae'] ?? ''); ?>">
                         </div>
                     </div>
+                </div>
 
+                <div class="form-section">
+                    <h2>Atividades Secundárias</h2>
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label for="atividades_secundarias">Atividades Secundárias (CNAE)</label>
@@ -174,11 +177,11 @@ include 'php/editar_empresa.php'
                                         </option>
                                     <?php } ?>
                                 </select>
-                                <button type="button" id="adicionar_cnae" class="btn btn-secondary">
+                                <button type="button" id="adicionar_cnae" class="btn btn-secondary"><label></label>
                                     <i class="fas fa-plus"></i> Adicionar
                                 </button>
                             </div>
-                            
+                            <br><br>
                             <div id="cnaes_selecionados" class="mt-3">
                                 <h6>CNAEs Selecionados:</h6>
                                 <ul class="list-group" id="lista_cnaes">
@@ -187,7 +190,7 @@ include 'php/editar_empresa.php'
                                         foreach ($cnaes_secundarios as $index => $cnae) {
                                             echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
                                             echo "{$cnae['id']} - {$cnae['descricao']}";
-                                            echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'>Remover</button>";
+                                            echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'><i class='fas fa-trash'></i> Remover</button>";
                                             echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
                                             echo "<input type='hidden' name='descricoes_secundarias[]' value='" . htmlspecialchars($descricoes_secundarias[$index]) . "'>";
                                             echo "</li>";

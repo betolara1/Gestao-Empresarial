@@ -77,10 +77,192 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Serviços</title>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>>
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dce0e4;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            outline: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .popup-content h2 {
+            margin: 0;
+            padding: 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.2rem;
+        }
+
+        .popup-content form {
+            padding: 20px;
+        }
+
+        .popup-content .form-group {
+            margin-bottom: 20px;
+        }
+
+        .popup-content .form-actions {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -465,110 +647,114 @@ try {
         document.getElementById('despesaForm').addEventListener('submit', cadastrarDespesa);
 
         $(document).ready(function() {
-            let isRequesting = false;
-            $('#cep').on('blur', function() {
-                if (isRequesting) return;
+            // Consolidar a função de busca de CEP e preenchimento de endereço
+            function buscarEPreencherEndereco(cep) {
+                var validacep = /^[0-9]{8}$/;
+                if (validacep.test(cep)) {
+                    $("#rua").val("...");
+                    $("#bairro").val("...");
+                    $("#cidade").val("...");
+                    $("#estado").val("...");
+                    $("#coordenada").val("Buscando coordenadas...");
 
-                let cep = $(this).val().replace(/\D/g, '');
-                if (cep !== '') {
-                    let validacep = /^[0-9]{8}$/;
-                    if (validacep.test(cep)) {
-                        isRequesting = true;
-                        $('#cep-feedback').text('Buscando CEP...').removeClass('text-danger').addClass('text-info');
-
-                        $.getJSON(`https://viacep.com.br/ws/${cep}/json/`)
-                            .done(function(dados) {
-                                if (!('erro' in dados)) {
-                                    $('#rua').val(dados.logradouro);
-                                    $('#bairro').val(dados.bairro);
-                                    $('#cidade').val(dados.localidade);
-                                    $('#estado').val(dados.uf);
-                                    $('#cep-feedback').text('CEP encontrado!').removeClass('text-info text-danger').addClass('text-success');
-
-                                    // Buscar coordenadas
-                                    buscarCoordenadas(dados.logradouro + ', ' + dados.localidade + ' - ' + dados.uf);
-                                } else {
-                                    limpaCamposEndereco();
-                                    $('#cep-feedback').text('CEP não encontrado.').removeClass('text-info text-success').addClass('text-danger');
-                                }
-                            })
-                            .fail(function() {
-                                limpaCamposEndereco();
-                                $('#cep-feedback').text('Erro na busca do CEP.').removeClass('text-info text-success').addClass('text-danger');
-                            })
-                            .always(function() {
-                                isRequesting = false;
-                            });
-                    } else {
-                        limpaCamposEndereco();
-                        $('#cep-feedback').text('Formato de CEP inválido.').removeClass('text-info text-success').addClass('text-danger');
-                    }
+                    $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
+                        if (!("erro" in dados)) {
+                            preencheCamposEndereco(dados);
+                            buscarCoordenadas(dados);
+                        } else {
+                            limpaFormularioCep();
+                            alert("CEP não encontrado.");
+                        }
+                    }).fail(function() {
+                        limpaFormularioCep();
+                        alert("Erro ao buscar CEP. Tente novamente mais tarde.");
+                    });
                 } else {
-                    limpaCamposEndereco();
-                    $('#cep-feedback').text('');
+                    limpaFormularioCep();
+                    alert("Formato de CEP inválido.");
+                }
+            }
+
+            // Evento para o campo de CEP
+            $("#cep").on('blur change', function() {
+                var cep = $(this).val().replace(/\D/g, '');
+                if (cep.length === 8) {
+                    buscarEPreencherEndereco(cep);
+                } else {
+                    limpaFormularioCep();
                 }
             });
 
-            function limpaCamposEndereco() {
-                $('#cep').val('');
-                $('#rua').val('');
-                $('#bairro').val('');
-                $('#cidade').val('');
-                $('#estado').val('');
-                $('#coordenada').val('');
+            // Consolidar a lógica de atualização de status do serviço
+            function atualizarStatusServico() {
+                const dataInicio = $('#data_inicio').val();
+                const dataTermino = $('#data_termino').val();
+                const statusServico = $('#status_servico');
+                const hoje = new Date().toISOString().split('T')[0];
+
+                if (dataTermino && dataInicio) {
+                    if (new Date(dataTermino) < new Date(dataInicio)) {
+                        alert('Data de término não pode ser menor que a data de início');
+                        $('#data_termino').val('');
+                        statusServico.val('EM ANDAMENTO');
+                        return;
+                    }
+                    if (new Date(dataTermino) > new Date()) {
+                        alert('Data de término não pode ser maior que hoje');
+                        $('#data_termino').val('');
+                        statusServico.val('EM ANDAMENTO');
+                        return;
+                    }
+                }
+
+                if (!dataInicio) {
+                    statusServico.val('');
+                } else if (dataTermino) {
+                    statusServico.val('CONCLUIDO');
+                } else {
+                    statusServico.val('EM ANDAMENTO');
+                }
             }
-        });
-    
-        // Atualizar o status do serviço quando as datas são alteradas
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('data_termino').setAttribute('max', hoje);
-        $(document).ready(function() {
-            // Inicializar o status baseado nos valores existentes
-            atualizarStatusServico();
-            
-            // Atualizar quando as datas mudarem
+
+            // Adiciona os event listeners
             $('#data_inicio, #data_termino').on('change', atualizarStatusServico);
+            atualizarStatusServico(); // Inicializa o status ao carregar a página
         });
 
-        function atualizarStatusServico() {
-            const dataInicio = $('#data_inicio').val();
-            const dataTermino = $('#data_termino').val();
-            const statusServico = $('#status_servico');
-            const hoje = new Date().toISOString().split('T')[0];
-            
-            // Validações
-            if (dataTermino && dataInicio) {
-                if (new Date(dataTermino) < new Date(dataInicio)) {
-                    alert('Data de término não pode ser menor que a data de início');
-                    $('#data_termino').val('');
-                    statusServico.val('EM ANDAMENTO');
-                    return;
-                }
-                
-                if (new Date(dataTermino) > new Date()) {
-                    alert('Data de término não pode ser maior que hoje');
-                    $('#data_termino').val('');
-                    statusServico.val('EM ANDAMENTO');
-                    return;
-                }
-            }
-            
-            // Definir status
-            if (!dataInicio) {
-                statusServico.val('');
-            } else if (dataTermino) {
-                statusServico.val('CONCLUIDO');
-            } else {
-                statusServico.val('EM ANDAMENTO');
-            }
+        function limpaFormularioCep() {
+            // Limpa valores do formulário de cep.
+            $("#rua").val("");
+            $("#bairro").val("");
+            $("#cidade").val("");
+            $("#estado").val("");
+            $("#coordenada").val("");
         }
 
+        function preencheCamposEndereco(dados) {
+            $("#rua").val(dados.street || dados.logradouro);
+            $("#bairro").val(dados.neighborhood || dados.bairro);
+            $("#cidade").val(dados.city || dados.cidade || dados.localidade);
+            $("#estado").val(dados.state || dados.uf);
+        }
 
+        //RETORNA O CPF/CNPJ DO CLIENTE SELECIONADO
+        function buscarCNPJCPF(clienteId) {
+            if (clienteId) {
+                const formData = new FormData();
+                formData.append("buscar_cliente", true);
+                formData.append("cliente_id", clienteId);
 
+                fetch("cadastro_servicos.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("cnpj_cpf").value = data.cnpj ? data.cnpj : data.cpf;
+                })
+                .catch(error => console.error('Erro ao buscar CNPJ/CPF:', error));
+            }
+        }
     </script>
-    <script src="js/busca_cpfcnpj.js"></script>
-    <script src="js/cep.js"></script>
-    <script src="js/despesas.js"></script>
-    <script src="js/status_servico.js"></script>
 </body>
 </html>

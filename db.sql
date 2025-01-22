@@ -153,9 +153,9 @@ CREATE TABLE IF NOT EXISTS socios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     porcentagem_sociedade DECIMAL(5,2) NOT NULL,
-    porcentagem_comissao DECIMAL(5,2) NOT NULL
+    porcentagem_comissao DECIMAL(5,2) NOT NULL,
+    valor_pro_labore DECIMAL(10,2) DEFAULT 0.00
 );
-ALTER TABLE socios ADD COLUMN valor_pro_labore DECIMAL(10,2) DEFAULT 0.00;
 
 CREATE TABLE IF NOT EXISTS retiradas_socios (
     id INT AUTO_INCREMENT PRIMARY KEY,

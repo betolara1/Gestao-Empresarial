@@ -12,6 +12,233 @@ include 'conexao.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Estilos para o formulário */
+        .form-section {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group label.required:after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dce0e4;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            outline: none;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            margin-top: -30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .total-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .popup-content h2 {
+            margin: 0;
+            padding: 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.2rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os checkboxes se movam para a próxima linha se não houver espaço */
+            gap: 1rem; /* Espaçamento entre os checkboxes */
+            margin-top: 0.5rem; /* Espaçamento acima do grupo de checkboxes */
+        }
+
+        .meses-container label {
+            display: flex;
+            align-items: center; /* Alinha o texto e o checkbox verticalmente */
+            cursor: pointer; /* Muda o cursor para indicar que é clicável */
+            font-size: 0.95rem; /* Tamanho da fonte */
+            color: var(--text-color); /* Cor do texto */
+        }
+
+        .meses-container input[type="checkbox"] {
+            margin-right: 0.5rem; /* Espaçamento entre o checkbox e o texto */
+            transform: scale(1.2); /* Aumenta o tamanho do checkbox */
+            cursor: pointer; /* Muda o cursor para indicar que é clicável */
+        }
+
+        /* Efeito de foco para acessibilidade */
+        .meses-container input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.3); /* Sombra ao focar no checkbox */
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1;
+            transition: transform 0.2s;
+        }
+
+        .close:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        /* Estilo para os botões dentro do popup */
+        .popup-content .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .popup-content .btn-primary {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+
+        .popup-content .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .popup-content .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+
+        .popup-content .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -189,16 +416,16 @@ include 'conexao.php';
                             despesas.forEach(function(despesa) {
                                 total += parseFloat(despesa.valor);
                                 html += `
-                                    <tr id="row-${despesa.id}">
+                                    <tr id="linha-${despesa.id}">
                                         <td>${despesa.descricao}</td>
-                                        <td>R$ ${parseFloat(despesa.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                        <td class="valor-despesa">R$ ${parseFloat(despesa.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                         <td>
                                             <div class="btn-actions">
-                                                <button type="button" class="btn-excluir" onclick="excluirDespesa(${despesa.id})">
-                                                    <i class="fas fa-trash"></i> Excluir
+                                                <button type="button" class="btn btn-danger" onclick="excluirDespesa(${despesa.id})">
+                                                    <i class="fas fa-trash"></i> 
                                                 </button>
                                                 <button type="button" class="btn-replicar" onclick="abrirModalReplicar(${despesa.id})">
-                                                    <i class="fas fa-copy"></i> Replicar
+                                                    <i class="fas fa-copy"></i> 
                                                 </button>
                                             </div>
                                         </td>
@@ -220,6 +447,45 @@ include 'conexao.php';
 
         // Atualiza a tabela quando mês ou ano são alterados
         $('#mes, #ano').change(buscarDespesas);
+
+        // Preencher o select de meses
+        const meses = [
+            { value: "01", text: "Janeiro" },
+            { value: "02", text: "Fevereiro" },
+            { value: "03", text: "Março" },
+            { value: "04", text: "Abril" },
+            { value: "05", text: "Maio" },
+            { value: "06", text: "Junho" },
+            { value: "07", text: "Julho" },
+            { value: "08", text: "Agosto" },
+            { value: "09", text: "Setembro" },
+            { value: "10", text: "Outubro" },
+            { value: "11", text: "Novembro" },
+            { value: "12", text: "Dezembro" }
+        ];
+
+        // Preencher o select de meses
+        const $exportMonth = $('#exportMonth');
+        meses.forEach(mes => {
+            $exportMonth.append(new Option(mes.text, mes.value));
+        });
+
+        // Inicializar o select de anos
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+            $('#exportYear').append($('<option>', {
+                value: i,
+                text: i
+            }));
+        }
+
+        // Setar mês e ano atuais como padrão
+        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
+        $('#exportMonth').val(currentMonth);
+        $('#exportYear').val(currentYear);
+
+        // Trigger change event to set initial visibility
+        $('#exportType').trigger('change');
     });
 
     function abrirModalReplicar(despesaId) {
@@ -267,33 +533,28 @@ include 'conexao.php';
             }
         });
     }
-    function excluirDespesa(id) {
-        if (confirm('Tem certeza que deseja excluir este registro?')) {
-            $.ajax({
-                url: 'excluir_despesa_fixa.php',
-                type: 'POST',
-                data: { id: id },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        // Remove a linha da tabela
-                        $('#row-' + id).fadeOut(400, function() {
-                            $(this).remove();
-                            // Recalcula o total
-                            atualizarTotal();
-                        });
-                        
-                        // Mostra mensagem de sucesso
-                        alert(response.message);
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('Erro ao processar a requisição');
+    function excluirDespesa(despesaId) {
+        $.ajax({
+            url: 'excluir_despesa_fixa.php',
+            type: 'POST',
+            data: { id: despesaId },
+            success: function(response) {
+                const data = JSON.parse(response); // Certifique-se de que a resposta seja analisada corretamente
+                if (data.success) {
+                    // Remover a linha da tabela
+                    $(`#linha-${despesaId}`).remove(); // Supondo que você tenha um ID de linha
+
+                    // Atualizar o total
+                    atualizarTotalDespesas();
+                    alert(data.message); // Exibir mensagem de sucesso
+                } else {
+                    alert('Erro ao excluir despesa: ' + data.message);
                 }
-            });
-        }
+            },
+            error: function() {
+                alert('Erro ao realizar a requisição.');
+            }
+        });
     }
 
 
@@ -340,25 +601,18 @@ include 'conexao.php';
         }
     });
 
-    // Initialize the export form
-    $(document).ready(function() {
-        // Populate export year select
-        const currentYear = new Date().getFullYear();
-        for (let i = currentYear - 5; i <= currentYear + 5; i++) {
-            $('#exportYear').append($('<option>', {
-                value: i,
-                text: i
-            }));
-        }
+    function atualizarTotalDespesas() {
+        let total = 0;
 
-        // Set current month and year as default
-        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-        $('#exportMonth').val(currentMonth);
-        $('#exportYear').val(currentYear);
+        // Iterar sobre as linhas da tabela e somar os valores
+        $('#tabelaDespesas tbody tr').each(function() {
+            const valor = parseFloat($(this).find('.valor-despesa').text().replace('R$ ', '').replace('.', '').replace(',', '.')) || 0;
+            total += valor;
+        });
 
-        // Trigger change event to set initial visibility
-        $('#exportType').trigger('change');
-    });
+        // Atualizar o total no DOM
+        $('#total-despesas').text('R$ ' + total.toFixed(2).replace('.', ','));
+    }
     </script>
 
 </body>

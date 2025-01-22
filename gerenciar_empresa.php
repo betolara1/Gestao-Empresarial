@@ -517,8 +517,12 @@ require_once 'php/gerenciar_empresa.php';
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" name="addArea" class="btn btn-primary">Adicionar</button>
-                    <button type="button" class="btn btn-danger" onclick="closePopup('addAreaPopup')">Cancelar</button>
+                    <button type="submit" name="addArea" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closePopup('addAreaPopup')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
                 </div>
             </form>
         </div>
@@ -533,8 +537,12 @@ require_once 'php/gerenciar_empresa.php';
                     <input type="text" id="tipo_servico" name="tipo_servico" required>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" name="addTipo" class="btn btn-primary">Adicionar</button>
-                    <button type="button" class="btn btn-danger" onclick="closePopup('addServicoPopup')">Cancelar</button>
+                    <button type="submit" name="addTipo" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closePopup('addServicoPopup')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
                 </div>
             </form>
         </div>

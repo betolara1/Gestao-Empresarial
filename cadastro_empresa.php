@@ -156,7 +156,9 @@ if ($empresa === 0) {
                                 <input type="hidden" name="descricao_cnae" id="descricao_cnae">
                             </div>
                         </div>
-
+                    </div>
+                    <div class="form-section">
+                        <h2>Atividades Secundárias</h2>
                         <div class="form-row">
                             <div class="form-group full-width">
                                 <label for="atividades_secundarias">Atividades Secundárias (CNAE)</label>
@@ -188,8 +190,8 @@ if ($empresa === 0) {
                                                 $cnae = reset($cnae);
                                                 if ($cnae) {
                                                     echo "<li class='list-group-item d-flex justify-content-between align-items-center' data-id='{$cnae['id']}'>";
-                                                    echo "{$cnae['id']} - {$cnae['descricao']}";
-                                                    echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'>Remover</button>";
+                                                    echo "{$cnae['id']} - {$cnae['descricao']} ";
+                                                    echo '<button type="button" class="btn btn-danger btn-sm remover-cnae"><i class="fas fa-trash"></i> Remover</button>';
                                                     echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
                                                     echo "</li>";
                                                 }

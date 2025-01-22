@@ -1,7 +1,34 @@
 <?php 
 include 'conexao.php';
-include 'php/sidebar.php'
+
+$sql_empresa = "SELECT * FROM empresa LIMIT 1"; 
+$result_empresa = $conn->query($sql_empresa);
+
+// Verifica se encontrou registros
+if ($result_empresa->num_rows > 0) {
+    $empresa = $result_empresa->fetch_assoc(); // Pega o primeiro registro
+} else {
+    $empresa = 0; // Caso não encontre dados, inicializa como vazio
+}
+
+if (isset($_GET['status'])) {
+    if ($_GET['status'] == 'success') {
+        echo '<div class="message success">Imagem salva com sucesso!</div>';
+    } elseif ($_GET['status'] == 'error') {
+        echo '<div class="message error">Erro ao salvar imagem. Tente novamente.</div>';
+    }
+}
+
+$sql_logo = "SELECT image_data FROM logos ORDER BY created_at DESC LIMIT 1";
+$result_logo = $conn->query($sql_logo);
+$logoImage = null;
+
+if ($result_logo->num_rows > 0) {
+    $result_logo_row = $result_logo->fetch_assoc();
+    $logoImage = $result_logo_row['image_data'];
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -14,6 +41,114 @@ include 'php/sidebar.php'
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/sidebar.css">
+
+    <style>
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .company-logo {
+            width: 150px;  /* Tamanho fixo para a área da logo */
+            height: 150px;
+            border-radius: 50%;  /* Torna a logo redonda */
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0 auto;  /* Centraliza horizontalmente */
+            position: relative;
+        }
+
+        #logo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* Mantém a proporção e cobre todo o espaço */
+            border-radius: 50%;  /* Garante que a imagem também fique redonda */
+        }
+
+        #logo-placeholder {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 10px 0;
+            font-size: 1.2rem;
+            color: white;
+            text-align: center;
+            width: 100%;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            padding: 0 15px;
+            margin: 5px 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Estilos para o formulário de upload */
+        #uploadForm {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Animação suave ao carregar a imagem */
+        #logo-preview {
+            transition: opacity 0.3s ease;
+        }
+
+        /* Efeito hover na logo */
+        .company-logo:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
