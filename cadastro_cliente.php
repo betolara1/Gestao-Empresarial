@@ -149,168 +149,264 @@ if (!empty($empresa['atividades_secundarias'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-
     <style>
-        /* Estilos para o formulário */
-    .form-section {
-        background-color: #fff;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
 
-    .form-section h2 {
-        color: #2c3e50;
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #eef2f7;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-    }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
 
-    .form-group {
-        margin-bottom: 15px;
-    }
+        .sidebar {
+            overflow-y: auto;
+        }
 
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
 
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #2c3e50;
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
 
-    .form-group label.required:after {
-        content: "*";
-        color: #e74c3c;
-        margin-left: 4px;
-    }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
 
-    .form-group input,
-    .form-group select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #dce0e4;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-    }
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
 
-    .form-group input:focus,
-    .form-group select:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
-        outline: none;
-    }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
 
-    .form-group input[readonly] {
-        background-color: #f8f9fa;
-        cursor: not-allowed;
-    }
+        .form-section {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-    /* Botões */
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 0 0 12px 12px;
-        margin-top: -30px;
-    }
+        .form-section h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f7;
+        }
 
-    .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #3498db;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #2980b9;
-    }
-
-    .btn-secondary {
-        background-color: #95a5a6;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background-color: #7f8c8d;
-    }
-
-    /* Feedback visual */
-    .input-with-feedback {
-        position: relative;
-    }
-
-    .form-text {
-        font-size: 0.85rem;
-        color: #666;
-        margin-top: 4px;
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
         .form-row {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        
-        .form-actions {
-            flex-direction: column;
-        }
-        
-        .btn {
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        select {
             width: 100%;
-            justify-content: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap; /* Impede quebra de linha */
+            overflow: hidden; /* Oculta texto que excede a largura */
+            text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
         }
-    }
 
-    /* Estilo para campos inválidos */
-    .form-group input:invalid,
-    .form-group select:invalid {
-        border-color: #e74c3c;
-    }
+        .form-group {
+            margin-bottom: 15px;
+        }
 
-    /* Tooltip para campos obrigatórios */
-    .required-tooltip {
-        position: relative;
-    }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
 
-    .required-tooltip:hover:after {
-        content: "Campo obrigatório";
-        position: absolute;
-        background: #34495e;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        bottom: 100%;
-        left: 0;
-        white-space: nowrap;
-        margin-bottom: 5px;
-    }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group label.required:after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dce0e4;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            outline: none;
+        }
+
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        /* Botões */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            margin-top: -30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback visual */
+        .input-with-feedback {
+            position: relative;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Estilo para campos inválidos */
+        .form-group input:invalid,
+        .form-group select:invalid {
+            border-color: #e74c3c;
+        }
+
+        /* Tooltip para campos obrigatórios */
+        .required-tooltip {
+            position: relative;
+        }
+
+        .required-tooltip:hover:after {
+            content: "Campo obrigatório";
+            position: absolute;
+            background: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            bottom: 100%;
+            left: 0;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>

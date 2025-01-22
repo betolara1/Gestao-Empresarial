@@ -45,6 +45,132 @@ $historico = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Pró-Labore</title>
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .form {
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px; /* Largura mínima para as colunas */
+            margin-right: 15px;
+        }
+
+        .form-group:last-child {
+            margin-right: 0; /* Remove margem do último item */
+        }
+
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn {
+            padding: 10px 20px; /* Aumenta o padding para um botão mais espaçoso */
+            border-radius: 5px; /* Bordas arredondadas */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s; /* Transições suaves */
+            display: inline-flex; /* Alinha o ícone e o texto */
+            align-items: center; /* Centraliza verticalmente */
+        }
+
+        .btn-primary {
+            background: #007bff; /* Cor do botão primário */
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545; /* Cor de fundo do botão */
+            color: white; /* Cor do texto */
+        }
+
+        .btn:hover {
+            opacity: 0.9; /* Efeito de hover */
+        }
+
+        .btn-danger:hover {
+            background: #c82333; /* Cor de fundo ao passar o mouse */
+            transform: scale(1.05); /* Efeito de aumento ao passar o mouse */
+        }
+
+        .btn i {
+            margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .alert {
+            color: green;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -68,7 +194,9 @@ $historico = $stmt->get_result();
                         <input type="date" id="data" name="data" required>
                     </div>
                 </div>
-                <button type="submit" class="btn">Registrar Pró-Labore</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Registrar Pró-Labore
+                </button>
             </form>
 
             <h2>Histórico de Pró-Labore</h2>
@@ -91,7 +219,9 @@ $historico = $stmt->get_result();
                 </tbody>
             </table>
             
-            <a href="gerenciar_empresa.php" class="btn">Voltar</a>
+            <a href="gerenciar_empresa.php" class="btn btn-danger">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
         </div>
     </div>
 </body>

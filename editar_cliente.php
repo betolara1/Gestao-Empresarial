@@ -1,6 +1,78 @@
 <?php
+// Configuração da conexão com o banco de dados
 include 'conexao.php';
-include 'php/editar_cliente.php'
+
+// Verifica se o ID do cliente foi passado pela URL
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+
+    // Consulta SQL para buscar os detalhes do cliente pelo ID
+    $sql = "SELECT 
+                tipo_pessoa,
+                razao_social,
+                cnpj,
+                nome,
+                cpf,
+                cep,
+                rua,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                estado,
+                celular,
+                email,
+                coordenada,
+                codigo_cnae,
+                data_cadastro
+            FROM cliente
+            WHERE id = ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Verifica se o cliente foi encontrado
+    if ($result->num_rows > 0) {
+        $cliente = $result->fetch_assoc();
+    } else {
+        die("Cliente não encontrado.");
+    }
+} else {
+    die("ID do cliente não informado.");
+}
+
+// Buscar áreas de atuação
+$query_areas = "SELECT id, nome FROM areas_atuacao ORDER BY nome";
+$result_areas = $conn->query($query_areas);
+
+function getCNAE() {
+    $url = "https://servicodados.ibge.gov.br/api/v2/cnae/classes";
+    
+    // Inicializa o CURL
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    // Executa a requisição
+    $response = curl_exec($ch);
+    
+    // Verifica se houve erro
+    if(curl_errno($ch)) {
+        echo 'Erro ao buscar CNAE: ' . curl_error($ch);
+        return false;
+    }
+    
+    curl_close($ch);
+    
+    // Converte o JSON para array
+    return json_decode($response, true);
+}
+
+// Busca os dados
+$cnae_data = getCNAE();
 ?>
 
 
@@ -13,7 +85,215 @@ include 'php/editar_cliente.php'
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .form-section {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dce0e4;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+            outline: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: left;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            margin-top: -30px;
+        }
+
+        /* Feedback visual */
+        small.form-text {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap; /* Impede quebra de linha */
+            overflow: hidden; /* Oculta texto que excede a largura */
+            text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -295,8 +575,105 @@ include 'php/editar_cliente.php'
                 descricaoInput.value = '';
             }
         }
+
+        $(document).ready(function() {
+            function limpaFormularioCep() {
+                // Limpa valores do formulário de cep.
+                $("#rua").val("");
+                $("#bairro").val("");
+                $("#cidade").val("");
+                $("#estado").val("");
+                $("#coordenada").val("");
+            }
+
+            function preencheCamposEndereco(dados) {
+                $("#rua").val(dados.street || dados.logradouro);
+                $("#bairro").val(dados.neighborhood || dados.bairro);
+                $("#cidade").val(dados.city || dados.cidade || dados.localidade);
+                $("#estado").val(dados.state || dados.uf);
+            }
+
+            function buscarCoordenadas(endereco) {
+                $('#coordenada').val("Buscando coordenadas...");
+                
+                // Monta o endereço completo para busca
+                const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+                
+                // Usa a API do OpenStreetMap (Nominatim)
+                $.ajax({
+                    url: 'https://nominatim.openstreetmap.org/search',
+                    type: 'GET',
+                    data: {
+                        q: enderecoCompleto,
+                        format: 'json',
+                        limit: 1
+                    },
+                    headers: {
+                        'Accept-Language': 'pt-BR'
+                    },
+                    success: function(response) {
+                        if (response && response.length > 0) {
+                            const lat = response[0].lat;
+                            const lon = response[0].lon;
+                            $('#coordenada').val(`${lat}, ${lon}`);
+                        } else {
+                            $('#coordenada').val('');
+                            console.log('Coordenadas não encontradas');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#coordenada').val('');
+                        console.log('Erro ao buscar coordenadas:', error);
+                    }
+                });
+            }
+
+            //Quando o campo cep perde o foco.
+            $("#cep").on('blur change', function() {
+                // Nova variável "cep" somente com dígitos.
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Verifica se campo cep possui valor informado.
+                if (cep.length === 8) {
+                    //Expressão regular para validar o CEP.
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if(validacep.test(cep)) {
+                        //Preenche os campos com "..." enquanto consulta webservice.
+                        $("#rua").val("...");
+                        $("#bairro").val("...");
+                        $("#cidade").val("...");
+                        $("#estado").val("...");
+                        $("#coordenada").val("Buscando coordenadas...");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
+                            if (!("erro" in dados)) {
+                                preencheCamposEndereco(dados);
+                                // Busca coordenadas após preencher o endereço
+                                buscarCoordenadas(dados);
+                            } else {
+                                //CEP pesquisado não foi encontrado.
+                                limpaFormularioCep();
+                                alert("CEP não encontrado.");
+                            }
+                        }).fail(function() {
+                            limpaFormularioCep();
+                            alert("Erro ao buscar CEP. Tente novamente mais tarde.");
+                        });
+                    } else {
+                        //cep é inválido.
+                        limpaFormularioCep();
+                        alert("Formato de CEP inválido.");
+                    }
+                } else {
+                    //cep sem valor, limpa formulário.
+                    limpaFormularioCep();
+                }
+            });
+        });
         
     </script>
 
-    <script src="js/cep.js"></script>
 </body>

@@ -7,12 +7,171 @@ include 'conexao.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Despesas</title>
+    <title>Cadastrar Despesas Fixas</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <link rel="stylesheet" href="css/main.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .form {
+            padding: 20px; /* Espaçamento interno */
+            border-radius: 8px; /* Bordas arredondadas */
+            background: #f8f9fa; /* Fundo suave para o formulário */
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Sombra leve */
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            transition: border-color 0.2s; /* Transição suave para a borda */
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="date"]:focus {
+            border-color: var(--accent-color); /* Cor da borda ao focar */
+            outline: none; /* Remove o contorno padrão */
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center; /* Centraliza os botões horizontalmente */
+            gap: 10px; /* Espaçamento entre os botões */
+            margin-top: 20px; /* Adiciona um espaço acima dos botões */
+        }
+
+        .btn {
+            padding: 10px 20px; /* Aumenta o padding para um botão mais espaçoso */
+            border-radius: 5px; /* Bordas arredondadas */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s; /* Transições suaves */
+        }
+
+        .btn-primary {
+            background: #007bff; /* Cor do botão primário */
+            color: white; /* Cor do texto */
+        }
+
+        .btn-primary:hover {
+            background: #0056b3; /* Cor ao passar o mouse */
+        }
+
+        .btn-danger {
+            background: #dc3545; /* Cor do botão de perigo */
+            color: white; /* Cor do texto */
+        }
+
+        .btn-danger:hover {
+            background: #c82333; /* Cor ao passar o mouse */
+        }
+
+        .alert {
+            color: green;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         /* Estilos para o formulário */
         .form-section {
             background-color: #fff;
@@ -35,18 +194,6 @@ include 'conexao.php';
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-            font-weight: 500;
-            font-size: 0.95rem;
         }
 
         .form-group label.required:after {
@@ -82,36 +229,6 @@ include 'conexao.php';
             margin-top: -30px;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-
         .table-responsive {
             overflow-x: auto;
         }
@@ -124,34 +241,48 @@ include 'conexao.php';
         }
 
         .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
+            display: none; /* Inicialmente escondido */
+            position: fixed; /* Fixa na tela */
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
+            justify-content: center; /* Centraliza horizontalmente */
+            align-items: center; /* Centraliza verticalmente */
+            z-index: 1000; /* Coloca o popup acima de outros elementos */
         }
 
         .popup-content {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 500px;
-            position: relative;
+            background: white; /* Fundo branco para o conteúdo do popup */
+            padding: 20px;
+            border-radius: 8px; /* Bordas arredondadas */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Sombra leve */
+            width: 400px; /* Largura do popup */
+            max-width: 90%; /* Largura máxima */
+            text-align: center; /* Centraliza o texto */
         }
 
         .popup-content h2 {
-            margin: 0;
-            padding: 20px;
-            background-color: #3498db;
-            color: white;
-            border-radius: 8px 8px 0 0;
-            font-size: 1.2rem;
+            color: var(--primary-color); /* Cor do título */
+            margin-bottom: 15px; /* Espaçamento abaixo do título */
+        }
+
+        .popup-content p {
+            margin-bottom: 20px; /* Espaçamento abaixo do parágrafo */
+            color: #495057; /* Cor do texto */
+        }
+
+        .popup-content label {
+            display: block; /* Cada checkbox em uma nova linha */
+            margin: 10px 0; /* Espaçamento entre os checkboxes */
+            color: #333; /* Cor do texto dos checkboxes */
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between; /* Espaçamento entre os botões */
+            margin-top: 20px; /* Espaçamento acima dos botões */
         }
 
         .checkbox-group {
@@ -238,6 +369,115 @@ include 'conexao.php';
         .popup-content .btn-secondary:hover {
             background-color: #5a6268;
         }
+
+        .btn-replicar {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-replicar:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Estilo para a seção de listagem */
+        .form-section {
+            margin-top: 30px; /* Espaçamento acima da seção */
+            padding: 20px; /* Espaçamento interno */
+            background: #f8f9fa; /* Fundo suave para a seção */
+            border-radius: 8px; /* Bordas arredondadas */
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Sombra leve */
+        }
+
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center; /* Centraliza o título */
+            font-size: 1.8rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+            margin: 20px 0; /* Margem acima e abaixo da tabela */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Remove espaços entre as células */
+            background: white; /* Fundo branco para a tabela */
+            border-radius: 8px; /* Bordas arredondadas */
+            overflow: hidden; /* Para bordas arredondadas */
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Sombra leve */
+        }
+
+        th, td {
+            padding: 12px; /* Espaçamento interno das células */
+            text-align: left; /* Alinhamento do texto à esquerda */
+            border-bottom: 1px solid #dee2e6; /* Linha de separação entre as linhas */
+        }
+
+        th {
+            background: #f8f9fa; /* Fundo suave para o cabeçalho */
+            font-weight: 600; /* Negrito para o cabeçalho */
+            color: #495057; /* Cor do texto do cabeçalho */
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Efeito de hover nas linhas */
+        }
+
+        .total-box {
+            margin-top: 20px; /* Espaçamento acima da caixa de total */
+            padding: 10px; /* Espaçamento interno */
+            background: #e9ecef; /* Fundo suave para a caixa de total */
+            border-radius: 5px; /* Bordas arredondadas */
+            text-align: center; /* Centraliza o texto */
+            font-size: 1.2rem; /* Tamanho da fonte */
+            font-weight: bold; /* Negrito */
+        }
+
+        #total-despesas {
+            color: #28a745; /* Cor verde para o total */
+        }
+
+        .meses-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha */
+            justify-content: center; /* Centraliza os itens */
+            margin: 20px 0; /* Margem acima e abaixo da lista de meses */
+        }
+
+        .meses-container label {
+            flex: 0 0 30%; /* Cada label ocupa 30% da largura do contêiner */
+            box-sizing: border-box; /* Inclui padding e border no cálculo da largura */
+            margin: 5px; /* Margem entre os checkboxes */
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap; /* Impede quebra de linha */
+            overflow: hidden; /* Oculta texto que excede a largura */
+            text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
+        }
     </style>
 </head>
 <body>
@@ -276,7 +516,7 @@ include 'conexao.php';
                                 <option value="">Selecione...</option>
                                 <?php
                                 $anoAtual = date('Y');
-                                for($i = $anoAtual - 5; $i <= $anoAtual + 5; $i++) {
+                                for($i = $anoAtual - 1; $i <= $anoAtual + 1; $i++) {
                                     echo "<option value='$i'" . ($i == $anoAtual ? " selected" : "") . ">$i</option>";
                                 }
                                 ?>
@@ -297,9 +537,9 @@ include 'conexao.php';
                         </div>
                     </div>
 
-                    <div class="form-actions">
+                    <div class="btn-group">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Adicionar Despesa
+                            <i class="fas fa-save"></i> Salvar
                         </button>
                     </div>
                 </form>
@@ -354,7 +594,7 @@ include 'conexao.php';
                             </select>
                         </div>
                     </div>
-                    <div class="form-actions">
+                    <div class="btn-group">
                         <button type="button" class="btn btn-primary" onclick="exportToPDF()">
                             <i class="fas fa-file-pdf"></i> Exportar para PDF
                         </button>
@@ -365,254 +605,263 @@ include 'conexao.php';
     </div>
 
     <!-- Modal de Replicação -->
-    <div id="replicarModal" class="popup" style="display: none;">
+    <div class="popup" id="replicarDespesaPopup">
         <div class="popup-content">
-            <span class="close" onclick="fecharModal()">&times;</span>
             <h2>Replicar Despesa</h2>
-            <div class="form-group">
-                <p>Selecione os meses para replicar:</p>
-                <div class="checkbox-group meses-container">
-                    <label><input type="checkbox" value="01"> Janeiro</label>
-                    <label><input type="checkbox" value="02"> Fevereiro</label>
-                    <label><input type="checkbox" value="03"> Março</label>
-                    <label><input type="checkbox" value="04"> Abril</label>
-                    <label><input type="checkbox" value="05"> Maio</label>
-                    <label><input type="checkbox" value="06"> Junho</label>
-                    <label><input type="checkbox" value="07"> Julho</label>
-                    <label><input type="checkbox" value="08"> Agosto</label>
-                    <label><input type="checkbox" value="09"> Setembro</label>
-                    <label><input type="checkbox" value="10"> Outubro</label>
-                    <label><input type="checkbox" value="11"> Novembro</label>
-                    <label><input type="checkbox" value="12"> Dezembro</label>
+            <p>Selecione os meses para replicar:</p>
+            <form id="replicarForm">
+                <div class="meses-container">
+                    <label><input type="checkbox" name="meses[]" value="Janeiro"> Janeiro</label>
+                    <label><input type="checkbox" name="meses[]" value="Fevereiro"> Fevereiro</label>
+                    <label><input type="checkbox" name="meses[]" value="Março"> Março</label>
+                    <label><input type="checkbox" name="meses[]" value="Abril"> Abril</label>
+                    <label><input type="checkbox" name="meses[]" value="Maio"> Maio</label>
+                    <label><input type="checkbox" name="meses[]" value="Junho"> Junho</label>
+                    <label><input type="checkbox" name="meses[]" value="Julho"> Julho</label>
+                    <label><input type="checkbox" name="meses[]" value="Agosto"> Agosto</label>
+                    <label><input type="checkbox" name="meses[]" value="Setembro"> Setembro</label>
+                    <label><input type="checkbox" name="meses[]" value="Outubro"> Outubro</label>
+                    <label><input type="checkbox" name="meses[]" value="Novembro"> Novembro</label>
+                    <label><input type="checkbox" name="meses[]" value="Dezembro"> Dezembro</label>
                 </div>
-            </div>
-            <div class="form-actions">
-                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="confirmarReplicacao()">Confirmar</button>
-            </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-danger" onclick="closePopup('replicarDespesaPopup')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-    let despesaParaReplicar = null;
-    $(document).ready(function() {
-        function buscarDespesas() {
-            const mes = $('#mes').val();
-            const ano = $('#ano').val();
-            
-            if (mes && ano) {
-                $.ajax({
-                    url: 'buscar_despesas.php',
-                    type: 'GET',
-                    data: { 
-                        mes: mes,
-                        ano: ano 
-                    },
-                    success: function(despesas) {
-                        let html = '';
-                        let total = 0;
-                        
-                        if (despesas.length > 0) {
-                            despesas.forEach(function(despesa) {
-                                total += parseFloat(despesa.valor);
-                                html += `
-                                    <tr id="linha-${despesa.id}">
-                                        <td>${despesa.descricao}</td>
-                                        <td class="valor-despesa">R$ ${parseFloat(despesa.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                        <td>
-                                            <div class="btn-actions">
-                                                <button type="button" class="btn btn-danger" onclick="excluirDespesa(${despesa.id})">
-                                                    <i class="fas fa-trash"></i> 
-                                                </button>
-                                                <button type="button" class="btn-replicar" onclick="abrirModalReplicar(${despesa.id})">
-                                                    <i class="fas fa-copy"></i> 
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-                        } else {
-                            html = '<tr><td colspan="5">Nenhuma despesa encontrada para o período selecionado.</td></tr>';
+        let despesaParaReplicar = null;
+        $(document).ready(function() {
+            function buscarDespesas() {
+                const mes = $('#mes').val();
+                const ano = $('#ano').val();
+                
+                if (mes && ano) {
+                    $.ajax({
+                        url: 'buscar_despesas.php',
+                        type: 'GET',
+                        data: { 
+                            mes: mes,
+                            ano: ano 
+                        },
+                        success: function(despesas) {
+                            let html = '';
+                            let total = 0;
+                            
+                            if (despesas.length > 0) {
+                                despesas.forEach(function(despesa) {
+                                    total += parseFloat(despesa.valor);
+                                    html += `
+                                        <tr id="linha-${despesa.id}">
+                                            <td>${despesa.descricao}</td>
+                                            <td class="valor-despesa">R$ ${parseFloat(despesa.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                            <td>
+                                                <div class="btn-actions">
+                                                    <button type="button" class="btn-replicar" onclick="abrirModalReplicar(${despesa.id})">
+                                                        <i class="fas fa-copy"></i> 
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger" onclick="excluirDespesa(${despesa.id})">
+                                                        <i class="fas fa-trash"></i> 
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
+                            } else {
+                                html = '<tr><td colspan="5">Nenhuma despesa encontrada para o período selecionado.</td></tr>';
+                            }
+                            $('table tbody').html(html);
+                            $('#total-despesas').text(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
+                        },
+                        error: function() {
+                            alert('Erro ao buscar as despesas.');
                         }
-                        $('table tbody').html(html);
-                        $('#total-despesas').text(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
-                    },
-                    error: function() {
-                        alert('Erro ao buscar as despesas.');
+                    });
+                }
+            }
+
+            // Atualiza a tabela quando mês ou ano são alterados
+            $('#mes, #ano').change(buscarDespesas);
+
+            // Preencher o select de meses
+            const meses = [
+                { value: "01", text: "Janeiro" },
+                { value: "02", text: "Fevereiro" },
+                { value: "03", text: "Março" },
+                { value: "04", text: "Abril" },
+                { value: "05", text: "Maio" },
+                { value: "06", text: "Junho" },
+                { value: "07", text: "Julho" },
+                { value: "08", text: "Agosto" },
+                { value: "09", text: "Setembro" },
+                { value: "10", text: "Outubro" },
+                { value: "11", text: "Novembro" },
+                { value: "12", text: "Dezembro" }
+            ];
+
+            // Preencher o select de meses
+            const $exportMonth = $('#exportMonth');
+            meses.forEach(mes => {
+                $exportMonth.append(new Option(mes.text, mes.value));
+            });
+
+            // Inicializar o select de anos
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                $('#exportYear').append($('<option>', {
+                    value: i,
+                    text: i
+                }));
+            }
+
+            // Setar mês e ano atuais como padrão
+            const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
+            $('#exportMonth').val(currentMonth);
+            $('#exportYear').val(currentYear);
+
+            // Trigger change event to set initial visibility
+            $('#exportType').trigger('change');
+        });
+
+        function abrirModalReplicar(despesaId) {
+            despesaParaReplicar = despesaId;
+            document.getElementById('replicarDespesaPopup').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('replicarDespesaPopup').style.display = 'none';
+            despesaParaReplicar = null;
+        }
+
+        function confirmarReplicacao() {
+            const mesesSelecionados = [];
+            document.querySelectorAll('.meses-container input:checked').forEach(checkbox => {
+                mesesSelecionados.push(checkbox.value);
+            });
+
+            if (mesesSelecionados.length === 0) {
+                alert('Selecione pelo menos um mês para replicar.');
+                return;
+            }
+
+            $.ajax({
+                url: 'replicar_despesa.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    despesa_id: despesaParaReplicar,
+                    meses: mesesSelecionados,
+                    ano: $('#ano').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        fecharModal();
+                        buscarDespesas(); // Atualiza a lista
+                    } else {
+                        alert('Erro: ' + (response.error || 'Erro ao replicar despesa'));
                     }
-                });
-            }
-        }
-
-        // Atualiza a tabela quando mês ou ano são alterados
-        $('#mes, #ano').change(buscarDespesas);
-
-        // Preencher o select de meses
-        const meses = [
-            { value: "01", text: "Janeiro" },
-            { value: "02", text: "Fevereiro" },
-            { value: "03", text: "Março" },
-            { value: "04", text: "Abril" },
-            { value: "05", text: "Maio" },
-            { value: "06", text: "Junho" },
-            { value: "07", text: "Julho" },
-            { value: "08", text: "Agosto" },
-            { value: "09", text: "Setembro" },
-            { value: "10", text: "Outubro" },
-            { value: "11", text: "Novembro" },
-            { value: "12", text: "Dezembro" }
-        ];
-
-        // Preencher o select de meses
-        const $exportMonth = $('#exportMonth');
-        meses.forEach(mes => {
-            $exportMonth.append(new Option(mes.text, mes.value));
-        });
-
-        // Inicializar o select de anos
-        const currentYear = new Date().getFullYear();
-        for (let i = currentYear - 5; i <= currentYear + 5; i++) {
-            $('#exportYear').append($('<option>', {
-                value: i,
-                text: i
-            }));
-        }
-
-        // Setar mês e ano atuais como padrão
-        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-        $('#exportMonth').val(currentMonth);
-        $('#exportYear').val(currentYear);
-
-        // Trigger change event to set initial visibility
-        $('#exportType').trigger('change');
-    });
-
-    function abrirModalReplicar(despesaId) {
-        despesaParaReplicar = despesaId;
-        document.getElementById('replicarModal').style.display = 'block';
-    }
-
-    function fecharModal() {
-        document.getElementById('replicarModal').style.display = 'none';
-        despesaParaReplicar = null;
-    }
-
-    function confirmarReplicacao() {
-        const mesesSelecionados = [];
-        document.querySelectorAll('.meses-container input:checked').forEach(checkbox => {
-            mesesSelecionados.push(checkbox.value);
-        });
-
-        if (mesesSelecionados.length === 0) {
-            alert('Selecione pelo menos um mês para replicar.');
-            return;
-        }
-
-        $.ajax({
-            url: 'replicar_despesa.php',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                despesa_id: despesaParaReplicar,
-                meses: mesesSelecionados,
-                ano: $('#ano').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert(response.message);
-                    fecharModal();
-                    buscarDespesas(); // Atualiza a lista
-                } else {
-                    alert('Erro: ' + (response.error || 'Erro ao replicar despesa'));
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro na requisição:', xhr.responseText);
+                    alert('Erro ao replicar a despesa. Verifique o console para mais detalhes.');
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Erro na requisição:', xhr.responseText);
-                alert('Erro ao replicar a despesa. Verifique o console para mais detalhes.');
-            }
-        });
-    }
-    function excluirDespesa(despesaId) {
-        $.ajax({
-            url: 'excluir_despesa_fixa.php',
-            type: 'POST',
-            data: { id: despesaId },
-            success: function(response) {
-                const data = JSON.parse(response); // Certifique-se de que a resposta seja analisada corretamente
-                if (data.success) {
-                    // Remover a linha da tabela
-                    $(`#linha-${despesaId}`).remove(); // Supondo que você tenha um ID de linha
-
-                    // Atualizar o total
-                    atualizarTotalDespesas();
-                    alert(data.message); // Exibir mensagem de sucesso
-                } else {
-                    alert('Erro ao excluir despesa: ' + data.message);
-                }
-            },
-            error: function() {
-                alert('Erro ao realizar a requisição.');
-            }
-        });
-    }
-
-
-    // Add this new function for PDF export
-    function exportToPDF() {
-        const exportType = $('#exportType').val();
-        const exportMonth = $('#exportMonth').val();
-        const exportYear = $('#exportYear').val();
-
-        $.ajax({
-            url: 'gerar_pdf.php',
-            type: 'POST',
-            data: {
-                exportType: exportType,
-                exportMonth: exportMonth,
-                exportYear: exportYear
-            },
-            xhrFields: {
-                responseType: 'blob'
-            },
-            success: function(response) {
-                const blob = new Blob([response], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = 'despesas.pdf';
-                link.click();
-            },
-            error: function() {
-                alert('Erro ao gerar o PDF.');
-            }
-        });
-    }
-
-    // Show/hide month and year selects based on export type
-    $('#exportType').change(function() {
-        const exportType = $(this).val();
-        if (exportType === 'month') {
-            $('#exportMonthGroup, #exportYearGroup').show();
-        } else if (exportType === 'year') {
-            $('#exportMonthGroup').hide();
-            $('#exportYearGroup').show();
-        } else {
-            $('#exportMonthGroup, #exportYearGroup').hide();
+            });
         }
-    });
+        function excluirDespesa(despesaId) {
+            $.ajax({
+                url: 'excluir_despesa_fixa.php',
+                type: 'POST',
+                data: { id: despesaId },
+                success: function(response) {
+                    const data = JSON.parse(response); // Certifique-se de que a resposta seja analisada corretamente
+                    if (data.success) {
+                        // Remover a linha da tabela
+                        $(`#linha-${despesaId}`).remove(); // Supondo que você tenha um ID de linha
 
-    function atualizarTotalDespesas() {
-        let total = 0;
+                        // Atualizar o total
+                        atualizarTotalDespesas();
+                        alert(data.message); // Exibir mensagem de sucesso
+                    } else {
+                        alert('Erro ao excluir despesa: ' + data.message);
+                    }
+                },
+                error: function() {
+                    alert('Erro ao realizar a requisição.');
+                }
+            });
+        }
 
-        // Iterar sobre as linhas da tabela e somar os valores
-        $('#tabelaDespesas tbody tr').each(function() {
-            const valor = parseFloat($(this).find('.valor-despesa').text().replace('R$ ', '').replace('.', '').replace(',', '.')) || 0;
-            total += valor;
+
+        // Add this new function for PDF export
+        function exportToPDF() {
+            const exportType = $('#exportType').val();
+            const exportMonth = $('#exportMonth').val();
+            const exportYear = $('#exportYear').val();
+
+            $.ajax({
+                url: 'gerar_pdf.php',
+                type: 'POST',
+                data: {
+                    exportType: exportType,
+                    exportMonth: exportMonth,
+                    exportYear: exportYear
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response) {
+                    const blob = new Blob([response], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = 'despesas.pdf';
+                    link.click();
+                },
+                error: function() {
+                    alert('Erro ao gerar o PDF.');
+                }
+            });
+        }
+
+        // Show/hide month and year selects based on export type
+        $('#exportType').change(function() {
+            const exportType = $(this).val();
+            if (exportType === 'month') {
+                $('#exportMonthGroup, #exportYearGroup').show();
+            } else if (exportType === 'year') {
+                $('#exportMonthGroup').hide();
+                $('#exportYearGroup').show();
+            } else {
+                $('#exportMonthGroup, #exportYearGroup').hide();
+            }
         });
 
-        // Atualizar o total no DOM
-        $('#total-despesas').text('R$ ' + total.toFixed(2).replace('.', ','));
-    }
+        function atualizarTotalDespesas() {
+            let total = 0;
+
+            // Iterar sobre as linhas da tabela e somar os valores
+            $('#tabelaDespesas tbody tr').each(function() {
+                const valor = parseFloat($(this).find('.valor-despesa').text().replace('R$ ', '').replace('.', '').replace(',', '.')) || 0;
+                total += valor;
+            });
+
+            // Atualizar o total no DOM
+            $('#total-despesas').text('R$ ' + total.toFixed(2).replace('.', ','));
+        }
+
+        function openPopup(id) {
+            const popup = document.getElementById(id);
+            popup.style.display = 'flex'; // Exibe o popup
+        }
+
+        function closePopup(id) {
+            const popup = document.getElementById(id);
+            popup.style.display = 'none'; // Esconde o popup
+        }
     </script>
 
 </body>

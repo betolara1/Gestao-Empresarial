@@ -1,20 +1,6 @@
 <?php
 include 'conexao.php';
 
-$dados = [
-    "numero_proposta" => "105",
-    "tipos_servico" => [
-        ["id" => "5", "tipo_servico" => "Informatica"],
-        ["id" => "6", "tipo_servico" => "Programador"]
-    ],
-    "despesas" => []
-];
-
-// Armazene os dados em variáveis PHP em vez de imprimir diretamente
-$numero_proposta = $dados['numero_proposta'];
-$tipos_servico = $dados['tipos_servico'];
-$despesas = $dados['despesas'];
-
 // Verifica se é uma requisição AJAX para buscar dados do cliente
 if (isset($_POST['buscar_cliente']) && isset($_POST['cliente_id'])) {
     $cliente_id = $_POST['cliente_id'];
@@ -76,7 +62,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Serviços</title>
+    <title>Cadastrar Serviço</title>
+    <link rel="stylesheet" href="css/main.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -89,6 +76,7 @@ try {
             --error-color: #f44336;
             --primary-dark: #1e40af;
             --background-color: #ffffff;
+            --sidebar-width: 280px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
@@ -109,6 +97,17 @@ try {
             min-height: 100vh;
         }
 
+        .sidebar {
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
         .container {
             max-width: 1200px;
             padding: 2rem;
@@ -125,18 +124,44 @@ try {
             font-weight: 700;
         }
 
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eef2f7;
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
             margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+
+        .form {
+            padding: 20px; /* Espaçamento interno */
+            border-radius: 8px; /* Bordas arredondadas */
+            background: #f8f9fa; /* Fundo suave para o formulário */
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Sombra leve */
+            margin-bottom: 30px;
         }
 
         .form-group {
@@ -145,122 +170,56 @@ try {
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
+            margin-bottom: 5px;
+            color: #495057;
             font-weight: 500;
-            font-size: 0.95rem;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #dce0e4;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            transition: border-color 0.2s; /* Transição suave para a borda */
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
-            outline: none;
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus {
+            border-color: var(--accent-color); /* Cor da borda ao focar */
+            outline: none; /* Remove o contorno padrão */
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px; /* Espaçamento entre os botões */
         }
 
         .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            padding: 10px 20px; /* Aumenta o padding para um botão mais espaçoso */
+            border-radius: 5px; /* Bordas arredondadas */
             border: none;
             cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s; /* Transições suaves */
         }
 
         .btn-primary {
-            background-color: #3498db;
-            color: white;
+            background: #007bff; /* Cor do botão primário */
+            color: white; /* Cor do texto */
         }
 
         .btn-primary:hover {
-            background-color: #2980b9;
+            background: #0056b3; /* Cor ao passar o mouse */
         }
 
         .btn-danger {
-            background-color: #e74c3c;
-            color: white;
+            background: #dc3545; /* Cor do botão de perigo */
+            color: white; /* Cor do texto */
         }
 
         .btn-danger:hover {
-            background-color: #c0392b;
-        }
-
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .popup-content {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .popup-content h2 {
-            margin: 0;
-            padding: 20px;
-            background-color: #3498db;
-            color: white;
-            border-radius: 8px 8px 0 0;
-            font-size: 1.2rem;
-        }
-
-        .popup-content form {
-            padding: 20px;
-        }
-
-        .popup-content .form-group {
-            margin-bottom: 20px;
-        }
-
-        .popup-content .form-actions {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            border-radius: 0 0 8px 8px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+            background: #c82333; /* Cor ao passar o mouse */
         }
     </style>
 </head>

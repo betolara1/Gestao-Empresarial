@@ -1,6 +1,43 @@
 <?php
 include 'conexao.php';
-include 'php/gerenciar_clientes.php'
+
+// Consulta SQL para buscar os clientes
+$sql = "SELECT 
+            id,
+            tipo_pessoa,
+            CASE 
+                WHEN tipo_pessoa = 'F' THEN nome
+                WHEN tipo_pessoa = 'J' THEN razao_social
+                ELSE 'Não especificado'
+            END AS cliente_nome_ou_razao,
+            cnpj,
+            cpf,
+            cep,
+            rua,
+            numero,
+            complemento,
+            bairro,
+            cidade,
+            estado,
+            telefone,
+            celular,
+            email,
+            codigo_cnae,
+            data_cadastro
+        FROM cliente";
+
+$result = $conn->query($sql);
+
+// Armazena os dados dos clientes em um array
+if ($result->num_rows > 0) {
+    $clientes = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $clientes = []; // Array vazio caso não haja clientes
+}
+
+if (isset($_GET['mensagem'])) {
+    echo "<p style='color: green; font-weight: bold; text-align: center;'>" . htmlspecialchars($_GET['mensagem']) . "</p>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +49,153 @@ include 'php/gerenciar_clientes.php'
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden; /* Para bordas arredondadas */
+        }
+
+        th, td {
+            padding: 10px; /* Aumenta o espaçamento */
+            text-align: center;
+            border: 1px solid var(--border-color);
+            width: 10%; /* Define uma largura mínima para as colunas */
+            white-space: nowrap; /* Impede a quebra de linha */
+            overflow: hidden; /* Oculta o texto que excede a largura da célula */
+            text-overflow: ellipsis; /* Adiciona reticências (...) para texto que não cabe */
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2; /* Cor de fundo alternada para linhas */
+        }
+
+        tr:hover {
+            background-color: #e9ecef; /* Cor de fundo ao passar o mouse */
+        }
+
+        .btn-editar, .btn-excluir {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-editar {
+            background-color: #3498db;
+        }
+
+        .btn-editar:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-excluir {
+            background-color: #e74c3c;
+        }
+
+        .btn-excluir:hover {
+            background-color: #c0392b;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #999;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->

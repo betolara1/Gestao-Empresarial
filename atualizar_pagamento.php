@@ -31,12 +31,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $total_pago = $result_totais['total_pago'];
         $total_pendente = $result_totais['total_pendente'];
 
-        echo json_encode([
+        // Obtenha a última parcela paga
+        $sql_ultima_parcela = "SELECT dia_pagamento FROM pagamentos 
+                                WHERE numero_proposta = ? AND status_pagamento = 'Pago' 
+                                ORDER BY dia_pagamento DESC LIMIT 1";
+        $stmt_ultima_parcela = $conn->prepare($sql_ultima_parcela);
+        $stmt_ultima_parcela->bind_param("i", $numero_proposta);
+        $stmt_ultima_parcela->execute();
+        $result_ultima_parcela = $stmt_ultima_parcela->get_result();
+        $ultima_parcela = $result_ultima_parcela->fetch_assoc();
+
+        if ($ultima_parcela) {
+            // Se houver uma última parcela paga, calcule a próxima data
+            $data_ultima_parcela = $ultima_parcela['dia_pagamento'];
+            $nova_data_pagamento = date('d/m/Y', strtotime("+1 month", strtotime($data_ultima_parcela))); // Adiciona 1 mês
+        } else {
+            // Se não houver parcelas pagas, defina uma data padrão ou lógica alternativa
+            $nova_data_pagamento = date('d/m/Y'); // Ou outra lógica
+        }
+
+        $response = [
             'success' => true,
-            'total_pago' => number_format($total_pago, 2, '.', ''),
-            'total_pendente' => number_format($total_pendente, 2, '.', ''),
-            'parcela_num' => $parcela_num
-        ]);
+            'total_pago' => $total_pago,
+            'total_pendente' => $total_pendente,
+            'proximo_pagamento' => $nova_data_pagamento
+        ];
+        echo json_encode($response);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }

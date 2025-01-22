@@ -1,7 +1,6 @@
 <?php
 // Configuração da conexão com o banco de dados
 include 'conexao.php';
-include 'php/cadastro_cliente.php';
 
 // Busca os dados cadastrados na tabela `minhaempresa`
 $sql_empresa = "SELECT * FROM empresa LIMIT 1"; // Supondo que há apenas uma linha ou você deseja exibir apenas a primeira
@@ -15,7 +14,7 @@ if ($result_empresa->num_rows > 0) {
 }
 
 
-if ($empresa === 0) {
+if ($empresa != 0) {
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -26,7 +25,214 @@ if ($empresa === 0) {
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-        <link rel="stylesheet" href="css/main.css">
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #838282;
+                --accent-color: #e74c3c;
+                --text-color: #2c3e50;
+                --sidebar-width: 250px;
+                --border-color: #ddd;
+                --success-color: #4CAF50;
+                --error-color: #f44336;
+                --primary-dark: #1e40af;
+                --background-color: #ffffff;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+                --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+                --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                line-height: 1.6;
+                color: var(--text-color);
+                background-color: var(--background-color);
+                display: flex;
+                min-height: 100vh;
+            }
+
+            .sidebar {
+                overflow-y: auto;
+            }
+
+            .main-content {
+                flex: 1;
+                margin-left: var(--sidebar-width);
+                padding: 2rem;
+                max-width: calc(100% - var(--sidebar-width));
+            }
+
+            .container {
+                max-width: 1200px;
+                padding: 2rem;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                margin: 2rem auto;
+            }
+
+            h1, h2 {
+                color: var(--primary-color);
+                margin-bottom: 1.5rem;
+                text-align: center;
+                font-weight: 700;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid #eee;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+                position: relative;
+                padding-bottom: 0.5rem;
+            }
+
+            h2::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60px;
+                height: 4px;
+                background-color: var(--accent-color);
+                border-radius: 2px;
+            }
+
+            /* Estilos para o formulário */
+            .form-section {
+                margin-bottom: 2rem;
+            }
+
+            .form-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px; /* Espaçamento entre os campos */
+            }
+
+            .form-group {
+                flex: 1;
+                min-width: 200px; /* Largura mínima para os campos */
+            }
+
+            .required {
+                color: var(--error-color);
+            }
+
+            .input-with-feedback {
+                position: relative;
+            }
+
+            .input-with-feedback .form-text {
+                position: absolute;
+                bottom: -20px;
+                left: 0;
+                color: var(--error-color);
+                font-size: 0.8rem;
+            }
+
+            .input-with-map {
+                display: flex;
+                align-items: center;
+            }
+
+            .input-with-map input {
+                flex: 1;
+            }
+
+            .btn {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .btn:hover {
+                background-color: var(--primary-dark);
+            }
+
+            .btn-secondary {
+                background-color: var(--accent-color);
+            }
+
+            .btn-secondary:hover {
+                background-color: darken(var(--accent-color), 10%);
+            }
+
+            .list-group {
+                list-style: none;
+                padding: 0;
+            }
+
+            .list-group-item {
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: 5px;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="date"],
+            input[type="number"],
+            select {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: 5px;
+                box-shadow: var(--shadow-md);
+                white-space: nowrap; /* Impede quebra de linha */
+                overflow: hidden; /* Oculta texto que excede a largura */
+                text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
+            }
+
+            .checkbox-group {
+                display: flex;
+                flex-wrap: wrap; /* Permite que os checkboxes quebrem para a próxima linha */
+                gap: 15px; /* Espaçamento entre os checkboxes */
+                justify-content: center; /* Centraliza os checkboxes horizontalmente */
+            }
+
+            .form-check {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                border: 1px solid var(--border-color);
+                border-radius: 5px;
+                background-color: white; /* Cor de fundo */
+                transition: background-color 0.3s, border-color 0.3s; /* Transições suaves */
+            }
+
+            .form-check:hover {
+                background-color: #f0f0f0; /* Cor de fundo ao passar o mouse */
+                border-color: var(--primary-color); /* Cor da borda ao passar o mouse */
+            }
+
+            .form-check-input {
+                margin-right: 10px; /* Espaçamento entre o checkbox e o texto */
+                cursor: pointer; /* Cursor de ponteiro */
+            }
+
+            .form-check-label {
+                cursor: pointer; /* Cursor de ponteiro */
+            }
+        </style>
     </head>
 
     <body>
