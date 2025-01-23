@@ -10,6 +10,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // Limpa e valida os dados recebidos
         $numero_proposta = (int) limparEntrada($_POST['numero_proposta']);
+
+        // Verifica se o número da proposta já existe
+        $stmt_verificacao = $conn->prepare("SELECT COUNT(*) as total FROM servicos WHERE numero_proposta = ?");
+        $stmt_verificacao->bind_param("i", $numero_proposta);
+        $stmt_verificacao->execute();
+        $result = $stmt_verificacao->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row['total'] > 0) {
+            throw new Exception("Número da proposta já existe. Por favor, escolha outro número.");
+        }
+
         $cliente_id = (int) limparEntrada($_POST['cliente']);
         $cnpj_cpf = limparEntrada($_POST['cnpj_cpf']);
         $data_inicio = limparEntrada($_POST['data_inicio']);
@@ -48,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt_servico = $conn->prepare($sql_servico);
         $stmt_servico->bind_param(
-            "iissssssssssssddssssss", 
+            "iissssssssssssddssssss",
             $numero_proposta, 
             $cliente_id, 
             $cnpj_cpf, 
@@ -91,19 +103,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         for ($i = 0; $i < $parcelamento; $i++) {
             $novo_id = $i + 1;
             $data_pagamento_parcela = date('Y-m-d', strtotime("+$i month", strtotime($data_pagamento_inicial)));
+            
+            // Define o status do pagamento
+            $status_pagamento = ($valor_total == $valor_entrada) ? 'Pago' : 'Aberto';
+            
             $sql_parcela = "INSERT INTO pagamentos 
                             (numero_proposta, parcela_num, status_pagamento, valor_parcela, data_pagamento, dia_pagamento) 
-                            VALUES (?, ?, 'Aberto', ?, ?, ?)
+                            VALUES (?, ?, ?, ?, ?, ?)
                             ON DUPLICATE KEY UPDATE 
-                            status_pagamento = 'Aberto', valor_parcela = ?, data_pagamento = ?, dia_pagamento = ?";
+                            status_pagamento = ?, valor_parcela = ?, data_pagamento = ?, dia_pagamento = ?";
             $stmt_parcela = $conn->prepare($sql_parcela);
             $stmt_parcela->bind_param(
-                "iiddssds", 
+                "iisdsssds", 
                 $numero_proposta, 
                 $novo_id, 
+                $status_pagamento,
                 $valor_parcela, 
                 $data_pagamento_parcela, 
-                $data_pagamento_parcela, 
+                $data_pagamento_parcela,
+                $status_pagamento, 
                 $valor_parcela, 
                 $data_pagamento_parcela, 
                 $data_pagamento_parcela

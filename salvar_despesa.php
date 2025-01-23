@@ -11,11 +11,11 @@ try {
 
     $nome_despesa = $_POST['nome_despesa'];
     $valor_despesa = floatval(str_replace(',', '.', $_POST['valor_despesa']));
-    $numero_proposta = $_POST['numero_proposta'] ?? null;
+    $proposta = $_POST['numero_proposta'];
 
     // Inserir no banco de dados
-    $stmt = $conn->prepare("INSERT INTO despesas (nome_despesa, valor, numero_proposta) VALUES (?, ?, ?)");
-    $stmt->bind_param("sds", $nome_despesa, $valor_despesa, $numero_proposta);
+    $stmt = $conn->prepare("INSERT INTO despesas (nome_despesa, valor, proposta) VALUES (?, ?, ?)");
+    $stmt->bind_param("sdi", $nome_despesa, $valor_despesa, $proposta);
 
     if ($stmt->execute()) {
         echo json_encode([

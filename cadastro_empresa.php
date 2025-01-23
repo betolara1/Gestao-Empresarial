@@ -13,8 +13,94 @@ if ($result_empresa->num_rows > 0) {
     $empresa = 0; // Caso não encontre dados, inicializa como vazio
 }
 
+function getCNAE() {
+    $url = "https://servicodados.ibge.gov.br/api/v2/cnae/classes";
+    
+    // Inicializa o CURL
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    // Executa a requisição
+    $response = curl_exec($ch);
+    
+    // Verifica se houve erro
+    if(curl_errno($ch)) {
+        echo 'Erro ao buscar CNAE: ' . curl_error($ch);
+        return false;
+    }
+    
+    curl_close($ch);
+    
+    // Converte o JSON para array
+    return json_decode($response, true);
+}
 
-if ($empresa != 0) {
+// Busca os dados
+$cnae_data = getCNAE();
+
+function getCNAEDescricao($codigo) {
+    $url = "https://servicodados.ibge.gov.br/api/v2/cnae/subclasses/" . $codigo;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    $response = curl_exec($ch);
+    
+    if(curl_errno($ch)) {
+        return false;
+    }
+    
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
+    
+    if (!empty($data)) {
+        return $data[0]['id'] . ' - ' . $data[0]['descricao'];
+    }
+    
+    return false;
+}
+
+// Para atividades secundárias que podem ter múltiplos códigos
+function getMultiplosCNAE($codigos) {
+    if (empty($codigos)) return '';
+    
+    // Se os códigos estiverem em formato de string, converte para array
+    if (is_string($codigos)) {
+        $codigos = explode(',', $codigos);
+    }
+
+    $descricoes = [];
+    foreach ($codigos as $codigo) {
+        // Assegure-se de que $codigo é uma string antes de usar trim
+        $codigo = is_array($codigo) ? implode(',', $codigo) : (string)$codigo; // Converte para string, se necessário
+        $codigo = trim($codigo);
+        $descricao = getCNAEDescricao($codigo);
+        if ($descricao) {
+            $descricoes[] = $descricao;
+        }
+    }
+    
+    return implode('; ', $descricoes);
+}
+
+// Processa os dados antes de exibir
+$cnae_principal = '';
+if (!empty($empresa['codigo_cnae'])) {
+    $cnae_principal = getCNAEDescricao($empresa['codigo_cnae']);
+}
+
+$cnae_secundarios = '';
+if (!empty($empresa['atividades_secundarias'])) {
+    $cnae_secundarios = getMultiplosCNAE($empresa['atividades_secundarias']);
+}
+
+
+if ($empresa === 0) {
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -117,12 +203,17 @@ if ($empresa != 0) {
             .form-row {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 15px; /* Espaçamento entre os campos */
+                margin-bottom: 15px;
             }
 
             .form-group {
                 flex: 1;
-                min-width: 200px; /* Largura mínima para os campos */
+                min-width: 250px; /* Largura mínima para as colunas */
+                margin-right: 15px;
+            }
+            
+            .form-group:last-child {
+                margin-right: 0; /* Remove margem do último item */
             }
 
             .required {
@@ -334,13 +425,11 @@ if ($empresa != 0) {
                             </div>
 
                             <div class="form-group">
-                                <label for="telefone">Telefone</label>
-                                <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
-                            </div>
-
-                            <div class="form-group">
                                 <label for="celular" class="required">Celular</label>
                                 <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" id="telefone" name="telefone" placeholder="(00) 0000-0000">
                             </div>
                         </div>
                     </div>
@@ -359,7 +448,7 @@ if ($empresa != 0) {
                                         </option>
                                     <?php } ?>
                                 </select>
-                                <input type="hidden" name="descricao_cnae" id="descricao_cnae">
+                                <input type="hidden" name="descricao_cnae" id="descricao_cnae" value="">
                             </div>
                         </div>
                     </div>
@@ -418,20 +507,48 @@ if ($empresa != 0) {
                 </form>
             </div>
         </div>
+
+
         <script>
             $('#cep').mask('00000-000');
             $('#cpf').mask('000.000.000-00');
             $('#cnpj').mask('00.000.000/0000-00');
-            $('#telefone').mask('(00) 0000-0000');
             $('#celular').mask('(00) 00000-0000');
 
+            let map;
+            let marker;
+
+            // Funções do Mapa
+            function initMap() {
+                const defaultLocation = { lat: -14.235004, lng: -51.92528 };
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 4,
+                    center: defaultLocation,
+                });
+            }
+
+            function atualizarMapa(latitude, longitude) {
+                const position = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
+                map.setCenter(position);
+                map.setZoom(15);
+
+                if (marker) {
+                    marker.setMap(null);
+                }
+
+                marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: 'Localização'
+                });
+            }
+
+            // Eventos jQuery para CEP e coordenadas
             $(document).ready(function() {
                 function buscarCoordenadas(cep) {
-                    // Remove any non-numeric characters from CEP
                     cep = cep.replace(/[^0-9]/g, '');
                     
                     if (cep.length === 8) {
-                        // Show loading indicator in the coordinates field
                         $('#coordenada').val('Buscando coordenadas...');
                         
                         $.ajax({
@@ -443,7 +560,8 @@ if ($empresa != 0) {
                                     const longitude = response.location.coordinates[0];
                                     $('#coordenada').val(`${latitude}, ${longitude}`);
                                     
-                                    // If you want to save the coordinates immediately
+                                    atualizarMapa(latitude, longitude);
+                                    
                                     $.ajax({
                                         url: 'atualizar_coordenadas.php',
                                         method: 'POST',
@@ -459,39 +577,138 @@ if ($empresa != 0) {
                                         }
                                     });
                                 } else {
-                                    $('#coordenada').val('');
+                                    $('#coordenada').val('Coordenadas não encontradas');
                                 }
                             },
                             error: function() {
-                                $('#coordenada').val('');
-                                console.log('Erro ao buscar coordenadas');
+                                $('#coordenada').val('Erro ao buscar coordenadas');
                             }
                         });
                     }
                 }
 
-                // Trigger coordinate search when CEP changes
-                $('#cep').on('blur', function() {
-                    buscarCoordenadas($(this).val());
-                });
-
-                // Also trigger when CEP field loses focus
-                $('#cep').on('change', function() {
+                $('#cep').on('blur change', function() {
                     buscarCoordenadas($(this).val());
                 });
             });
 
+            // Inicialização do mapa
+            window.initMap = initMap; 
+
+            $(document).ready(function() {
+                function limpaFormularioCep() {
+                    // Limpa valores do formulário de cep.
+                    $("#rua").val("");
+                    $("#bairro").val("");
+                    $("#cidade").val("");
+                    $("#estado").val("");
+                    $("#coordenada").val("");
+                }
+
+                function preencheCamposEndereco(dados) {
+                    $("#rua").val(dados.street || dados.logradouro);
+                    $("#bairro").val(dados.neighborhood || dados.bairro);
+                    $("#cidade").val(dados.city || dados.cidade || dados.localidade);
+                    $("#estado").val(dados.state || dados.uf);
+                }
+
+                function buscarCoordenadas(endereco) {
+                    $('#coordenada').val("Buscando coordenadas...");
+                    
+                    // Monta o endereço completo para busca
+                    const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+                    
+                    // Usa a API do OpenStreetMap (Nominatim)
+                    $.ajax({
+                        url: 'https://nominatim.openstreetmap.org/search',
+                        type: 'GET',
+                        data: {
+                            q: enderecoCompleto,
+                            format: 'json',
+                            limit: 1
+                        },
+                        headers: {
+                            'Accept-Language': 'pt-BR'
+                        },
+                        success: function(response) {
+                            if (response && response.length > 0) {
+                                const lat = response[0].lat;
+                                const lon = response[0].lon;
+                                $('#coordenada').val(`${lat}, ${lon}`);
+                            } else {
+                                $('#coordenada').val('');
+                                console.log('Coordenadas não encontradas');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            $('#coordenada').val('');
+                            console.log('Erro ao buscar coordenadas:', error);
+                        }
+                    });
+                }
+
+                //Quando o campo cep perde o foco.
+                $("#cep").on('blur change', function() {
+                    // Nova variável "cep" somente com dígitos.
+                    var cep = $(this).val().replace(/\D/g, '');
+
+                    //Verifica se campo cep possui valor informado.
+                    if (cep.length === 8) {
+                        //Expressão regular para validar o CEP.
+                        var validacep = /^[0-9]{8}$/;
+
+                        //Valida o formato do CEP.
+                        if(validacep.test(cep)) {
+                            //Preenche os campos com "..." enquanto consulta webservice.
+                            $("#rua").val("...");
+                            $("#bairro").val("...");
+                            $("#cidade").val("...");
+                            $("#estado").val("...");
+                            $("#coordenada").val("Buscando coordenadas...");
+
+                            //Consulta o webservice viacep.com.br/
+                            $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
+                                if (!("erro" in dados)) {
+                                    preencheCamposEndereco(dados);
+                                    // Busca coordenadas após preencher o endereço
+                                    buscarCoordenadas(dados);
+                                } else {
+                                    //CEP pesquisado não foi encontrado.
+                                    limpaFormularioCep();
+                                    alert("CEP não encontrado.");
+                                }
+                            }).fail(function() {
+                                limpaFormularioCep();
+                                alert("Erro ao buscar CEP. Tente novamente mais tarde.");
+                            });
+                        } else {
+                            //cep é inválido.
+                            limpaFormularioCep();
+                            alert("Formato de CEP inválido.");
+                        }
+                    } else {
+                        //cep sem valor, limpa formulário.
+                        limpaFormularioCep();
+                    }
+                });
+            });
+
             document.addEventListener('DOMContentLoaded', function() {
-                // Função para criar e configurar campo de busca
+                // Código do campo de busca
                 function createSearchableSelect(selectElement, placeholder) {
+                    const searchContainer = document.createElement('div');
+                    searchContainer.className = 'search-select-container';
+                    
                     // Cria campo de busca
                     const searchInput = document.createElement('input');
                     searchInput.type = 'text';
                     searchInput.placeholder = placeholder;
-                    searchInput.className = 'form-control mb-2';
+                    searchInput.className = 'form-control search-input';
                     
-                    // Insere o campo de busca antes do select
-                    selectElement.parentNode.insertBefore(searchInput, selectElement);
+                    // Insere o container antes do select
+                    selectElement.parentNode.insertBefore(searchContainer, selectElement);
+                    searchContainer.appendChild(searchInput);
+                    searchContainer.appendChild(selectElement);
                     
                     // Array com todas as opções originais
                     const options = Array.from(selectElement.options);
@@ -505,8 +722,8 @@ if ($empresa != 0) {
                         
                         // Adiciona opção padrão
                         const defaultOption = selectElement.id === 'atividade_principal' 
-                            ? 'Selecione uma atividade'
-                            : 'Selecione as atividades secundárias';
+                            ? 'Selecione uma atividade principal'
+                            : 'Selecione um CNAE';
                         selectElement.add(new Option(defaultOption, ''));
                         
                         // Filtra e adiciona opções que correspondem à busca
@@ -515,98 +732,123 @@ if ($empresa != 0) {
                             
                             if (option.text.toLowerCase().includes(searchTerm)) {
                                 const newOption = new Option(option.text, option.value);
-                                // Mantém o estado selecionado para atividades secundárias
-                                if (selectElement.id === 'cnae_select' && option.selected) {
-                                    newOption.selected = true;
+                                // Copia os atributos data-* da opção original
+                                if (option.dataset.descricao) {
+                                    newOption.dataset.descricao = option.dataset.descricao;
                                 }
+                                // Mantém o estado selecionado/desabilitado
+                                newOption.selected = option.selected;
+                                newOption.disabled = option.disabled;
                                 selectElement.add(newOption);
                             }
                         });
                     });
                 }
 
-                // Configura busca para atividade principal
+                // Configura busca para atividade principal e secundária
                 const atividadePrincipal = document.getElementById('atividade_principal');
-                createSearchableSelect(atividadePrincipal, 'Buscar CNAE Principal...');
-
-                // Configura busca para atividades secundárias
                 const atividadesSecundarias = document.getElementById('cnae_select');
-                createSearchableSelect(atividadesSecundarias, 'Buscar CNAE Secundário...');
-            });
+                
+                if (atividadePrincipal) {
+                    createSearchableSelect(atividadePrincipal, 'Buscar CNAE Principal...');
+                }
+                if (atividadesSecundarias) {
+                    createSearchableSelect(atividadesSecundarias, 'Buscar CNAE Secundário...');
+                }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const selectCnae = document.getElementById('cnae_select');
+                // Código para adicionar e remover CNAEs secundários
                 const btnAdicionar = document.getElementById('adicionar_cnae');
                 const listaCnaes = document.getElementById('lista_cnaes');
+                let selectedValue = '';
+                let selectedText = '';
 
-                // Função para obter a descrição do CNAE selecionado
-                function getCNAEDescription(codigo) {
-                    const option = selectCnae.querySelector(`option[value="${codigo}"]`);
-                    return option ? option.text : '';
+                // Captura o valor quando o select muda
+                if (atividadesSecundarias) {
+                    atividadesSecundarias.addEventListener('change', function() {
+                        selectedValue = this.value;
+                        selectedText = this.options[this.selectedIndex].text;
+                        console.log('CNAE selecionado:', selectedValue, selectedText); // Debug
+                    });
                 }
 
-                btnAdicionar.addEventListener('click', function() {
-                    const selectedOption = selectCnae.options[selectCnae.selectedIndex];
-                    
-                    if (!selectedOption.value) {
-                        alert('Por favor, selecione um CNAE');
-                        return;
-                    }
+                // Função para adicionar CNAE secundário
+                if (btnAdicionar && atividadesSecundarias) {
+                    btnAdicionar.addEventListener('click', function() {
+                        console.log('Clique no botão adicionar'); // Debug
+                        
+                        if (!selectedValue) {
+                            alert('Por favor, selecione um CNAE');
+                            return;
+                        }
 
-                    // Verifica se o CNAE já foi adicionado
-                    const jaExiste = document.querySelector(`#lista_cnaes li[data-id="${selectedOption.value}"]`);
-                    if (jaExiste) {
-                        alert('Este CNAE já foi adicionado');
-                        return;
-                    }
+                        // Verifica se o CNAE já foi adicionado
+                        const jaExiste = document.querySelector(`input[name="atividades_secundarias[]"][value="${selectedValue}"]`);
+                        if (jaExiste) {
+                            alert('Este CNAE já foi adicionado');
+                            return;
+                        }
 
-                    // Cria novo item na lista
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    li.setAttribute('data-id', selectedOption.value);
-                    
-                    // Adiciona o texto do CNAE e campos hidden para código e descrição
-                    li.innerHTML = `
-                        ${selectedOption.text}
-                        <button type="button" class="btn btn-danger btn-sm remover-cnae">Remover</button>
-                        <input type="hidden" name="atividades_secundarias[]" value="${selectedOption.value}">
-                        <input type="hidden" name="descricoes_secundarias[]" value="${selectedOption.text}">
-                    `;
+                        // Pega a descrição do CNAE selecionado
+                        const descricaoCnae = selectedText.split(' - ')[1];
 
-                    // Adiciona à lista
-                    listaCnaes.appendChild(li);
-                    
-                    // Limpa a seleção
-                    selectCnae.value = '';
+                        // Cria novo item na lista
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        
+                        // Adiciona o texto do CNAE e campos hidden para código e descrição
+                        li.innerHTML = `
+                            ${selectedText}
+                            <button type="button" class="btn btn-danger btn-sm remover-cnae">
+                                <i class="fas fa-trash"></i> Remover
+                            </button>
+                            <input type="hidden" name="atividades_secundarias[]" value="${selectedValue}">
+                            <input type="hidden" name="descricoes_secundarias[]" value="${descricaoCnae}">
+                        `;
+
+                        // Adiciona à lista
+                        listaCnaes.appendChild(li);
+                        
+                        // Desabilita a opção no select
+                        const option = atividadesSecundarias.querySelector(`option[value="${selectedValue}"]`);
+                        if (option) {
+                            option.disabled = true;
+                        }
+                        
+                        // Limpa as seleções
+                        atividadesSecundarias.value = '';
+                        selectedValue = '';
+                        selectedText = '';
+                    });
+                }
+
+                // Função para remover CNAE secundário
+                if (listaCnaes) {
+                    listaCnaes.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('remover-cnae') || e.target.closest('.remover-cnae')) {
+                            const li = e.target.closest('li');
+                            const cnaeValue = li.querySelector('input[name="atividades_secundarias[]"]').value;
+                            
+                            // Habilita novamente a opção no select
+                            const option = atividadesSecundarias.querySelector(`option[value="${cnaeValue}"]`);
+                            if (option) {
+                                option.disabled = false;
+                            }
+                            
+                            // Remove o item da lista
+                            li.remove();
+                        }
+                    });
+                }
+            });
+
+            $(document).ready(function() {
+                $('#atividade_principal').change(function() {
+                    const selectedOption = $(this).find('option:selected');
+                    const descricao = selectedOption.data('descricao');
+                    $('#descricao_cnae').val(descricao); // Define a descrição no campo oculto
                 });
             });
-
-            function atualizarDescricaoCNAE(selectElement) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-                const descricaoInput = document.getElementById('descricao_cnae');
-                if (selectedOption.value) {
-                    descricaoInput.value = selectedOption.dataset.descricao;
-                } else {
-                    descricaoInput.value = '';
-                }
-            }
-
-            // Executa ao carregar a página para garantir que a descrição está correta
-            document.addEventListener('DOMContentLoaded', function() {
-                const select = document.getElementById('atividade_principal');
-                atualizarDescricaoCNAE(select);
-            });
-
-            // Evento para remover CNAE
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remover-cnae')) {
-                    e.target.closest('li').remove();
-                }
-            });
-            
         </script>
-        <script src="js/cep.js"></script>
-        <script src="js/coordenadas.js"></script>
     </body>
     </html>
 <?php

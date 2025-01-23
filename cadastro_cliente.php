@@ -250,10 +250,9 @@ if (!empty($empresa['atividades_secundarias'])) {
         }
 
         .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
         input[type="text"],
@@ -270,9 +269,13 @@ if (!empty($empresa['atividades_secundarias'])) {
             overflow: hidden; /* Oculta texto que excede a largura */
             text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
         }
-
         .form-group {
-            margin-bottom: 15px;
+            flex: 1; /* Cada grupo ocupa o mesmo espaço */
+            margin-right: 15px; /* Espaçamento entre os grupos */
+        }
+
+        .form-group:last-child {
+            margin-right: 0; /* Remove margem do último grupo */
         }
 
         .form-group.full-width {
@@ -481,13 +484,15 @@ if (!empty($empresa['atividades_secundarias'])) {
                             <label for="numero" class="required">Número</label>
                             <input type="text" id="numero" name="numero" required placeholder="Número">
                         </div>
-                    </div>
 
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="complemento">Complemento</label>
                             <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
                         </div>
+                    </div>
+
+                    <div class="form-row">
+                        
 
                         <div class="form-group">
                             <label for="bairro">Bairro</label>

@@ -63,23 +63,17 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar Serviço</title>
-    <link rel="stylesheet" href="css/main.css">
     <style>
+        /* Estilos Gerais */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #838282;
             --accent-color: #e74c3c;
             --text-color: #2c3e50;
-            --sidebar-width: 250px;
+            --background-color: #f4f7fa;
             --border-color: #ddd;
             --success-color: #4CAF50;
             --error-color: #f44336;
-            --primary-dark: #1e40af;
-            --background-color: #ffffff;
-            --sidebar-width: 280px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
         }
 
         * {
@@ -89,7 +83,7 @@ try {
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Arial', sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
@@ -97,24 +91,18 @@ try {
             min-height: 100vh;
         }
 
-        .sidebar {
-            overflow-y: auto;
-        }
-
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 2rem;
-            max-width: calc(100% - var(--sidebar-width));
-        }
-
         .container {
             max-width: 1200px;
-            padding: 2rem;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            margin: 2rem auto;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Estilos do Header */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         h1, h2 {
@@ -149,77 +137,303 @@ try {
             border-radius: 2px;
         }
 
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5rem;
+        /* Estilos do Card */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
-
-        .form {
-            padding: 20px; /* Espaçamento interno */
-            border-radius: 8px; /* Bordas arredondadas */
-            background: #f8f9fa; /* Fundo suave para o formulário */
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Sombra leve */
+        .form-section {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .form-group {
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #495057;
-            font-weight: 500;
+        .form-group {
+            flex: 1; /* Cada grupo ocupa o mesmo espaço */
+            margin-right: 15px; /* Espaçamento entre os grupos */
         }
 
-        .form-group input[type="text"],
-        .form-group input[type="number"] {
-            width: 100%;
+        .form-group:last-child {
+            margin-right: 0; /* Remove margem do último grupo */
+        }
+
+        .form-control {
+            width: 100%; /* Largura total */
             padding: 10px;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
-            transition: border-color 0.2s; /* Transição suave para a borda */
+            border-radius: 4px;
+            box-sizing: border-box; /* Inclui padding e border no cálculo da largura */
         }
 
-        .form-group input[type="text"]:focus,
-        .form-group input[type="number"]:focus {
-            border-color: var(--accent-color); /* Cor da borda ao focar */
-            outline: none; /* Remove o contorno padrão */
-        }
-
-        .btn-group {
+        .form-actions {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px; /* Espaçamento entre os botões */
+            justify-content: left;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+            margin-top: -30px;
         }
 
         .btn {
-            padding: 10px 20px; /* Aumenta o padding para um botão mais espaçoso */
-            border-radius: 5px; /* Bordas arredondadas */
+            padding: 8px 16px; /* Ajuste o padding para combinar com o estilo */
+            border-radius: 4px;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s; /* Transições suaves */
+            transition: all 0.3s;
         }
 
+        /* Estilos dos Botões */
         .btn-primary {
             background: #007bff; /* Cor do botão primário */
             color: white; /* Cor do texto */
         }
 
         .btn-primary:hover {
-            background: #0056b3; /* Cor ao passar o mouse */
+            background-color: #0056b3; /* Cor ao passar o mouse */
         }
 
-        .btn-danger {
-            background: #dc3545; /* Cor do botão de perigo */
+        .btn-secondary {
+            background-color: var(--accent-color); /* Cor do botão secundário */
             color: white; /* Cor do texto */
         }
 
-        .btn-danger:hover {
-            background: #c82333; /* Cor ao passar o mouse */
+        .btn-secondary:hover {
+            background-color: #c82333; /* Cor ao passar o mouse */
+        }
+
+        /* Estilos das Células de Status */
+        .status-cell {
+            padding: 5px;
+            border-radius: 4px;
+            color: white; /* Cor do texto */
+        }
+
+        .status-concluido {
+            background-color: #28a745; /* Verde para Concluído */
+        }
+
+        .status-em-andamento {
+            background-color: #ffc107; /* Amarelo para Em Andamento */
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap; /* Impede quebra de linha */
+            overflow: hidden; /* Oculta texto que excede a largura */
+            text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
+        }
+
+        .disabled-field {
+            background-color: #d3d3d3; /* Cor cinza */
+            color: #a9a9a9; /* Cor do texto cinza */
+            cursor: not-allowed; /* Cursor de não permitido */
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os checkboxes quebrem para a próxima linha */
+            gap: 15px; /* Espaçamento entre os checkboxes */
+            justify-content: center; /* Centraliza os checkboxes horizontalmente */
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: white; /* Cor de fundo */
+            transition: background-color 0.3s, border-color 0.3s; /* Transições suaves */
+        }
+
+        .form-check:hover {
+            background-color: #f0f0f0; /* Cor de fundo ao passar o mouse */
+            border-color: var(--primary-color); /* Cor da borda ao passar o mouse */
+        }
+
+        .form-check-input {
+            margin-right: 10px; /* Espaçamento entre o checkbox e o texto */
+            cursor: pointer; /* Cursor de ponteiro */
+        }
+
+        .form-check-label {
+            cursor: pointer; /* Cursor de ponteiro */
+        }
+
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            position: relative;
+        }
+
+        .popup h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        #despesaForm {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #despesaForm label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        #despesaForm input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        #despesaForm input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        #despesaForm button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        #despesaForm button:hover {
+            background-color: #357abd;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden; /* Para bordas arredondadas */
+        }
+
+        th, td {
+            padding: 10px; /* Aumenta o espaçamento */
+            text-align: center;
+            border: 1px solid var(--border-color);
+            width: 10%; /* Define uma largura mínima para as colunas */
+            white-space: nowrap; /* Impede a quebra de linha */
+            overflow: hidden; /* Oculta o texto que excede a largura da célula */
+            text-overflow: ellipsis; /* Adiciona reticências (...) para texto que não cabe */
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2; /* Cor de fundo alternada para linhas */
+        }
+
+        tr:hover {
+            background-color: #e9ecef; /* Cor de fundo ao passar o mouse */
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-cancelar {
+            background-color: #dc3545;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #c82333;
+        }
+
+        .btn-editar, .btn-excluir {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-excluir {
+            background-color: #e74c3c;
+        }
+
+        .btn-excluir:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
@@ -229,206 +443,165 @@ try {
     
     <div class="main-content">
         <div class="container">
-                <!-- Popup -->
-            <div id="popup" class="popup" style="display: none;">
-                <div class="popup-content">
-                    <span class="close" onclick="closePopup()">&times;</span>
-                    <h2>Adicionar Nova Despesa</h2>
-                    <form id="despesaForm">
-                        <label for="nome_despesa">Nome da Despesa:</label>
-                        <input type="text" id="nome_despesa" name="nome_despesa" required>
 
-                        <label for="valor_despesa">Valor:</label>
-                        <input type="number" id="valor_despesa" name="valor_despesa" step="0.01" min="0" required>
-                        <label></label>
-                        <button class="btn" type="submit">Salvar</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                <h2>Cadastro de Despesas</h2>
-                    <!-- Tabela -->
-                    <table id="tabelaDespesas" boarder="1">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Valor</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr id='row-" . $row['id'] . "'>";
-                                        echo "<td>" . htmlspecialchars($row['nome_despesa']) . "</td>";
-                                        echo "<td>R$ " . number_format($row['valor'], 2, ',', '.') . "</td>";
-                                        echo "<td>";
-                                        echo "<button type='button' class='btn-excluir' onclick='excluirDespesa(" . $row['id'] . ")'>Excluir</button>";
-                                        echo "</td>";
-                                        echo "</tr>";
-                                    }
-                                }
-                            ?>
-                        </tbody>
-                    </table>
-                    <button class="btn" onclick="openPopup()">Adicionar Despesa</button>
-                </div>  
-                <div class="form-group"></div>
-            </div>
-
-            <br><br><br>
             <h1>Cadastro de Serviços</h1>
             <form action="salvar_servico.php" method="POST">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="numero_proposta">Número da Proposta</label>
-                        <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($numero_proposta); ?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente" class="required">Cliente</label>
-                        <select id="cliente" name="cliente" onchange="buscarCNPJCPF(this.value)" required>
-                            <option value="">Selecione...</option>
-                            <?php
-                            $clientes = $conn->query("SELECT id, IFNULL(razao_social, nome) AS nome FROM cliente");
-                            while ($cliente = $clientes->fetch_assoc()) {
-                                echo "<option value='{$cliente['id']}'>{$cliente['nome']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    
+                <div class="form-section">
+                    <h2>Informações do Serviço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cnpj_cpf" class="required">CNPJ/CPF</label>
-                            <input type="text" id="cnpj_cpf" name="cnpj_cpf" readonly>
+                            <label for="numero_proposta">Número da Proposta</label>
+                            <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($numero_proposta); ?>" onchange="verificarNumeroProposta(this.value)">
+                            <small id="numero_proposta_feedback" style="display: none;"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente" class="required">Cliente</label>
+                            <select id="cliente" name="cliente" onchange="buscarCNPJCPF(this.value)" required>
+                                <option value="">Selecione...</option>
+                                <?php
+                                $clientes = $conn->query("SELECT id, IFNULL(razao_social, nome) AS nome FROM cliente");
+                                while ($cliente = $clientes->fetch_assoc()) {
+                                    echo "<option value='{$cliente['id']}'>{$cliente['nome']}</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cnpj_cpf" class="required">CNPJ/CPF</label>
+                                <input type="text" id="cnpj_cpf" name="cnpj_cpf" readonly>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group"></div>
-                    <div class="form-group"></div>
                 </div>
                 
-
-                <label>Tipos de Serviço:</label>
-                <div class="checkbox-group">
-                    <?php foreach ($tipos_servico as $servico): ?>
-                        <div class='form-check'>
-                            <input class='form-check-input' type='checkbox' 
-                                name='tipo_servico[]' 
-                                id='servico_<?php echo htmlspecialchars($servico['id']); ?>' 
-                                value='<?php echo htmlspecialchars($servico['id']); ?>'>
-                            <label class='form-check-label' 
-                                for='servico_<?php echo htmlspecialchars($servico['id']); ?>'>
-                                <?php echo htmlspecialchars($servico['tipo_servico']); ?>
-                            </label>
+                <div class="form-section">
+                    <h2>Tipos de Serviço</h2>
+                    <div class="checkbox-group">
+                        <?php foreach ($tipos_servico as $servico): ?>
+                            <div class='form-check'>
+                                <input class='form-check-input' type='checkbox' 
+                                    name='tipo_servico[]' 
+                                    id='servico_<?php echo htmlspecialchars($servico['id']); ?>' 
+                                    value='<?php echo htmlspecialchars($servico['id']); ?>'>
+                                <label class='form-check-label' 
+                                    for='servico_<?php echo htmlspecialchars($servico['id']); ?>'>
+                                    <?php echo htmlspecialchars($servico['tipo_servico']); ?>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Status do Serviço</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="data_inicio" class="required">Data de Início do Serviço</label>
+                            <input type="date" id="data_inicio" name="data_inicio" required>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-                <br><br>
 
-                <label>Endereço do Serviço</label>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cep" class="required">CEP:</label>
-                        <input type="text" id="cep" name="cep" required placeholder="00000-000">
-                        <small id="cep-feedback" class="form-text"></small>
-                    </div>
-                    <div class="form-group">
-                        <label for="rua">Rua:</label>
-                        <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
-                    </div>
-                    <div class="form-group">
-                        <label for="numero" class="required">Número:</label>
-                        <input type="text" id="numero" name="numero" required placeholder="Número">
-                    </div>
-                    <div class="form-group">
-                        <label for="complemento">Complemento:</label>
-                        <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
+                        <div class="form-group">
+                            <label for="data_termino">Data de Término do Serviço</label>
+                            <input type="date" id="data_termino" name="data_termino">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status_servico">Status do Serviço</label>
+                            <input type="text" id="status_servico" name="status_servico" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bairro">Bairro:</label>
-                        <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
+                <div class="form-section">
+                    <h2>Informações do Pagamento</h2>
+                    <div class="form-row">
+                            <div class="form-group">
+                                <label for="valor_total" class="required">Valor Total</label>
+                                <input type="number" id="valor_total" name="valor_total" step="0.01" required onchange="verificarValores()">
+                            </div>
+
+                        <div class="form-group">
+                            <label for="valor_entrada">Valor Entrada</label>
+                            <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" onchange="verificarValores()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="data_pagamento">Vencimento</label>
+                            <input type="date" id="data_pagamento" name="data_pagamento">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="cidade">Cidade:</label>
-                        <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
-                    </div>
-                    <div class="form-group">
-                        <label for="estado">Estado:</label>
-                        <input type="text" id="estado" name="estado" readonly placeholder="Estado">
-                    </div>
-                    <div class="form-group">
-                        <label for="coordenada">Coordenada:</label>
-                        <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude">
-                        <small id="coordenadas-feedback" class="form-text"></small>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="forma_pagamento" class="required">Forma de Pagamento</label>
+                            <select id="forma_pagamento" name="forma_pagamento" required>
+                                <option value="">Selecione a forma de pagamento</option>
+                                <option value="CARTÃO DE CRÉDITO">Cartão de Crédito</option>
+                                <option value="CARTÃO DE DÉBITO">Cartão de Débito</option>
+                                <option value="PIX">PIX</option>
+                                <option value="DINHEIRO">Dinheiro</option>
+                                <option value="BOLETO">Boleto</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="parcelamento">Parcelamento</label>
+                            <select id="parcelamento" name="parcelamento">
+                                <option value="">Selecione o parcelamento</option>
+                                <?php
+                                for ($i = 1; $i <= 12; $i++) {
+                                    echo "<option value=\"$i\">{$i}x</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group"></div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="data_inicio" class="required">Data de Início do Serviço</label>
-                        <input type="date" id="data_inicio" name="data_inicio" required>
+                <div class="form-section">
+                    <h2>Endereço do Serviço</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cep" class="required">CEP:</label>
+                            <input type="text" id="cep" name="cep" required placeholder="00000-000">
+                            <small id="cep-feedback" class="form-text"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="rua">Rua:</label>
+                            <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
+                        </div>
+                        <div class="form-group">
+                            <label for="numero" class="required">Número:</label>
+                            <input type="text" id="numero" name="numero" required placeholder="Número">
+                        </div>
+                        <div class="form-group">
+                            <label for="complemento">Complemento:</label>
+                            <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="data_termino">Data de Término do Serviço</label>
-                        <input type="date" id="data_termino" name="data_termino">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bairro">Bairro:</label>
+                            <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
+                        </div>
+                        <div class="form-group">
+                            <label for="cidade">Cidade:</label>
+                            <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado:</label>
+                            <input type="text" id="estado" name="estado" readonly placeholder="Estado">
+                        </div>
+                        <div class="form-group">
+                            <label for="coordenada">Coordenada:</label>
+                            <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude">
+                            <small id="coordenadas-feedback" class="form-text"></small>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="status_servico">Status do Serviço</label>
-                        <input type="text" id="status_servico" name="status_servico" readonly>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="valor_total" class="required">Valor Total</label>
-                        <input type="number" id="valor_total" name="valor_total" step="0.01" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="valor_entrada">Valor Entrada</label>
-                        <input type="number" id="valor_entrada" name="valor_entrada" step="0.01">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="data_pagamento">Dia para Pagamento</label>
-                        <input type="date" id="data_pagamento" name="data_pagamento">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="forma_pagamento" class="required">Forma de Pagamento</label>
-                        <select id="forma_pagamento" name="forma_pagamento" required>
-                            <option value="">Selecione a forma de pagamento</option>
-                            <option value="CARTÃO DE CRÉDITO">Cartão de Crédito</option>
-                            <option value="CARTÃO DE DÉBITO">Cartão de Débito</option>
-                            <option value="PIX">PIX</option>
-                            <option value="DINHEIRO">Dinheiro</option>
-                            <option value="BOLETO">Boleto</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="parcelamento">Parcelamento</label>
-                        <select id="parcelamento" name="parcelamento">
-                            <option value="">Selecione o parcelamento</option>
-                            <?php
-                            for ($i = 1; $i <= 12; $i++) {
-                                echo "<option value=\"$i\">{$i}x</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="form-group"></div>
-                    
                 </div>
 
                 <div class="form-row">
@@ -455,11 +628,60 @@ try {
                     </div>
                 </div>
 
-                <button class="btn" type="submit">Cadastrar Serviço</button>
+                <div class="form-section">
+                    <h2>Cadastro de Despesas</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <table id="tabelaDespesas" border="1">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Valor</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="despesasBody">
+                                    <tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>
+                                </tbody>
+                            </table>
+                            <br>
+                            <button type="button" class="btn btn-primary" onclick="openPopup()">
+                                <i class="fa fa-plus"></i> Adicionar Despesa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Cadastrar Serviço</button>
+                </div>
             </form>
         </div>
-    </div>
 
+        <!-- Popup -->
+        <div id="popup" class="popup" onclick="closePopupOutside(event)">
+            <div class="popup-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+                <h2>Adicionar Nova Despesa</h2>
+                <form id="despesaForm">
+                    <div class="form-field">
+                        <label for="nome_despesa">Nome da Despesa</label>
+                        <input type="text" id="nome_despesa" name="nome_despesa" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="valor_despesa">Valor</label>
+                        <input type="text" id="valor_despesa" name="valor_despesa" required onkeyup="formatarMoeda(this)">
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn" type="submit"><i class="fa fa-save"></i> Salvar</button>
+                        <button class="btn btn-cancelar" type="button" onclick="closePopup()"><i class="fa fa-times"></i> Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Mascaras de CPF, CNPJ e outros campos
@@ -470,11 +692,9 @@ try {
 
         $(document).ready(function() {
             function buscarCoordenadas(cep) {
-                // Remove any non-numeric characters from CEP
                 cep = cep.replace(/[^0-9]/g, '');
                 
                 if (cep.length === 8) {
-                    // Show loading indicator in the coordinates field
                     $('#coordenada').val('Buscando coordenadas...');
                     
                     $.ajax({
@@ -482,8 +702,8 @@ try {
                         method: 'GET',
                         success: function(response) {
                             if (response.location && response.location.coordinates) {
-                                const latitude = response.location.coordinates[1];
-                                const longitude = response.location.coordinates[0];
+                                const latitude = response.location.coordinates.latitude;
+                                const longitude = response.location.coordinates.longitude;
                                 $('#coordenada').val(`${latitude}, ${longitude}`);
                             } else {
                                 $('#coordenada').val('');
@@ -491,7 +711,6 @@ try {
                         },
                         error: function() {
                             $('#coordenada').val('');
-                            console.log('Erro ao buscar coordenadas');
                         }
                     });
                 }
@@ -509,11 +728,25 @@ try {
         });
 
         function openPopup() {
-            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popup').style.display = 'flex';
         }
 
         function closePopup() {
             document.getElementById('popup').style.display = 'none';
+        }
+
+        function formatarMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = (valor/100).toFixed(2);
+            valor = valor.replace(".", ",");
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+            input.value = valor;
+        }
+
+        function closePopupOutside(event) {
+            if (event.target.className === 'popup') {
+                closePopup();
+            }
         }
 
         // Cadastrar Despesa (requisição AJAX)
@@ -601,7 +834,6 @@ try {
             }
         }
 
-
         // Adicionar evento de submit ao formulário
         document.getElementById('despesaForm').addEventListener('submit', cadastrarDespesa);
 
@@ -614,7 +846,6 @@ try {
                     $("#bairro").val("...");
                     $("#cidade").val("...");
                     $("#estado").val("...");
-                    $("#coordenada").val("Buscando coordenadas...");
 
                     $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
                         if (!("erro" in dados)) {
@@ -713,6 +944,98 @@ try {
                 })
                 .catch(error => console.error('Erro ao buscar CNPJ/CPF:', error));
             }
+        }
+
+        // Supondo que você tenha uma variável chamada numero_proposta
+        let numero_proposta = document.getElementById('numero_proposta').value; // ou de onde você estiver pegando
+
+        console.log("Número da Proposta:", numero_proposta);
+
+        function verificarValores() {
+            const valorTotal = parseFloat(document.getElementById('valor_total').value) || 0;
+            const valorEntrada = parseFloat(document.getElementById('valor_entrada').value) || 0;
+            const campoParcelamento = document.getElementById('parcelamento');
+
+            if (valorEntrada === valorTotal && valorTotal !== 0) {
+                campoParcelamento.value = '';
+                campoParcelamento.disabled = true;
+            } else {
+                campoParcelamento.disabled = false;
+            }
+        }
+
+        function verificarNumeroProposta(numero) {
+            $.ajax({
+                url: 'verificar_proposta.php',
+                method: 'POST',
+                data: { numero_proposta: numero },
+                success: function(response) {
+                    const feedback = $('#numero_proposta_feedback');
+                    feedback.show();
+                    
+                    if (response.existe) {
+                        feedback.text('Número da proposta já existe!');
+                        feedback.css('color', 'red');
+                    } else {
+                        feedback.text('Número da proposta disponível');
+                        feedback.css('color', 'green');
+                    }
+                }
+            });
+        }
+
+        // Adiciona o evento assim que o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            const numeroPropostaInput = document.getElementById('numero_proposta');
+            
+            // Carrega as despesas iniciais usando o valor atual do número da proposta
+            const numeroPropostaInicial = numeroPropostaInput.value;
+            if (numeroPropostaInicial) {
+                buscarDespesas(numeroPropostaInicial);
+            }
+            
+            // Adiciona o evento de input para detectar mudanças em tempo real
+            numeroPropostaInput.addEventListener('input', function() {
+                const numeroProposta = this.value;
+                if (numeroProposta) {
+                    buscarDespesas(numeroProposta);
+                }
+            });
+        });
+
+        function buscarDespesas(numeroProposta) {
+            console.log('Buscando despesas para proposta:', numeroProposta); // Debug
+            fetch(`buscar_despesas.php?numero_proposta=${numeroProposta}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Despesas encontradas:', data); // Debug
+                    const tbody = document.getElementById('despesasBody');
+                    
+                    if (data && data.length > 0) {
+                        let html = '';
+                        data.forEach(despesa => {
+                            html += `
+                                <tr id="row-${despesa.id}">
+                                    <td>${despesa.nome_despesa}</td>
+                                    <td>R$ ${despesa.valor}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-excluir" onclick="excluirDespesa(${despesa.id})">
+                                            <i class="fa fa-trash"></i> 
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        tbody.innerHTML = html;
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar despesas:', error);
+                    document.getElementById('despesasBody').innerHTML = 
+                        '<tr><td colspan="3">Erro ao carregar despesas</td></tr>';
+                });
         }
     </script>
 </body>

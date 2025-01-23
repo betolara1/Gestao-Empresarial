@@ -39,6 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $atividades_secundarias_string = implode(',', $atividades_secundarias);
     $descricoes_secundarias_string = implode('|||', $descricoes_secundarias);
 
+    var_dump($descricao_cnae); // Para verificar se a descrição está correta
+
     // SQL para inserção
     $sql = "INSERT INTO empresa (
         razao_social, cnpj, nome, cpf, cep, rua, numero, complemento, 

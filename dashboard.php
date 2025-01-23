@@ -469,8 +469,341 @@ $conn->close();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Cards padrão */
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Cards de gráfico */
+        .card-grafico {
+            grid-column: span 6; /* 2 cards por linha por padrão */
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card wide (ocupa linha inteira) */
+        .card-wide {
+            grid-column: span 12;
+            height: 500px;
+        }
+
+        /* Header do card */
+        .card-header {
+            padding-bottom: 1rem;
+        }
+
+        /* Corpo do card */
+        .card-body {
+            flex: 1;
+            position: relative;
+            min-height: 0; /* Importante para evitar overflow */
+        }
+
+        /* Container do gráfico */
+        .chart-container {
+            position: relative;
+            height: 100% !important;
+            width: 100%;
+        }
+
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .card-grafico {
+                grid-column: span 12; /* 1 card por linha em telas menores */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+        }
+
+        /* Estilos específicos para elementos dentro dos cards */
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .periodo-selector,
+        .chart-toggles {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .select-periodo,
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .toggle-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* Informações adicionais */
+        .saldo-info,
+        .total-info,
+        .projecao-info {
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+
+        .filtros-projecao {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .select-periodo {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            min-width: 150px;
+        }
+
+        .projecao-info {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .projecao-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .filtros-socios {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .faturamento-info {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .periodo-selector {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .periodo-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: #f1f1f1;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .periodo-btn:hover {
+            background: #e4e4e4;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .periodo-btn.active {
+            background: #3498db;
+            color: white;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+        }
+
+        .periodo-btn.active:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .periodo-selector {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .periodo-btn {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+    </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -484,7 +817,7 @@ $conn->close();
                 <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Indicadores Financeiros</h3>
+                            <h2>Indicadores Financeiros</h2>
                             <div class="periodo-selector">
                                 <button class="periodo-btn active" data-periodo="mes">Mês Atual</button>
                                 <button class="periodo-btn" data-periodo="ano">Ano <?php echo $anoAtual; ?></button>
@@ -522,7 +855,7 @@ $conn->close();
                 <!-- Visão Geral em Gráfico de Rosca -->
                 <div class="card card-grafico">
                     <div class="card-header">
-                        <h3>Visão Geral</h3>
+                        <h2>Visão Geral</h2>
                     </div>
                     <div class="card-body">
                         <canvas id="visaoGeralChart"></canvas>
@@ -532,7 +865,7 @@ $conn->close();
                 <!-- Status dos Serviços em Gráfico de Pizza -->
                 <div class="card card-grafico">
                     <div class="card-header">
-                        <h3>Status dos Serviços</h3>
+                        <h2>Status dos Serviços</h2>
                     </div>
                     <div class="card-body">
                         <canvas id="statusServicosChart"></canvas>
@@ -542,7 +875,7 @@ $conn->close();
                 <!-- Despesas por Tipo em Gráfico de Barras -->
                 <div class="card card-grafico">
                     <div class="card-header">
-                        <h3>Despesas por Tipo</h3>
+                        <h2>Despesas por Tipo</h2>
                     </div>
                     <div class="card-body">
                         <canvas id="despesasTipoChart"></canvas>
@@ -552,7 +885,7 @@ $conn->close();
                 <!-- Status de Pagamento em Gráfico de Rosca -->
                 <div class="card card-grafico">
                     <div class="card-header">
-                        <h3>Status de Pagamento</h3>
+                        <h2>Status de Pagamento</h2>
                     </div>
                     <div class="card-body">
                         <canvas id="statusPagamentoChart"></canvas>
@@ -563,7 +896,7 @@ $conn->close();
                 <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Faturamento por Tipo de Serviço</h3>
+                            <h2>Faturamento por Tipo de Serviço</h2>
                         </div>
                     </div>
                     <div class="card-body">
@@ -580,7 +913,7 @@ $conn->close();
                 <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Melhores Clientes</h3>
+                            <h2>Melhores Clientes</h2>
                         </div>
                     </div>
                     <div class="card-body">
@@ -594,7 +927,7 @@ $conn->close();
                 <div class="card card-grafico card-wide">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Comparativo Anual</h3>
+                            <h2>Comparativo Anual</h2>
                             <div class="chart-toggles">
                                 <button class="toggle-btn active" data-type="valores">Valores</button>
                                 <button class="toggle-btn" data-type="servicos">Serviços</button>
@@ -612,7 +945,7 @@ $conn->close();
                 <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Projeção Financeira</h3>
+                            <h2>Projeção Financeira</h2>
                             <div class="filtros-projecao">
                                 <select name="ano" id="anoSelect" class="select-periodo">
                                     <option value="">Selecione o Ano</option>
@@ -658,7 +991,7 @@ $conn->close();
                 <div class="card card-grafico card-wide">
                     <div class="card-header">
                         <div class="header-content">
-                            <h3>Dashboard de Sócios - <span id="periodoSelecionado"></span></h3>
+                            <h2>Dashboard de Sócios - <span id="periodoSelecionado"></span></h2>
                             <div class="filtros-socios">
                                 <select name="ano" id="anoSelectSocios" class="select-periodo">
                                     <option value="">Selecione o Ano</option>
@@ -1479,256 +1812,5 @@ $conn->close();
         atualizarDashboardSocios();
     });
     </script>
-
-    <style>
-    /* Container Principal */
-    .dashboard {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        gap: 1.5rem;
-        padding: 1.5rem;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* Cards padrão */
-    .card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Cards de gráfico */
-    .card-grafico {
-        grid-column: span 6; /* 2 cards por linha por padrão */
-        height: 400px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Card wide (ocupa linha inteira) */
-    .card-wide {
-        grid-column: span 12;
-        height: 500px;
-    }
-
-    /* Header do card */
-    .card-header {
-        padding-bottom: 1rem;
-    }
-
-    /* Corpo do card */
-    .card-body {
-        flex: 1;
-        position: relative;
-        min-height: 0; /* Importante para evitar overflow */
-    }
-
-    /* Container do gráfico */
-    .chart-container {
-        position: relative;
-        height: 100% !important;
-        width: 100%;
-    }
-
-    /* Responsividade */
-    @media (max-width: 1200px) {
-        .card-grafico {
-            grid-column: span 12; /* 1 card por linha em telas menores */
-        }
-    }
-
-    @media (max-width: 768px) {
-        .dashboard {
-            padding: 1rem;
-            gap: 1rem;
-        }
-        
-        .card {
-            padding: 1rem;
-        }
-    }
-
-    /* Estilos específicos para elementos dentro dos cards */
-    .header-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .periodo-selector,
-    .chart-toggles {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .select-periodo,
-    .toggle-btn {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #fff;
-        cursor: pointer;
-    }
-
-    .toggle-btn.active {
-        background: #3498db;
-        color: white;
-        border-color: #3498db;
-    }
-
-    /* Informações adicionais */
-    .saldo-info,
-    .total-info,
-    .projecao-info {
-        text-align: center;
-        padding: 1rem 0;
-        margin-top: auto;
-    }
-
-    .filtros-projecao {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .select-periodo {
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: #fff;
-        min-width: 150px;
-    }
-
-    .projecao-info {
-        text-align: center;
-        margin-top: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 4px;
-    }
-
-    .projecao-total {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-
-    .filtros-socios {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .faturamento-info {
-        text-align: center;
-        margin-top: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 1.1em;
-    }
-
-    .toggle-btn {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #fff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .toggle-btn:hover {
-        background: #f8f9fa;
-    }
-
-    .periodo-selector {
-        display: flex;
-        gap: 0.8rem;
-        margin-top: 1rem;
-    }
-
-    .periodo-btn {
-        padding: 0.6rem 1.2rem;
-        border: none;
-        border-radius: 6px;
-        background: #f1f1f1;
-        color: #666;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .periodo-btn:hover {
-        background: #e4e4e4;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    }
-
-    .periodo-btn.active {
-        background: #3498db;
-        color: white;
-        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
-    }
-
-    .periodo-btn.active:hover {
-        background: #2980b9;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
-        .periodo-selector {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .periodo-btn {
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-        }
-    }
-    h1, h2 {
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        font-weight: 700;
-    }
-
-    h1 {
-        font-size: 2.5rem;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #eee;
-    }
-
-    h2 {
-        font-size: 1.8rem;
-        position: relative;
-        padding-bottom: 0.5rem;
-    }
-
-    h2::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 4px;
-        background-color: var(--accent-color);
-        border-radius: 2px;
-    }
-    </style>
 </body>
 </html>

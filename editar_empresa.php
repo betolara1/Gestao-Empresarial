@@ -141,8 +141,59 @@ if (!empty($empresa['atividades_secundarias'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <link rel="stylesheet" href="css/main.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #838282;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --sidebar-width: 250px;
+            --border-color: #ddd;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --primary-dark: #1e40af;
+            --background-color: #ffffff;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            max-width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+        }
+
         h1, h2 {
             color: var(--primary-color);
             margin-bottom: 1.5rem;
@@ -248,6 +299,11 @@ if (!empty($empresa['atividades_secundarias'])) {
             border: 1px solid var(--border-color);
             margin-bottom: 5px;
             border-radius: 5px;
+        }
+
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -628,155 +684,153 @@ if (!empty($empresa['atividades_secundarias'])) {
             });
         });
     
-    
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Código do campo de busca
-        function createSearchableSelect(selectElement, placeholder) {
-            const searchContainer = document.createElement('div');
-            searchContainer.className = 'search-select-container';
-            
-            // Cria campo de busca
-            const searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = placeholder;
-            searchInput.className = 'form-control search-input';
-            
-            // Insere o container antes do select
-            selectElement.parentNode.insertBefore(searchContainer, selectElement);
-            searchContainer.appendChild(searchInput);
-            searchContainer.appendChild(selectElement);
-            
-            // Array com todas as opções originais
-            const options = Array.from(selectElement.options);
-            
-            // Função de busca
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Código do campo de busca
+            function createSearchableSelect(selectElement, placeholder) {
+                const searchContainer = document.createElement('div');
+                searchContainer.className = 'search-select-container';
                 
-                // Remove todas as opções atuais
-                selectElement.innerHTML = '';
+                // Cria campo de busca
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.placeholder = placeholder;
+                searchInput.className = 'form-control search-input';
                 
-                // Adiciona opção padrão
-                const defaultOption = selectElement.id === 'atividade_principal' 
-                    ? 'Selecione uma atividade principal'
-                    : 'Selecione um CNAE';
-                selectElement.add(new Option(defaultOption, ''));
+                // Insere o container antes do select
+                selectElement.parentNode.insertBefore(searchContainer, selectElement);
+                searchContainer.appendChild(searchInput);
+                searchContainer.appendChild(selectElement);
                 
-                // Filtra e adiciona opções que correspondem à busca
-                options.forEach(option => {
-                    if (option.value === '') return; // Pula a opção padrão
+                // Array com todas as opções originais
+                const options = Array.from(selectElement.options);
+                
+                // Função de busca
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
                     
-                    if (option.text.toLowerCase().includes(searchTerm)) {
-                        const newOption = new Option(option.text, option.value);
-                        // Copia os atributos data-* da opção original
-                        if (option.dataset.descricao) {
-                            newOption.dataset.descricao = option.dataset.descricao;
+                    // Remove todas as opções atuais
+                    selectElement.innerHTML = '';
+                    
+                    // Adiciona opção padrão
+                    const defaultOption = selectElement.id === 'atividade_principal' 
+                        ? 'Selecione uma atividade principal'
+                        : 'Selecione um CNAE';
+                    selectElement.add(new Option(defaultOption, ''));
+                    
+                    // Filtra e adiciona opções que correspondem à busca
+                    options.forEach(option => {
+                        if (option.value === '') return; // Pula a opção padrão
+                        
+                        if (option.text.toLowerCase().includes(searchTerm)) {
+                            const newOption = new Option(option.text, option.value);
+                            // Copia os atributos data-* da opção original
+                            if (option.dataset.descricao) {
+                                newOption.dataset.descricao = option.dataset.descricao;
+                            }
+                            // Mantém o estado selecionado/desabilitado
+                            newOption.selected = option.selected;
+                            newOption.disabled = option.disabled;
+                            selectElement.add(newOption);
                         }
-                        // Mantém o estado selecionado/desabilitado
-                        newOption.selected = option.selected;
-                        newOption.disabled = option.disabled;
-                        selectElement.add(newOption);
+                    });
+                });
+            }
+
+            // Configura busca para atividade principal e secundária
+            const atividadePrincipal = document.getElementById('atividade_principal');
+            const atividadesSecundarias = document.getElementById('cnae_select');
+            
+            if (atividadePrincipal) {
+                createSearchableSelect(atividadePrincipal, 'Buscar CNAE Principal...');
+            }
+            if (atividadesSecundarias) {
+                createSearchableSelect(atividadesSecundarias, 'Buscar CNAE Secundário...');
+            }
+
+            // Código para adicionar e remover CNAEs secundários
+            const btnAdicionar = document.getElementById('adicionar_cnae');
+            const listaCnaes = document.getElementById('lista_cnaes');
+            let selectedValue = '';
+            let selectedText = '';
+
+            // Captura o valor quando o select muda
+            if (atividadesSecundarias) {
+                atividadesSecundarias.addEventListener('change', function() {
+                    selectedValue = this.value;
+                    selectedText = this.options[this.selectedIndex].text;
+                    console.log('CNAE selecionado:', selectedValue, selectedText); // Debug
+                });
+            }
+
+            // Função para adicionar CNAE secundário
+            if (btnAdicionar && atividadesSecundarias) {
+                btnAdicionar.addEventListener('click', function() {
+                    console.log('Clique no botão adicionar'); // Debug
+                    
+                    if (!selectedValue) {
+                        alert('Por favor, selecione um CNAE');
+                        return;
+                    }
+
+                    // Verifica se o CNAE já foi adicionado
+                    const jaExiste = document.querySelector(`input[name="atividades_secundarias[]"][value="${selectedValue}"]`);
+                    if (jaExiste) {
+                        alert('Este CNAE já foi adicionado');
+                        return;
+                    }
+
+                    // Pega a descrição do CNAE selecionado
+                    const descricaoCnae = selectedText.split(' - ')[1];
+
+                    // Cria novo item na lista
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    
+                    // Adiciona o texto do CNAE e campos hidden para código e descrição
+                    li.innerHTML = `
+                        ${selectedText}
+                        <button type="button" class="btn btn-danger btn-sm remover-cnae">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                        <input type="hidden" name="atividades_secundarias[]" value="${selectedValue}">
+                        <input type="hidden" name="descricoes_secundarias[]" value="${descricaoCnae}">
+                    `;
+
+                    // Adiciona à lista
+                    listaCnaes.appendChild(li);
+                    
+                    // Desabilita a opção no select
+                    const option = atividadesSecundarias.querySelector(`option[value="${selectedValue}"]`);
+                    if (option) {
+                        option.disabled = true;
+                    }
+                    
+                    // Limpa as seleções
+                    atividadesSecundarias.value = '';
+                    selectedValue = '';
+                    selectedText = '';
+                });
+            }
+
+            // Função para remover CNAE secundário
+            if (listaCnaes) {
+                listaCnaes.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remover-cnae') || e.target.closest('.remover-cnae')) {
+                        const li = e.target.closest('li');
+                        const cnaeValue = li.querySelector('input[name="atividades_secundarias[]"]').value;
+                        
+                        // Habilita novamente a opção no select
+                        const option = atividadesSecundarias.querySelector(`option[value="${cnaeValue}"]`);
+                        if (option) {
+                            option.disabled = false;
+                        }
+                        
+                        // Remove o item da lista
+                        li.remove();
                     }
                 });
-            });
-        }
-
-        // Configura busca para atividade principal e secundária
-        const atividadePrincipal = document.getElementById('atividade_principal');
-        const atividadesSecundarias = document.getElementById('cnae_select');
-        
-        if (atividadePrincipal) {
-            createSearchableSelect(atividadePrincipal, 'Buscar CNAE Principal...');
-        }
-        if (atividadesSecundarias) {
-            createSearchableSelect(atividadesSecundarias, 'Buscar CNAE Secundário...');
-        }
-
-        // Código para adicionar e remover CNAEs secundários
-        const btnAdicionar = document.getElementById('adicionar_cnae');
-        const listaCnaes = document.getElementById('lista_cnaes');
-        let selectedValue = '';
-        let selectedText = '';
-
-        // Captura o valor quando o select muda
-        if (atividadesSecundarias) {
-            atividadesSecundarias.addEventListener('change', function() {
-                selectedValue = this.value;
-                selectedText = this.options[this.selectedIndex].text;
-                console.log('CNAE selecionado:', selectedValue, selectedText); // Debug
-            });
-        }
-
-        // Função para adicionar CNAE secundário
-        if (btnAdicionar && atividadesSecundarias) {
-            btnAdicionar.addEventListener('click', function() {
-                console.log('Clique no botão adicionar'); // Debug
-                
-                if (!selectedValue) {
-                    alert('Por favor, selecione um CNAE');
-                    return;
-                }
-
-                // Verifica se o CNAE já foi adicionado
-                const jaExiste = document.querySelector(`input[name="atividades_secundarias[]"][value="${selectedValue}"]`);
-                if (jaExiste) {
-                    alert('Este CNAE já foi adicionado');
-                    return;
-                }
-
-                // Pega a descrição do CNAE selecionado
-                const descricaoCnae = selectedText.split(' - ')[1];
-
-                // Cria novo item na lista
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                
-                // Adiciona o texto do CNAE e campos hidden para código e descrição
-                li.innerHTML = `
-                    ${selectedText}
-                    <button type="button" class="btn btn-danger btn-sm remover-cnae">
-                        <i class="fas fa-trash"></i> Remover
-                    </button>
-                    <input type="hidden" name="atividades_secundarias[]" value="${selectedValue}">
-                    <input type="hidden" name="descricoes_secundarias[]" value="${descricaoCnae}">
-                `;
-
-                // Adiciona à lista
-                listaCnaes.appendChild(li);
-                
-                // Desabilita a opção no select
-                const option = atividadesSecundarias.querySelector(`option[value="${selectedValue}"]`);
-                if (option) {
-                    option.disabled = true;
-                }
-                
-                // Limpa as seleções
-                atividadesSecundarias.value = '';
-                selectedValue = '';
-                selectedText = '';
-            });
-        }
-
-        // Função para remover CNAE secundário
-        if (listaCnaes) {
-            listaCnaes.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remover-cnae') || e.target.closest('.remover-cnae')) {
-                    const li = e.target.closest('li');
-                    const cnaeValue = li.querySelector('input[name="atividades_secundarias[]"]').value;
-                    
-                    // Habilita novamente a opção no select
-                    const option = atividadesSecundarias.querySelector(`option[value="${cnaeValue}"]`);
-                    if (option) {
-                        option.disabled = false;
-                    }
-                    
-                    // Remove o item da lista
-                    li.remove();
-                }
-            });
-        }
-    });
+            }
+        });
     </script>
 </body>
 </html>

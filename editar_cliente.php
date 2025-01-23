@@ -178,15 +178,27 @@ $cnae_data = getCNAE();
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        .form-section h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            flex: 1; /* Cada grupo ocupa o mesmo espaço */
+            margin-right: 15px; /* Espaçamento entre os grupos */
+        }
+
+        .form-group:last-child {
+            margin-right: 0; /* Remove margem do último grupo */
         }
 
         .form-group label {
@@ -293,6 +305,11 @@ $cnae_data = getCNAE();
             overflow: hidden; /* Oculta texto que excede a largura */
             text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
         }
+
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -387,15 +404,15 @@ $cnae_data = getCNAE();
                             <input type="text" id="numero" name="numero" required placeholder="Número" 
                                    value="<?php echo htmlspecialchars($cliente['numero']); ?>">
                         </div>
-                    </div>
 
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="complemento">Complemento:</label>
                             <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
                                    value="<?php echo htmlspecialchars($cliente['complemento']); ?>">
                         </div>
+                    </div>
 
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="bairro">Bairro:</label>
                             <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro" 
@@ -413,6 +430,15 @@ $cnae_data = getCNAE();
                             <input type="text" id="estado" name="estado" readonly placeholder="Estado" 
                                    value="<?php echo htmlspecialchars($cliente['estado']); ?>">
                         </div>
+
+                        <div class="form-group">
+                            <label for="coordenada">Coordenada:</label>
+                            <div class="input-with-feedback">
+                                <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
+                                       value="<?php echo htmlspecialchars($cliente['coordenada']); ?>">
+                                <small id="coordenadas-feedback" class="form-text"></small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -426,14 +452,7 @@ $cnae_data = getCNAE();
                                    value="<?php echo htmlspecialchars($cliente['email']); ?>">
                         </div>
 
-                        <div class="form-group">
-                            <label for="coordenada">Coordenada:</label>
-                            <div class="input-with-feedback">
-                                <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
-                                       value="<?php echo htmlspecialchars($cliente['coordenada']); ?>">
-                                <small id="coordenadas-feedback" class="form-text"></small>
-                            </div>
-                        </div>
+                        
 
                         <div class="form-group">
                             <label for="celular" class="required">Celular:</label>

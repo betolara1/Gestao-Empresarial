@@ -6,7 +6,10 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
     // Consulta para buscar os dados do serviço pelo ID
-    $sql = "SELECT * FROM servicos WHERE numero_proposta = ?";
+    $sql = "SELECT s.*, c.nome as nome_cliente, c.cpf, c.cnpj 
+            FROM servicos s 
+            LEFT JOIN cliente c ON s.cliente_id = c.id 
+            WHERE s.numero_proposta = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -15,6 +18,7 @@ if (isset($_GET['id'])) {
     // Verifica se o serviço foi encontrado
     if ($result->num_rows > 0) {
         $servico = $result->fetch_assoc(); // Obtém os dados do serviço
+        $nome_cliente = $servico['nome_cliente']; // Adiciona esta linha
     } else {
         die("Serviço não encontrado.");
     }
@@ -165,17 +169,6 @@ $totais = $result_totais->fetch_assoc();
 
 $total_pago = $totais['total_pago'];
 $total_pendente = $totais['total_pendente'];
-
-
-// Modifique a consulta SQL para incluir um JOIN com a tabela cliente
-$sql = "SELECT s.*, c.nome as nome_cliente, c.cpf, c.cnpj 
-        FROM servicos s 
-        LEFT JOIN cliente c ON s.cliente_id = c.id 
-        WHERE s.numero_proposta = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
 
 
@@ -368,6 +361,11 @@ $result = $stmt->get_result();
             text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
         }
 
+        .form-group input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
         .disabled-field {
             background-color: #d3d3d3; /* Cor cinza */
             color: #a9a9a9; /* Cor do texto cinza */
@@ -419,15 +417,15 @@ $result = $stmt->get_result();
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="numero_proposta">Número da Proposta</label>
-                                <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($servico['numero_proposta']); ?>" class="form-control disabled-field" readonly>
+                                <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($servico['numero_proposta']); ?>" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="cliente">Cliente</label>
-                                <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($servico['cliente_id']); ?>" readonly class="form-control disabled-field">
+                                <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($nome_cliente); ?>" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="cnpj_cpf">CNPJ/CPF</label>
-                                <input type="text" id="cnpj_cpf" name="cnpj_cpf" value="<?php echo htmlspecialchars($servico['cnpj_cpf']); ?>" readonly class="form-control disabled-field">
+                                <input type="text" id="cnpj_cpf" name="cnpj_cpf" value="<?php echo htmlspecialchars($servico['cnpj_cpf']); ?>" readonly>
                             </div>
                         </div>
                     </div>
@@ -474,7 +472,7 @@ $result = $stmt->get_result();
                                 <label for="status_servico">Status do Serviço</label>
                                 <input type="text" id="status_servico" name="status_servico" 
                                        value="<?php echo htmlspecialchars($servico['status_servico']); ?>" 
-                                       readonly class="form-control disabled-field">
+                                       readonly>
                             </div>
                         </div>
                     </div>
@@ -486,13 +484,6 @@ $result = $stmt->get_result();
                                 <label for="data_pagamento">Vencimento</label>
                                 <input type="date" id="data_pagamento" name="data_pagamento" value="<?php echo htmlspecialchars($servico['data_pagamento']); ?>" required class="form-control">
                             </div>
-                            <div class="form-group">
-                                <label for="responsavel_execucao">Responsável pelo Serviço</label>
-                                <input type="text" id="responsavel_execucao" name="responsavel_execucao" value="<?php echo htmlspecialchars($servico['responsavel_execucao']); ?>" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-group">
                                 <label for="forma_pagamento">Forma de Pagamento</label>
                                 <select id="forma_pagamento" name="forma_pagamento" required class="form-control">
@@ -507,7 +498,7 @@ $result = $stmt->get_result();
 
                             <div id="editarServicoForm" class="form-group">
                                 <label for="parcelamento">Quatidade de Parcelas</label>
-                                <input type="number" id="parcelamento" name="parcelamento" step="0.01" value="<?php echo htmlspecialchars($servico['parcelamento']); ?>" readonly class="form-control disabled-field">
+                                <input type="number" id="parcelamento" name="parcelamento" step="0.01" value="<?php echo htmlspecialchars($servico['parcelamento']); ?>" readonly>
                             </div>
                         </div>
 
@@ -526,13 +517,13 @@ $result = $stmt->get_result();
                             <div class="form-group">
                                 <label for="valor_pago">Valor Pago</label>
                                 <input type="number" id="valor_pago" name="valor_pago" step="0.01" 
-                                    value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly>
                             </div>
 
                             <div class="form-group">
                                 <label for="valor_pagar">Valor A Ser Pago</label>
                                 <input type="number" id="valor_pagar" name="valor_pagar" step="0.01" 
-                                    value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly>
                             </div>
                         </div>
                     </div>
@@ -550,7 +541,7 @@ $result = $stmt->get_result();
                             <div class="form-group">
                                 <label for="rua">Rua:</label>
                                 <input type="text" id="rua" name="rua" placeholder="Endereço" 
-                                    value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly>
                             </div>
 
                             <div class="form-group">
@@ -570,17 +561,17 @@ $result = $stmt->get_result();
                             <div class="form-group">
                                 <label for="bairro">Bairro:</label>
                                 <input type="text" id="bairro" name="bairro" placeholder="Bairro" 
-                                    value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="cidade">Cidade:</label>
                                 <input type="text" id="cidade" name="cidade" placeholder="Cidade" 
-                                    value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="estado">Estado:</label>
                                 <input type="text" id="estado" name="estado" placeholder="Estado" 
-                                    value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly class="form-control disabled-field">
+                                    value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="coordenada">Coordenada:</label>
@@ -589,6 +580,10 @@ $result = $stmt->get_result();
                                         value="<?php echo htmlspecialchars($servico['coordenada']); ?>" class="form-control">
                                     <small id="coordenadas-feedback" class="form-text"></small>
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="responsavel_execucao">Responsável pelo Serviço</label>
+                                <input type="text" id="responsavel_execucao" name="responsavel_execucao" value="<?php echo htmlspecialchars($servico['responsavel_execucao']); ?>" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -607,6 +602,86 @@ $result = $stmt->get_result();
     </div>
 
     <script>
+        let map;
+        let marker;
+
+        // Funções do Mapa
+        function initMap() {
+            const defaultLocation = { lat: -14.235004, lng: -51.92528 };
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 4,
+                center: defaultLocation,
+            });
+        }
+
+        function atualizarMapa(latitude, longitude) {
+            const position = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
+            map.setCenter(position);
+            map.setZoom(15);
+
+            if (marker) {
+                marker.setMap(null);
+            }
+
+            marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: 'Localização'
+            });
+        }
+
+        // Eventos jQuery para CEP e coordenadas
+        $(document).ready(function() {
+            function buscarCoordenadas(cep) {
+                cep = cep.replace(/[^0-9]/g, '');
+                
+                if (cep.length === 8) {
+                    $('#coordenada').val('Buscando coordenadas...');
+                    
+                    $.ajax({
+                        url: `https://brasilapi.com.br/api/cep/v2/${cep}`,
+                        method: 'GET',
+                        success: function(response) {
+                            if (response.location && response.location.coordinates) {
+                                const latitude = response.location.coordinates[1];
+                                const longitude = response.location.coordinates[0];
+                                $('#coordenada').val(`${latitude}, ${longitude}`);
+                                
+                                atualizarMapa(latitude, longitude);
+                                
+                                $.ajax({
+                                    url: 'atualizar_coordenadas.php',
+                                    method: 'POST',
+                                    data: {
+                                        cep: cep,
+                                        coordenada: `${latitude}, ${longitude}`
+                                    },
+                                    success: function(response) {
+                                        console.log('Coordenadas salvas com sucesso');
+                                    },
+                                    error: function() {
+                                        console.log('Erro ao salvar coordenadas');
+                                    }
+                                });
+                            } else {
+                                $('#coordenada').val('Coordenadas não encontradas');
+                            }
+                        },
+                        error: function() {
+                            $('#coordenada').val('Erro ao buscar coordenadas');
+                        }
+                    });
+                }
+            }
+
+            $('#cep').on('blur change', function() {
+                buscarCoordenadas($(this).val());
+            });
+        });
+
+        // Inicialização do mapa
+        window.initMap = initMap; 
+
         // Mascaras de CPF, CNPJ e outros campos
         $('#cep').mask('00000-000');
         $('#cpf').mask('000.000.000-00');
@@ -756,10 +831,5 @@ $result = $stmt->get_result();
 
 
     </script>
-    <script src="js/coordenadas.js"></script>
-    <script src="js/busca_cpfcnpj.js"></script>
-    <script src="js/cep.js"></script>
-    <script src="js/despesas.js"></script>
-    <script src="js/status_servico.js"></script>
 </body>
 </html>
