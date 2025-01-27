@@ -1060,8 +1060,8 @@ $conn->close();
                     </div>
                 </div>
 
-                                <!-- Projeção Financeira -->
-                                <div class="card card-grafico">
+                <!-- Projeção Financeira -->
+                <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
                             <h2>Projeção Financeira</h2>
@@ -1166,14 +1166,6 @@ $conn->close();
                     <div class="card-header">
                         <div class="header-content">
                             <h2>Mapa de Serviços</h2>
-                            <div class="map-filters">
-                                <select id="filtroStatusMapa" class="select-periodo">
-                                    <option value="">Todos os Status</option>
-                                    <option value="EM ANDAMENTO">Em Andamento</option>
-                                    <option value="CONCLUIDO">Concluído</option>
-                                    <option value="CANCELADO">Cancelado</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
                     <div class="card-body">
