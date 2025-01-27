@@ -310,6 +310,35 @@ $cnae_data = getCNAE();
             background-color: #f8f9fa;
             cursor: not-allowed;
         }
+
+                /* Estilos para o mapa */
+                .leaflet-container {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .leaflet-popup-content {
+            margin: 13px 19px;
+            line-height: 1.4;
+        }
+
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: var(--primary-color) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f8f9fa !important;
+        }
     </style>
 </head>
 <body>
@@ -724,38 +753,4 @@ $cnae_data = getCNAE();
             }
         });
     </script>
-
-    <style>
-        /* ... existing styles ... */
-
-        /* Estilos para o mapa */
-        .leaflet-container {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 8px;
-            box-shadow: var(--shadow-md);
-        }
-
-        .leaflet-popup-content {
-            margin: 13px 19px;
-            line-height: 1.4;
-        }
-
-        .leaflet-control-zoom {
-            border: none !important;
-            box-shadow: var(--shadow-md) !important;
-        }
-
-        .leaflet-control-zoom a {
-            background-color: white !important;
-            color: var(--primary-color) !important;
-        }
-
-        .leaflet-control-zoom a:hover {
-            background-color: #f8f9fa !important;
-        }
-    </style>
-
 </body>

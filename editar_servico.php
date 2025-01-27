@@ -6,7 +6,7 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
     // Consulta para buscar os dados do serviço pelo ID
-    $sql = "SELECT s.*, c.nome as nome_cliente, c.cpf, c.cnpj 
+    $sql = "SELECT s.*, c.nome as nome_cliente, c.cpf, c.cnpj, c.tipo_pessoa, c.razao_social 
             FROM servicos s 
             LEFT JOIN cliente c ON s.cliente_id = c.id 
             WHERE s.numero_proposta = ?";
@@ -19,6 +19,8 @@ if (isset($_GET['id'])) {
     if ($result->num_rows > 0) {
         $servico = $result->fetch_assoc(); // Obtém os dados do serviço
         $nome_cliente = $servico['nome_cliente']; // Adiciona esta linha
+        $tipo_pessoa = $servico['tipo_pessoa']; // Adiciona esta linha
+        $razao_social = $servico['razao_social']; // Adiciona esta linha
     } else {
         die("Serviço não encontrado.");
     }
@@ -178,6 +180,8 @@ $total_pendente = $totais['total_pendente'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Serviço</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
@@ -401,6 +405,35 @@ $total_pendente = $totais['total_pendente'];
         .form-check-label {
             cursor: pointer; /* Cursor de ponteiro */
         }
+
+        /* Estilos para o mapa */
+        .leaflet-container {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .leaflet-popup-content {
+            margin: 13px 19px;
+            line-height: 1.4;
+        }
+
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: var(--primary-color) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f8f9fa !important;
+        }
     </style>
 </head>
 <body>
@@ -420,7 +453,9 @@ $total_pendente = $totais['total_pendente'];
                             </div>
                             <div class="form-group">
                                 <label for="cliente">Cliente</label>
-                                <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($nome_cliente); ?>" readonly>
+                                <input type="text" id="cliente" name="cliente" 
+                                    value="<?php echo htmlspecialchars($tipo_pessoa === 'J' ? $razao_social : $nome_cliente); ?>" 
+                                    readonly>
                             </div>
                             <div class="form-group">
                                 <label for="cnpj_cpf">CNPJ/CPF</label>
@@ -587,6 +622,13 @@ $total_pendente = $totais['total_pendente'];
                         </div>
                     </div>
 
+                    <!-- Nova Seção: Mapa -->
+                    <div class="form-section">
+                        <h2>Localização no Mapa</h2>
+                        <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 15px;"></div>
+                        <small class="form-text text-muted">Clique no mapa para atualizar as coordenadas ou arraste o marcador</small>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Salvar Alterações
@@ -601,6 +643,12 @@ $total_pendente = $totais['total_pendente'];
     </div>
 
     <script>
+        $('#cep').mask('00000-000');
+        $('#cpf').mask('000.000.000-00');
+        $('#cnpj').mask('00.000.000/0000-00');
+        $('#telefone').mask('(00) 0000-0000');
+        $('#celular').mask('(00) 00000-0000');
+        
         $(document).ready(function() {
             function limpaFormularioCep() {
                 // Limpa valores do formulário de cep.
@@ -620,11 +668,28 @@ $total_pendente = $totais['total_pendente'];
 
             function buscarCoordenadas(endereco) {
                 $('#coordenada').val("Buscando coordenadas...");
-                
+
                 const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
-                
+
                 // Atualizar o mapa com o novo endereço
                 updateMapFromAddress(endereco);
+
+                // Adicione uma chamada para a API de geocodificação aqui
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoCompleto)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lng = parseFloat(data[0].lon);
+                            $('#coordenada').val(`${lat}, ${lng}`);
+                        } else {
+                            alert("Coordenadas não encontradas.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar coordenadas:', error);
+                        alert("Erro ao buscar coordenadas. Tente novamente mais tarde.");
+                    });
             }
 
             //Quando o campo cep perde o foco.
