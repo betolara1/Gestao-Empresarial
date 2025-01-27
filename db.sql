@@ -27,7 +27,6 @@ CREATE TABLE cliente (
         (tipo_pessoa = 'J' AND cnpj IS NOT NULL AND razao_social IS NOT NULL AND cpf IS NULL)
     )
 );
-ALTER TABLE cliente ADD COLUMN descricao_cnae TEXT AFTER codigo_cnae;
 
 
 CREATE TABLE servicos (
@@ -57,7 +56,6 @@ CREATE TABLE servicos (
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES cliente(id)
 );
-ALTER TABLE servicos ADD COLUMN observacao TEXT after origem_demanda;
 
 
 
@@ -128,9 +126,6 @@ CREATE TABLE empresa (
     descricao_cnae TEXT,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-ALTER TABLE empresa ADD COLUMN atividades_secundarias TEXT AFTER email;
-ALTER TABLE empresa ADD COLUMN descricoes_secundarias TEXT AFTER atividades_secundarias;
-ALTER TABLE empresa ADD COLUMN descricao_cnae TEXT AFTER codigo_cnae;
 
 
 CREATE TABLE despesas_fixas (

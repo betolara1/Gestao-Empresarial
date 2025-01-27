@@ -180,7 +180,6 @@ $resultQuantidadeTotalServicos = $conn->query($sqlQuantidadeTotalServicos);
 $totalServicos = $resultQuantidadeTotalServicos->fetch_assoc()['total'];
 
 
-
 // Pega o mês selecionado ou o mês atual como padrão
 $mesSelecionado = isset($_GET['mes']) ? $_GET['mes'] : date('m');
 
@@ -456,6 +455,32 @@ $saldoMes = $entradaMesTotal - $saidaMesTotal;
 $saldoFuturo = $entradaFutura - $saidaFutura;
 $saldoAnoTotal = $entradaAnoTotal - $saidaAnoTotal;
 
+// Consulta para buscar as localizações dos serviços
+$sqlLocalizacoes = "
+    SELECT 
+        s.numero_proposta,
+        s.data_inicio,
+        s.status_servico,
+        s.valor_total,
+        s.coordenada,
+        s.rua,
+        s.numero,
+        s.bairro,
+        s.cidade,
+        s.estado,
+        c.nome as nome_cliente
+    FROM servicos s
+    LEFT JOIN cliente c ON s.cliente_id = c.id
+    WHERE s.coordenada IS NOT NULL 
+    AND s.coordenada != ''";
+
+$resultLocalizacoes = $conn->query($sqlLocalizacoes);
+$localizacoesServicos = [];
+
+while ($row = $resultLocalizacoes->fetch_assoc()) {
+    $localizacoesServicos[] = $row;
+}
+
 $conn->close();
 ?>
 
@@ -470,6 +495,15 @@ $conn->close();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <style>
         :root {
@@ -558,11 +592,11 @@ $conn->close();
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 1.5rem;
-            padding: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
             max-width: 100%;
-            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         /* Cards padrão */
@@ -576,16 +610,15 @@ $conn->close();
 
         /* Cards de gráfico */
         .card-grafico {
-            grid-column: span 6; /* 2 cards por linha por padrão */
-            height: 400px;
-            display: flex;
-            flex-direction: column;
+            height: auto !important;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
         /* Card wide (ocupa linha inteira) */
         .card-wide {
-            grid-column: span 12;
-            height: 500px;
+            grid-column: 1 / -1;
         }
 
         /* Header do card */
@@ -595,22 +628,23 @@ $conn->close();
 
         /* Corpo do card */
         .card-body {
-            flex: 1;
             position: relative;
-            min-height: 0; /* Importante para evitar overflow */
+            min-height: 300px;
+            max-height: 500px;
+            overflow: hidden;
         }
 
         /* Container do gráfico */
         .chart-container {
             position: relative;
-            height: 100% !important;
-            width: 100%;
+            height: 300px !important;
+            width: 100% !important;
         }
 
         /* Responsividade */
         @media (max-width: 1200px) {
             .card-grafico {
-                grid-column: span 12; /* 1 card por linha em telas menores */
+                grid-column: span 12;
             }
         }
 
@@ -803,6 +837,109 @@ $conn->close();
             background-color: var(--accent-color);
             border-radius: 2px;
         }
+
+        .map-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .marker-cluster {
+            background-color: rgba(52, 152, 219, 0.6);
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            padding: 15px;
+        }
+
+        .servico-popup {
+            min-width: 200px;
+        }
+
+        .servico-popup h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        .servico-popup p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .servico-popup .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-top: 5px;
+        }
+
+        .status-em-andamento { background-color: #3498db; }
+        .status-concluido { background-color: #2ecc71; }
+        .status-cancelado { background-color: #e74c3c; }
+
+        #btnVisualizacao {
+            display: none;
+        }
+
+        /* Ajustes para os cards de gráficos */
+        .card-grafico {
+            height: auto !important;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-body {
+            position: relative;
+            min-height: 300px;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        /* Container específico para gráficos */
+        .chart-container {
+            position: relative;
+            height: 300px !important;
+            width: 100% !important;
+        }
+
+        /* Ajuste específico para o mapa */
+        #servicosMap {
+            height: 500px !important;
+            width: 100% !important;
+            position: relative;
+        }
+
+        /* Container do dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Card largo (para mapa e gráficos grandes) */
+        .card-wide {
+            grid-column: 1 / -1;
+        }
+
+        /* Ajuste para containers de canvas */
+        canvas {
+            max-height: 100%;
+            width: 100% !important;
+            height: 100% !important;
+        }
     </style>
 </head>
 <body>
@@ -923,26 +1060,8 @@ $conn->close();
                     </div>
                 </div>
 
-                <!-- Comparativo Anual -->
-                <div class="card card-grafico card-wide">
-                    <div class="card-header">
-                        <div class="header-content">
-                            <h2>Comparativo Anual</h2>
-                            <div class="chart-toggles">
-                                <button class="toggle-btn active" data-type="valores">Valores</button>
-                                <button class="toggle-btn" data-type="servicos">Serviços</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="comparativoAnualChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Projeção Financeira -->
-                <div class="card card-grafico">
+                                <!-- Projeção Financeira -->
+                                <div class="card card-grafico">
                     <div class="card-header">
                         <div class="header-content">
                             <h2>Projeção Financeira</h2>
@@ -987,6 +1106,24 @@ $conn->close();
                     </div>
                 </div>
 
+                <!-- Comparativo Anual -->
+                <div class="card card-grafico card-wide">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <h2>Comparativo Anual</h2>
+                            <div class="chart-toggles">
+                                <button class="toggle-btn active" data-type="valores">Valores</button>
+                                <button class="toggle-btn" data-type="servicos">Serviços</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="comparativoAnualChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Dashboard de Sócios -->
                 <div class="card card-grafico card-wide">
                     <div class="card-header">
@@ -1021,6 +1158,26 @@ $conn->close();
                         <div class="faturamento-info">
                             Faturamento do Período: R$ <span id="faturamentoTotal">0,00</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Mapa de Serviços -->
+                <div class="card card-grafico card-wide">
+                    <div class="card-header">
+                        <div class="header-content">
+                            <h2>Mapa de Serviços</h2>
+                            <div class="map-filters">
+                                <select id="filtroStatusMapa" class="select-periodo">
+                                    <option value="">Todos os Status</option>
+                                    <option value="EM ANDAMENTO">Em Andamento</option>
+                                    <option value="CONCLUIDO">Concluído</option>
+                                    <option value="CANCELADO">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="servicosMap" style="height: 500px; width: 100%; border-radius: 8px;"></div>
                     </div>
                 </div>
 
@@ -1810,6 +1967,34 @@ $conn->close();
         // Inicialização
         mesSelectSocios.value = new Date().getMonth() + 1;
         atualizarDashboardSocios();
+
+        // Adicionar após os outros gráficos
+        // Inicialização do mapa de serviços
+        const servicos = <?php echo json_encode($localizacoesServicos); ?>;
+        const map = L.map('servicosMap').setView([-14.235004, -51.92528], 4);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Criar um grupo de marcadores
+        const markers = L.markerClusterGroup();
+
+        servicos.forEach(servico => {
+            const coords = servico.coordenada.split(',').map(coord => parseFloat(coord.trim()));
+            if (!isNaN(coords[0]) && !isNaN(coords[1])) {
+                const marker = L.marker(coords)
+                    .bindPopup(`
+                        <strong>Proposta:</strong> ${servico.numero_proposta}<br>
+                        <strong>Cliente:</strong> ${servico.nome_cliente}
+                    `);
+                // Adicionar o marcador ao grupo
+                markers.addLayer(marker);
+            }
+        });
+
+        // Adicionar o grupo de marcadores ao mapa
+        map.addLayer(markers);
     });
     </script>
 </body>

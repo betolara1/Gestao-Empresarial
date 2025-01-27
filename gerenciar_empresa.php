@@ -756,6 +756,12 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     </div>
                 </div>
             </div>
+
+            <!-- Adicionar nova seção para o mapa -->
+            <div class="section-card">
+                <h2 class="section-title">Localização</h2>
+                <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+            </div>
         </div>
     </div>
 
@@ -848,6 +854,14 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             </form>
         </div>
     </div>
+
+    <!-- Adicionar Leaflet CSS e JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
 
     <script>
         function openPopup(id) {
@@ -987,6 +1001,126 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 alert('Erro ao cadastrar sócio');
             });
         });
+
+        // Função para inicializar o mapa
+        function initMap() {
+            // Pegar as coordenadas da empresa do PHP
+            const coordString = '<?php echo $empresa['coordenada'] ?? ""; ?>';
+            let lat = -23.550520; // Coordenada padrão (São Paulo)
+            let lng = -46.633308; // Coordenada padrão (São Paulo)
+
+            // Se houver coordenadas salvas, usar elas
+            if (coordString) {
+                const coords = coordString.split(',');
+                if (coords.length === 2) {
+                    lat = parseFloat(coords[0]);
+                    lng = parseFloat(coords[1]);
+                }
+            }
+
+            // Criar o mapa
+            const map = L.map('map').setView([lat, lng], 15);
+
+            // Adicionar camada do OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Adicionar marcador
+            const marker = L.marker([lat, lng]).addTo(map);
+
+            // Adicionar popup com informações
+            const popupContent = `
+                <div style="padding: 10px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 16px;"><?php echo htmlspecialchars($empresa['nome'] ?? ""); ?></h3>
+                    <p style="margin: 0; font-size: 14px;">
+                        <?php echo htmlspecialchars($empresa['rua'] ?? "") . ", " . 
+                                 htmlspecialchars($empresa['numero'] ?? "") . "<br>" .
+                                 htmlspecialchars($empresa['bairro'] ?? "") . ", " .
+                                 htmlspecialchars($empresa['cidade'] ?? "") . "/" .
+                                 htmlspecialchars($empresa['estado'] ?? ""); ?>
+                    </p>
+                </div>
+            `;
+
+            marker.bindPopup(popupContent);
+
+            // Adicionar controle de zoom
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Adicionar escala
+            L.control.scale({
+                imperial: false,
+                position: 'bottomleft'
+            }).addTo(map);
+
+            // Atualizar o tamanho do mapa quando a janela for redimensionada
+            window.addEventListener('resize', function() {
+                map.invalidateSize();
+            });
+
+            // Adicionar evento de clique no mapa para copiar coordenadas
+            map.on('click', function(e) {
+                const coords = e.latlng;
+                const coordStr = `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
+                
+                // Criar um elemento temporário para copiar o texto
+                const el = document.createElement('textarea');
+                el.value = coordStr;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+
+                // Mostrar mensagem de confirmação
+                alert(`Coordenadas copiadas: ${coordStr}`);
+            });
+        }
+
+        // Inicializar o mapa quando a página carregar
+        document.addEventListener('DOMContentLoaded', initMap);
     </script>
+
+    <style>
+        /* Adicionar estilos para o mapa */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaflet-popup-content h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .leaflet-popup-content p {
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Ajustar controles do mapa */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: #2c3e50 !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f8f9fa !important;
+        }
+    </style>
 </body>
 </html>

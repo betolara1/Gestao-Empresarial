@@ -26,7 +26,6 @@ if (isset($_GET['id'])) {
     die("ID do serviço não informado.");
 }
 
-
 // Consulta SQL para buscar todos os tipos de despesas
 $sqlTipoDespesa = "SELECT * FROM despesas";
 $resultTipoDespesa = $conn->query($sqlTipoDespesa);
@@ -575,7 +574,7 @@ $total_pendente = $totais['total_pendente'];
                             </div>
                             <div class="form-group">
                                 <label for="coordenada">Coordenada:</label>
-                                <div class="input-with-map">
+                                <div class="input-with-feedback">
                                     <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
                                         value="<?php echo htmlspecialchars($servico['coordenada']); ?>" class="form-control">
                                     <small id="coordenadas-feedback" class="form-text"></small>
@@ -602,185 +601,159 @@ $total_pendente = $totais['total_pendente'];
     </div>
 
     <script>
+        $(document).ready(function() {
+            function limpaFormularioCep() {
+                // Limpa valores do formulário de cep.
+                $("#rua").val("");
+                $("#bairro").val("");
+                $("#cidade").val("");
+                $("#estado").val("");
+                $("#coordenada").val("");
+            }
+
+            function preencheCamposEndereco(dados) {
+                $("#rua").val(dados.street || dados.logradouro);
+                $("#bairro").val(dados.neighborhood || dados.bairro);
+                $("#cidade").val(dados.city || dados.cidade || dados.localidade);
+                $("#estado").val(dados.state || dados.uf);
+            }
+
+            function buscarCoordenadas(endereco) {
+                $('#coordenada').val("Buscando coordenadas...");
+                
+                const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+                
+                // Atualizar o mapa com o novo endereço
+                updateMapFromAddress(endereco);
+            }
+
+            //Quando o campo cep perde o foco.
+            $("#cep").on('blur change', function() {
+                // Nova variável "cep" somente com dígitos.
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Verifica se campo cep possui valor informado.
+                if (cep.length === 8) {
+                    //Expressão regular para validar o CEP.
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if(validacep.test(cep)) {
+                        //Preenche os campos com "..." enquanto consulta webservice.
+                        $("#rua").val("...");
+                        $("#bairro").val("...");
+                        $("#cidade").val("...");
+                        $("#estado").val("...");
+                        $("#coordenada").val("Buscando coordenadas...");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
+                            if (!("erro" in dados)) {
+                                preencheCamposEndereco(dados);
+                                // Busca coordenadas após preencher o endereço
+                                buscarCoordenadas(dados);
+                            } else {
+                                //CEP pesquisado não foi encontrado.
+                                limpaFormularioCep();
+                                alert("CEP não encontrado.");
+                            }
+                        }).fail(function() {
+                            limpaFormularioCep();
+                            alert("Erro ao buscar CEP. Tente novamente mais tarde.");
+                        });
+                    } else {
+                        //cep é inválido.
+                        limpaFormularioCep();
+                        alert("Formato de CEP inválido.");
+                    }
+                } else {
+                    //cep sem valor, limpa formulário.
+                    limpaFormularioCep();
+                }
+            });
+        });
+        
+        // Adicionar código do mapa
         let map;
         let marker;
 
-        // Funções do Mapa
         function initMap() {
-            const defaultLocation = { lat: -14.235004, lng: -51.92528 };
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 4,
-                center: defaultLocation,
-            });
-        }
-
-        function atualizarMapa(latitude, longitude) {
-            const position = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
-            map.setCenter(position);
-            map.setZoom(15);
-
-            if (marker) {
-                marker.setMap(null);
-            }
-
-            marker = new google.maps.Marker({
-                position: position,
-                map: map,
-                title: 'Localização'
-            });
-        }
-
-        // Eventos jQuery para CEP e coordenadas
-        $(document).ready(function() {
-            function buscarCoordenadas(cep) {
-                cep = cep.replace(/[^0-9]/g, '');
-                
-                if (cep.length === 8) {
-                    $('#coordenada').val('Buscando coordenadas...');
-                    
-                    $.ajax({
-                        url: `https://brasilapi.com.br/api/cep/v2/${cep}`,
-                        method: 'GET',
-                        success: function(response) {
-                            if (response.location && response.location.coordinates) {
-                                const latitude = response.location.coordinates[1];
-                                const longitude = response.location.coordinates[0];
-                                $('#coordenada').val(`${latitude}, ${longitude}`);
-                                
-                                atualizarMapa(latitude, longitude);
-                                
-                                $.ajax({
-                                    url: 'atualizar_coordenadas.php',
-                                    method: 'POST',
-                                    data: {
-                                        cep: cep,
-                                        coordenada: `${latitude}, ${longitude}`
-                                    },
-                                    success: function(response) {
-                                        console.log('Coordenadas salvas com sucesso');
-                                    },
-                                    error: function() {
-                                        console.log('Erro ao salvar coordenadas');
-                                    }
-                                });
-                            } else {
-                                $('#coordenada').val('Coordenadas não encontradas');
-                            }
-                        },
-                        error: function() {
-                            $('#coordenada').val('Erro ao buscar coordenadas');
-                        }
-                    });
+            // Coordenadas iniciais (usar as do cliente se existirem, ou centro do Brasil como padrão)
+            let initialLat = -15.77972;
+            let initialLng = -47.92972;
+            
+            // Pegar coordenadas salvas do cliente
+            const coordField = document.getElementById('coordenada');
+            const savedCoords = coordField.value;
+            
+            if (savedCoords) {
+                const [lat, lng] = savedCoords.split(',').map(coord => parseFloat(coord.trim()));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    initialLat = lat;
+                    initialLng = lng;
                 }
             }
 
-            $('#cep').on('blur change', function() {
-                buscarCoordenadas($(this).val());
+            // Inicializar o mapa
+            map = L.map('map').setView([initialLat, initialLng], 15);
+
+            // Adicionar camada do OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Adicionar marcador
+            marker = L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(map);
+
+            // Atualizar coordenadas quando o marcador for arrastado
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                updateCoordinates(position.lat, position.lng);
             });
-        });
 
-        // Inicialização do mapa
-        window.initMap = initMap; 
+            // Atualizar coordenadas ao clicar no mapa
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateCoordinates(e.latlng.lat, e.latlng.lng);
+            });
+        }
 
-        // Mascaras de CPF, CNPJ e outros campos
-        $('#cep').mask('00000-000');
-        $('#cpf').mask('000.000.000-00');
-        $('#cnpj').mask('00.000.000/0000-00');
-        $('#celular').mask('(00) 00000-0000');
+        function updateCoordinates(lat, lng) {
+            const coordField = document.getElementById('coordenada');
+            coordField.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
 
-        $(document).ready(function() {
-            function buscarCoordenadas(cep) {
-                // Remove any non-numeric characters from CEP
-                cep = cep.replace(/[^0-9]/g, '');
-                
-                if (cep.length === 8) {
-                    // Show loading indicator in the coordinates field
-                    $('#coordenada').val('Buscando coordenadas...');
-                    
-                    $.ajax({
-                        url: `https://brasilapi.com.br/api/cep/v2/${cep}`,
-                        method: 'GET',
-                        success: function(response) {
-                            if (response.location && response.location.coordinates) {
-                                const latitude = response.location.coordinates[1];
-                                const longitude = response.location.coordinates[0];
-                                $('#coordenada').val(`${latitude}, ${longitude}`);
-                            } else {
-                                $('#coordenada').val('');
-                            }
-                        },
-                        error: function() {
-                            $('#coordenada').val('');
-                            console.log('Erro ao buscar coordenadas');
+        // Atualizar mapa quando o endereço mudar
+        function updateMapFromAddress(endereco) {
+            const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoCompleto)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        
+                        if (map && marker) {
+                            marker.setLatLng([lat, lng]);
+                            map.setView([lat, lng], 16);
+                            updateCoordinates(lat, lng);
                         }
-                    });
-                }
-            }
-
-            // Trigger coordinate search when CEP changes
-            $('#cep').on('blur', function() {
-                buscarCoordenadas($(this).val());
-            });
-
-            // Also trigger when CEP field loses focus
-            $('#cep').on('change', function() {
-                buscarCoordenadas($(this).val());
-            });
-        });
-
-
-        $(document).ready(function() {
-            let isRequesting = false;
-            $('#cep').on('blur', function() {
-                if (isRequesting) return;
-
-                let cep = $(this).val().replace(/\D/g, '');
-                if (cep !== '') {
-                    let validacep = /^[0-9]{8}$/;
-                    if (validacep.test(cep)) {
-                        isRequesting = true;
-                        $('#cep-feedback').text('Buscando CEP...').removeClass('text-danger').addClass('text-info');
-
-                        $.getJSON(`https://viacep.com.br/ws/${cep}/json/`)
-                            .done(function(dados) {
-                                if (!('erro' in dados)) {
-                                    $('#rua').val(dados.logradouro);
-                                    $('#bairro').val(dados.bairro);
-                                    $('#cidade').val(dados.localidade);
-                                    $('#estado').val(dados.uf);
-                                    $('#cep-feedback').text('CEP encontrado!').removeClass('text-info text-danger').addClass('text-success');
-
-                                    // Buscar coordenadas
-                                    buscarCoordenadas(dados.logradouro + ', ' + dados.localidade + ' - ' + dados.uf);
-                                } else {
-                                    limpaCamposEndereco();
-                                    $('#cep-feedback').text('CEP não encontrado.').removeClass('text-info text-success').addClass('text-danger');
-                                }
-                            })
-                            .fail(function() {
-                                limpaCamposEndereco();
-                                $('#cep-feedback').text('Erro na busca do CEP.').removeClass('text-info text-success').addClass('text-danger');
-                            })
-                            .always(function() {
-                                isRequesting = false;
-                            });
-                    } else {
-                        limpaCamposEndereco();
-                        $('#cep-feedback').text('Formato de CEP inválido.').removeClass('text-info text-success').addClass('text-danger');
                     }
-                } else {
-                    limpaCamposEndereco();
-                    $('#cep-feedback').text('');
-                }
-            });
+                })
+                .catch(error => console.error('Erro ao buscar coordenadas:', error));
+        }
 
-            function limpaCamposEndereco() {
-                $('#cep').val('');
-                $('#rua').val('');
-                $('#bairro').val('');
-                $('#cidade').val('');
-                $('#estado').val('');
-                $('#coordenada').val('');
+        // Inicializar o mapa quando a página carregar
+        initMap();
+
+        // Atualizar o mapa quando a janela for redimensionada
+        window.addEventListener('resize', function() {
+            if (map) {
+                map.invalidateSize();
             }
         });
     

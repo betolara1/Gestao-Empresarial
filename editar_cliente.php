@@ -442,8 +442,8 @@ $cnae_data = getCNAE();
                     </div>
                 </div>
 
-                <!-- Seção: Contato -->
-                <div class="form-section">
+                                <!-- Seção: Contato -->
+                                <div class="form-section">
                     <h2>Contato</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -452,14 +452,19 @@ $cnae_data = getCNAE();
                                    value="<?php echo htmlspecialchars($cliente['email']); ?>">
                         </div>
 
-                        
-
                         <div class="form-group">
                             <label for="celular" class="required">Celular:</label>
                             <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000" 
                                    value="<?php echo htmlspecialchars($cliente['celular']); ?>">
                         </div>
                     </div>
+                </div>
+
+                <!-- Nova Seção: Mapa -->
+                <div class="form-section">
+                    <h2>Localização no Mapa</h2>
+                    <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 15px;"></div>
+                    <small class="form-text text-muted">Clique no mapa para atualizar as coordenadas ou arraste o marcador</small>
                 </div>
 
                 <div class="form-actions">
@@ -474,6 +479,14 @@ $cnae_data = getCNAE();
         </div>
     </div>
 
+    <!-- Adicionar Leaflet CSS e JS antes do </body> -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
     <script>
         // Mascaras de CPF, CNPJ e outros campos
         $('#cep').mask('00000-000');
@@ -481,46 +494,6 @@ $cnae_data = getCNAE();
         $('#cnpj').mask('00.000.000/0000-00');
         $('#telefone').mask('(00) 0000-0000');
         $('#celular').mask('(00) 00000-0000');
-
-        $(document).ready(function() {
-            function buscarCoordenadas(cep) {
-                // Remove any non-numeric characters from CEP
-                cep = cep.replace(/[^0-9]/g, '');
-                
-                if (cep.length === 8) {
-                    // Show loading indicator in the coordinates field
-                    $('#coordenada').val('Buscando coordenadas...');
-                    
-                    $.ajax({
-                        url: `https://brasilapi.com.br/api/cep/v2/${cep}`,
-                        method: 'GET',
-                        success: function(response) {
-                            if (response.location && response.location.coordinates) {
-                                const latitude = response.location.coordinates[1];
-                                const longitude = response.location.coordinates[0];
-                                $('#coordenada').val(`${latitude}, ${longitude}`);
-                            } else {
-                                $('#coordenada').val('');
-                            }
-                        },
-                        error: function() {
-                            $('#coordenada').val('');
-                            console.log('Erro ao buscar coordenadas');
-                        }
-                    });
-                }
-            }
-
-            // Trigger coordinate search when CEP changes
-            $('#cep').on('blur', function() {
-                buscarCoordenadas($(this).val());
-            });
-
-            // Also trigger when CEP field loses focus
-            $('#cep').on('change', function() {
-                buscarCoordenadas($(this).val());
-            });
-        });
 
         $(document).ready(function() {
             // Função para mostrar/ocultar campos baseado no tipo de pessoa
@@ -615,36 +588,10 @@ $cnae_data = getCNAE();
             function buscarCoordenadas(endereco) {
                 $('#coordenada').val("Buscando coordenadas...");
                 
-                // Monta o endereço completo para busca
                 const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
                 
-                // Usa a API do OpenStreetMap (Nominatim)
-                $.ajax({
-                    url: 'https://nominatim.openstreetmap.org/search',
-                    type: 'GET',
-                    data: {
-                        q: enderecoCompleto,
-                        format: 'json',
-                        limit: 1
-                    },
-                    headers: {
-                        'Accept-Language': 'pt-BR'
-                    },
-                    success: function(response) {
-                        if (response && response.length > 0) {
-                            const lat = response[0].lat;
-                            const lon = response[0].lon;
-                            $('#coordenada').val(`${lat}, ${lon}`);
-                        } else {
-                            $('#coordenada').val('');
-                            console.log('Coordenadas não encontradas');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#coordenada').val('');
-                        console.log('Erro ao buscar coordenadas:', error);
-                    }
-                });
+                // Atualizar o mapa com o novo endereço
+                updateMapFromAddress(endereco);
             }
 
             //Quando o campo cep perde o foco.
@@ -693,6 +640,122 @@ $cnae_data = getCNAE();
             });
         });
         
+        // Adicionar código do mapa
+        let map;
+        let marker;
+
+        function initMap() {
+            // Coordenadas iniciais (usar as do cliente se existirem, ou centro do Brasil como padrão)
+            let initialLat = -15.77972;
+            let initialLng = -47.92972;
+            
+            // Pegar coordenadas salvas do cliente
+            const coordField = document.getElementById('coordenada');
+            const savedCoords = coordField.value;
+            
+            if (savedCoords) {
+                const [lat, lng] = savedCoords.split(',').map(coord => parseFloat(coord.trim()));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    initialLat = lat;
+                    initialLng = lng;
+                }
+            }
+
+            // Inicializar o mapa
+            map = L.map('map').setView([initialLat, initialLng], 15);
+
+            // Adicionar camada do OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Adicionar marcador
+            marker = L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(map);
+
+            // Atualizar coordenadas quando o marcador for arrastado
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                updateCoordinates(position.lat, position.lng);
+            });
+
+            // Atualizar coordenadas ao clicar no mapa
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateCoordinates(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function updateCoordinates(lat, lng) {
+            const coordField = document.getElementById('coordenada');
+            coordField.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
+
+        // Atualizar mapa quando o endereço mudar
+        function updateMapFromAddress(endereco) {
+            const enderecoCompleto = `${endereco.logradouro}, ${endereco.localidade}, ${endereco.uf}, Brasil`;
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoCompleto)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        
+                        if (map && marker) {
+                            marker.setLatLng([lat, lng]);
+                            map.setView([lat, lng], 16);
+                            updateCoordinates(lat, lng);
+                        }
+                    }
+                })
+                .catch(error => console.error('Erro ao buscar coordenadas:', error));
+        }
+
+        // Inicializar o mapa quando a página carregar
+        initMap();
+
+        // Atualizar o mapa quando a janela for redimensionada
+        window.addEventListener('resize', function() {
+            if (map) {
+                map.invalidateSize();
+            }
+        });
     </script>
+
+    <style>
+        /* ... existing styles ... */
+
+        /* Estilos para o mapa */
+        .leaflet-container {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .leaflet-popup-content {
+            margin: 13px 19px;
+            line-height: 1.4;
+        }
+
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: var(--primary-color) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f8f9fa !important;
+        }
+    </style>
 
 </body>
