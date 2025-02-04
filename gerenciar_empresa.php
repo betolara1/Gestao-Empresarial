@@ -733,10 +733,10 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     <table>
                         <thead>
                             <tr>
-                                <th>Nome</th>
-                                <th>Porcentagem Sociedade</th>
-                                <th>Porcentagem Comissão</th>
-                                <th>Ações</th>
+                                <th><i class="fas fa-user"></i> Nome</th>
+                                <th><i class="fas fa-percentage"></i> Porcentagem Sociedade</th>
+                                <th><i class="fas fa-money-bill-wave"></i> Porcentagem Comissão</th>
+                                <th><i class="fas fa-cogs"></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -782,8 +782,8 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                             <table id="areasTable">
                                 <thead>
                                     <tr>
-                                        <th>Nome</th>
-                                        <th>Ação</th>
+                                        <th><i class="fas fa-tag"></i> Nome</th>
+                                        <th><i class="fas fa-cogs"></i> Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -802,8 +802,8 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                             <table id="servicosTable">
                                 <thead>
                                     <tr>
-                                        <th>Tipo</th>
-                                        <th>Ação</th>
+                                        <th><i class="fas fa-tools"></i> Tipo</th>
+                                        <th><i class="fas fa-cogs"></i> Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -820,7 +820,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
 
             <!-- Adicionar nova seção para o mapa -->
             <div class="section-card">
-                <h2 class="section-title">Localização</h2>
+                <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> Localização</h2>
                 <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
             </div>
         </div>
@@ -829,10 +829,10 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
     <!-- Popups -->
     <div id="addAreaPopup" class="popup">
         <div class="popup-content">
-            <h3>Nova Área de Atuação</h3>
+            <h3><i class="fas fa-plus-circle"></i> Nova Área de Atuação</h3>
             <form id="formArea">
                 <div class="form-group">
-                    <label for="nome">Nome da Área:</label>
+                    <label for="nome"><i class="fas fa-tag"></i> Nome da Área:</label>
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 <div class="btn-group">
@@ -849,10 +849,10 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
 
     <div id="addServicoPopup" class="popup">
         <div class="popup-content">
-            <h3>Novo Tipo de Serviço</h3>
+            <h3><i class="fas fa-plus-circle"></i> Novo Tipo de Serviço</h3>
             <form id="formServico">
                 <div class="form-group">
-                    <label for="tipo_servico">Tipo de Serviço:</label>
+                    <label for="tipo_servico"><i class="fas fa-tools"></i> Tipo de Serviço:</label>
                     <input type="text" id="tipo_servico" name="tipo_servico" required>
                 </div>
                 <div class="btn-group">
@@ -869,15 +869,15 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
 
     <div id="addSocioPopup" class="popup">
         <div class="popup-content">
-            <h3>Cadastrar Novo Sócio</h3>
+            <h3><i class="fas fa-user-plus"></i> Cadastrar Novo Sócio</h3>
             <form id="formSocio" method="POST" action="salvar_socios.php">
                 <div class="form-group">
-                    <label for="nome">Nome:</label>
+                    <label for="nome"><i class="fas fa-user"></i> Nome:</label>
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="porcentagem_sociedade">Porcentagem Sociedade:</label>
+                    <label for="porcentagem_sociedade"><i class="fas fa-percentage"></i> Porcentagem Sociedade:</label>
                     <div class="input-group">
                         <input type="number" 
                                id="porcentagem_sociedade" 
@@ -891,7 +891,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 </div>
                 
                 <div class="form-group">
-                    <label for="porcentagem_comissao">Porcentagem Comissão:</label>
+                    <label for="porcentagem_comissao"><i class="fas fa-money-bill-wave"></i> Porcentagem Comissão:</label>
                     <div class="input-group">
                         <input type="number" 
                                id="porcentagem_comissao" 

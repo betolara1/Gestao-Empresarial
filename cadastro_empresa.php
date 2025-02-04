@@ -100,7 +100,7 @@ if (!empty($empresa['atividades_secundarias'])) {
 }
 
 
-if ($empresa === 0) {
+if ($empresa != 0) {
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -331,32 +331,32 @@ if ($empresa === 0) {
         <?php include 'sidebar.php'; ?>
         <div class="main-content">
             <div class="container">
-                <h1>Cadastrar Empresa</h1>
+                <h1><i class="fas fa-building"></i> Cadastrar Empresa</h1>
                 
                 <form id="cadastroForm" action="salvar_empresa.php" method="POST" enctype="multipart/form-data">
                     <!-- Seção: Informações Principais -->
                     <div class="form-section">
-                        <h2>Informações Principais</h2>
+                        <h2><i class="fas fa-info-circle"></i> Informações Principais</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="razao_social" class="required">Razão Social</label>
+                                <label for="razao_social" class="required"><i class="fas fa-building"></i> Razão Social</label>
                                 <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Digite a razão social" required>
                             </div>
                             
                             <div class="form-group">
-                                <label for="cnpj" class="required">CNPJ</label>
+                                <label for="cnpj" class="required"><i class="fas fa-id-card"></i> CNPJ</label>
                                 <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nome">Nome Fantasia</label>
+                                <label for="nome"><i class="fas fa-store"></i> Nome Fantasia</label>
                                 <input type="text" id="nome" name="nome" placeholder="Digite o nome fantasia">
                             </div>
 
                             <div class="form-group">
-                                <label for="cpf">CPF</label>
+                                <label for="cpf"><i class="fas fa-id-badge"></i> CPF</label>
                                 <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
                             </div>
                         </div>
@@ -364,10 +364,10 @@ if ($empresa === 0) {
 
                     <!-- Seção: Endereço -->
                     <div class="form-section">
-                        <h2>Endereço</h2>
+                        <h2><i class="fas fa-map-marked-alt"></i> Endereço</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cep" class="required">CEP</label>
+                                <label for="cep" class="required"><i class="fas fa-map-marker-alt"></i> CEP</label>
                                 <div class="input-with-feedback">
                                     <input type="text" id="cep" name="cep" required placeholder="00000-000">
                                     <small id="cep-feedback" class="form-text"></small>
@@ -375,39 +375,39 @@ if ($empresa === 0) {
                             </div>
 
                             <div class="form-group">
-                                <label for="rua">Rua</label>
+                                <label for="rua"><i class="fas fa-road"></i> Rua</label>
                                 <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
                             </div>
 
                             <div class="form-group">
-                                <label for="numero" class="required">Número</label>
+                                <label for="numero" class="required"><i class="fas fa-home"></i> Número</label>
                                 <input type="text" id="numero" name="numero" required placeholder="Número">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="complemento">Complemento</label>
+                                <label for="complemento"><i class="fas fa-info"></i> Complemento</label>
                                 <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
                             </div>
 
                             <div class="form-group">
-                                <label for="bairro">Bairro</label>
+                                <label for="bairro"><i class="fas fa-map"></i> Bairro</label>
                                 <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
                             </div>
 
                             <div class="form-group">
-                                <label for="cidade">Cidade</label>
+                                <label for="cidade"><i class="fas fa-city"></i> Cidade</label>
                                 <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
                             </div>
 
                             <div class="form-group">
-                                <label for="estado">Estado</label>
+                                <label for="estado"><i class="fas fa-flag"></i> Estado</label>
                                 <input type="text" id="estado" name="estado" readonly>
                             </div>
 
                             <div class="form-group">
-                                <label for="coordenada">Coordenadas</label>
+                                <label for="coordenada"><i class="fas fa-map-pin"></i> Coordenadas</label>
                                 <div class="input-with-map">
                                     <input type="text" id="coordenada" name="coordenada" readonly placeholder="Latitude, Longitude">
                                 </div>
@@ -417,15 +417,15 @@ if ($empresa === 0) {
 
                     <!-- Seção: Contato -->
                     <div class="form-section">
-                        <h2>Contato</h2>
+                        <h2><i class="fas fa-address-book"></i> Contato</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="email" class="required">E-mail</label>
+                                <label for="email" class="required"><i class="fas fa-envelope"></i> E-mail</label>
                                 <input type="email" id="email" name="email" required placeholder="seu@email.com">
                             </div>
 
                             <div class="form-group">
-                                <label for="celular" class="required">Celular</label>
+                                <label for="celular" class="required"><i class="fas fa-mobile-alt"></i> Celular</label>
                                 <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000">
                             </div>
                             <div class="form-group">
@@ -436,10 +436,10 @@ if ($empresa === 0) {
 
                     <!-- Seção: Atividades -->
                     <div class="form-section">
-                        <h2>Atividades</h2>
+                        <h2><i class="fas fa-briefcase"></i> Atividades</h2>
                         <div class="form-row">
                             <div class="form-group full-width">
-                                <label for="atividade_principal" class="required">Atividade Principal (CNAE)</label>
+                                <label for="atividade_principal" class="required"><i class="fas fa-star"></i> Atividade Principal (CNAE)</label>
                                 <select name="atividade_principal" id="atividade_principal" required onchange="atualizarDescricaoCNAE(this)">
                                     <option value="">Selecione uma atividade principal</option>
                                     <?php foreach ($cnae_data as $cnae) { ?>
@@ -453,10 +453,10 @@ if ($empresa === 0) {
                         </div>
                     </div>
                     <div class="form-section">
-                        <h2>Atividades Secundárias</h2>
+                        <h2><i class="fas fa-tasks"></i> Atividades Secundárias</h2>
                         <div class="form-row">
                             <div class="form-group full-width">
-                                <label for="atividades_secundarias">Atividades Secundárias (CNAE)</label>
+                                <label for="atividades_secundarias"><i class="fas fa-list"></i> Atividades Secundárias (CNAE)</label>
                                 <select name="cnae_select" id="cnae_select">
                                     <option value="">Selecione um CNAE</option>
                                     <?php
@@ -473,7 +473,7 @@ if ($empresa === 0) {
                                
                                 <label></label> <label></label> <label></label> <label></label>
                                 <div id="cnaes_selecionados" class="mt-3">
-                                    <h6>CNAEs Selecionados:</h6>
+                                    <h6><i class="fas fa-check-circle"></i> CNAEs Selecionados:</h6>
                                     <ul class="list-group" id="lista_cnaes">
                                         <?php
                                         // Exibe CNAEs já selecionados anteriormente
@@ -486,7 +486,7 @@ if ($empresa === 0) {
                                                 if ($cnae) {
                                                     echo "<li class='list-group-item d-flex justify-content-between align-items-center' data-id='{$cnae['id']}'>";
                                                     echo "{$cnae['id']} - {$cnae['descricao']} ";
-                                                    echo '<button type="button" class="btn btn-danger btn-sm remover-cnae"><i class="fas fa-trash"></i> Remover</button>';
+                                                    echo '<button type="button" class="btn btn-danger btn-sm remover-cnae"><i class="fas fa-trash"></i> </button>';
                                                     echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
                                                     echo "</li>";
                                                 }
@@ -507,7 +507,6 @@ if ($empresa === 0) {
                 </form>
             </div>
         </div>
-
 
         <script>
             $('#cep').mask('00000-000');
@@ -799,7 +798,7 @@ if ($empresa === 0) {
                         li.innerHTML = `
                             ${selectedText}
                             <button type="button" class="btn btn-danger btn-sm remover-cnae">
-                                <i class="fas fa-trash"></i> Remover
+                                <i class="fas fa-trash"></i> 
                             </button>
                             <input type="hidden" name="atividades_secundarias[]" value="${selectedValue}">
                             <input type="hidden" name="descricoes_secundarias[]" value="${descricaoCnae}">

@@ -438,6 +438,7 @@ try {
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -452,12 +453,12 @@ try {
                     <h2>Informações do Serviço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="numero_proposta">Número da Proposta</label>
+                            <label for="numero_proposta"><i class="fas fa-file-alt"></i> Número da Proposta</label>
                             <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($numero_proposta); ?>" onchange="verificarNumeroProposta(this.value)">
                             <small id="numero_proposta_feedback" style="display: none;"></small>
                         </div>
                         <div class="form-group">
-                            <label for="cliente" class="required">Cliente</label>
+                            <label for="cliente" class="required"><i class="fas fa-user"></i> Cliente</label>
                             <select id="cliente" name="cliente" onchange="buscarCNPJCPF(this.value)" required>
                                 <option value="">Selecione...</option>
                                 <?php
@@ -471,7 +472,7 @@ try {
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cnpj_cpf" class="required">CNPJ/CPF</label>
+                                <label for="cnpj_cpf" class="required"><i class="fas fa-id-card"></i> CNPJ/CPF</label>
                                 <input type="text" id="cnpj_cpf" name="cnpj_cpf" readonly>
                             </div>
                         </div>
@@ -500,17 +501,17 @@ try {
                     <h2>Status do Serviço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="data_inicio" class="required">Data de Início do Serviço</label>
+                            <label for="data_inicio" class="required"><i class="fas fa-calendar-plus"></i> Data de Início do Serviço</label>
                             <input type="date" id="data_inicio" name="data_inicio" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="data_termino">Data de Término do Serviço</label>
+                            <label for="data_termino"><i class="fas fa-calendar-check"></i> Data de Término do Serviço</label>
                             <input type="date" id="data_termino" name="data_termino">
                         </div>
 
                         <div class="form-group">
-                            <label for="status_servico">Status do Serviço</label>
+                            <label for="status_servico"><i class="fas fa-info-circle"></i> Status do Serviço</label>
                             <input type="text" id="status_servico" name="status_servico" readonly>
                         </div>
                     </div>
@@ -520,24 +521,24 @@ try {
                     <h2>Informações do Pagamento</h2>
                     <div class="form-row">
                             <div class="form-group">
-                                <label for="valor_total" class="required">Valor Total</label>
+                                <label for="valor_total" class="required"><i class="fas fa-dollar-sign"></i> Valor Total</label>
                                 <input type="number" id="valor_total" name="valor_total" step="0.01" required onchange="verificarValores()">
                             </div>
 
                         <div class="form-group">
-                            <label for="valor_entrada">Valor Entrada</label>
+                            <label for="valor_entrada"><i class="fas fa-money-bill-wave"></i> Valor Entrada</label>
                             <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" onchange="verificarValores()">
                         </div>
 
                         <div class="form-group">
-                            <label for="data_pagamento">Vencimento</label>
+                            <label for="data_pagamento"><i class="fas fa-calendar-alt"></i> Vencimento</label>
                             <input type="date" id="data_pagamento" name="data_pagamento">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="forma_pagamento" class="required">Forma de Pagamento</label>
+                            <label for="forma_pagamento" class="required"><i class="fas fa-credit-card"></i> Forma de Pagamento</label>
                             <select id="forma_pagamento" name="forma_pagamento" required>
                                 <option value="">Selecione a forma de pagamento</option>
                                 <option value="CARTÃO DE CRÉDITO">Cartão de Crédito</option>
@@ -549,7 +550,7 @@ try {
                         </div>
 
                         <div class="form-group">
-                            <label for="parcelamento">Parcelamento</label>
+                            <label for="parcelamento"><i class="fas fa-clock"></i> Parcelamento</label>
                             <select id="parcelamento" name="parcelamento">
                                 <option value="">Selecione o parcelamento</option>
                                 <?php
@@ -567,39 +568,39 @@ try {
                     <h2>Endereço do Serviço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cep" class="required">CEP:</label>
+                            <label for="cep" class="required"><i class="fas fa-map-marker-alt"></i> CEP:</label>
                             <input type="text" id="cep" name="cep" required placeholder="00000-000">
                             <small id="cep-feedback" class="form-text"></small>
                         </div>
                         <div class="form-group">
-                            <label for="rua">Rua:</label>
+                            <label for="rua"><i class="fas fa-road"></i> Rua:</label>
                             <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
                         </div>
                         <div class="form-group">
-                            <label for="numero" class="required">Número:</label>
+                            <label for="numero" class="required"><i class="fas fa-home"></i> Número:</label>
                             <input type="text" id="numero" name="numero" required placeholder="Número">
                         </div>
                         <div class="form-group">
-                            <label for="complemento">Complemento:</label>
+                            <label for="complemento"><i class="fas fa-info"></i> Complemento:</label>
                             <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="bairro">Bairro:</label>
+                            <label for="bairro"><i class="fas fa-map"></i> Bairro:</label>
                             <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
                         </div>
                         <div class="form-group">
-                            <label for="cidade">Cidade:</label>
+                            <label for="cidade"><i class="fas fa-city"></i> Cidade:</label>
                             <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
                         </div>
                         <div class="form-group">
-                            <label for="estado">Estado:</label>
+                            <label for="estado"><i class="fas fa-flag"></i> Estado:</label>
                             <input type="text" id="estado" name="estado" readonly placeholder="Estado">
                         </div>
                         <div class="form-group">
-                            <label for="coordenada">Coordenada:</label>
+                            <label for="coordenada"><i class="fas fa-map-pin"></i> Coordenada:</label>
                             <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude">
                             <small id="coordenadas-feedback" class="form-text"></small>
                         </div>
@@ -608,12 +609,12 @@ try {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="responsavel_execucao" class="required">Nome do Responsável pela Execução</label>
+                        <label for="responsavel_execucao" class="required"><i class="fas fa-user-tie"></i> Nome do Responsável pela Execução</label>
                         <input type="text" id="responsavel_execucao" name="responsavel_execucao" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="origem_demanda" class="required">Origem da Demanda</label>
+                        <label for="origem_demanda" class="required"><i class="fas fa-bullhorn"></i> Origem da Demanda</label>
                         <select id="origem_demanda" name="origem_demanda" required>
                             <option value="">Selecione...</option>
                             <option value="INTERNET">Internet</option>
@@ -625,7 +626,7 @@ try {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="observacao">Observação:</label>
+                        <label for="observacao"><i class="fas fa-comment"></i> Observação:</label>
                         <textarea id="observacao" name="observacao" class="form-control" rows="4" placeholder="Digite sua observação aqui"></textarea>
                     </div>
                 </div>
@@ -1066,18 +1067,15 @@ try {
 
             console.log('Buscando despesas para proposta:', numeroProposta);
 
-            fetch(`buscar_despesas.php?numero_proposta=${encodeURIComponent(numeroProposta)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => {
-                            throw new Error(err.message || 'Erro na resposta do servidor');
-                        });
-                    }
-                    return response.json();
-                })
+            fetch(`buscar_despesas_fixas.php?numero_proposta=${encodeURIComponent(numeroProposta)}`)
+                .then(response => response.json())
                 .then(data => {
                     console.log('Resposta do servidor:', data);
                     const tbody = document.getElementById('despesasBody');
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
                     
                     if (Array.isArray(data) && data.length > 0) {
                         let html = '';

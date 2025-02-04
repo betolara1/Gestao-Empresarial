@@ -272,11 +272,11 @@ $historico = $stmt->get_result();
             <form method="POST" class="form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="valor">Valor do Pró-Labore:</label>
+                        <label for="valor"><i class="fas fa-dollar-sign"></i> Valor do Pró-Labore:</label>
                         <input type="number" step="0.01" id="valor" name="valor" required>
                     </div>
                     <div class="form-group">
-                        <label for="data">Data:</label>
+                        <label for="data"><i class="fas fa-calendar-alt"></i> Data:</label>
                         <input type="date" id="data" name="data" required>
                     </div>
                 </div>
@@ -285,14 +285,14 @@ $historico = $stmt->get_result();
                 </button>
             </form>
 
-            <h2>Histórico de Pró-Labore</h2>
+            <h2><i class="fas fa-history"></i> Histórico de Pró-Labore</h2>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Valor</th>
-                        <th>Mês/Ano</th>
-                        <th>Ações</th>
+                        <th><i class="fas fa-calendar"></i> Data</th>
+                        <th><i class="fas fa-money-bill-wave"></i> Valor</th>
+                        <th><i class="fas fa-calendar-check"></i> Mês/Ano</th>
+                        <th><i class="fas fa-cogs"></i> Ações</th>
                     </tr>
                 </thead>
                 <tbody>

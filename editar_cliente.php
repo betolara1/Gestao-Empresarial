@@ -356,15 +356,6 @@ $cnae_data = getCNAE();
             background-color: #f8f9fa !important;
         }
 
-        /* Cores específicas para diferentes tipos de informação */
-        .fa-user-circle, .fa-user { color: #007bff; }
-        .fa-building, .fa-industry { color: #28a745; }
-        .fa-envelope { color: #dc3545; }
-        .fa-mobile-alt { color: #17a2b8; }
-        .fa-map-marked-alt, .fa-map-marker-alt { color: #fd7e14; }
-        .fa-city { color: #20c997; }
-        .fa-id-card, .fa-briefcase { color: #6610f2; }
-        .fa-info-circle { color: #6c757d; }
     </style>
 </head>
 <body>

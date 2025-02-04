@@ -149,6 +149,7 @@ if (!empty($empresa['atividades_secundarias'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -425,7 +426,7 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <h2>Informações Principais</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="tipoPessoa" class="required">Tipo de Pessoa</label>
+                            <label for="tipoPessoa" class="required"><i class="fas fa-user-tag"></i> Tipo de Pessoa</label>
                             <select id="tipoPessoa" name="tipoPessoa" required>
                                 <option value="">Selecione o tipo de pessoa</option>
                                 <option value="F">Física</option>
@@ -437,12 +438,12 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <div id="pessoaJuridica" class="hidden">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="razaoSocial" class="required">Razão Social</label>
+                                <label for="razaoSocial" class="required"><i class="fas fa-building"></i> Razão Social</label>
                                 <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Digite a razão social">
                             </div>
                             
                             <div class="form-group">
-                                <label for="cnpj" class="required">CNPJ</label>
+                                <label for="cnpj" class="required"><i class="fas fa-id-card"></i> CNPJ</label>
                                 <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00">
                             </div>
                         </div>
@@ -451,12 +452,12 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <div id="pessoaFisica" class="hidden">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nomeCliente" class="required">Nome do Cliente</label>
+                                <label for="nomeCliente" class="required"><i class="fas fa-user"></i> Nome do Cliente</label>
                                 <input type="text" id="nomeCliente" name="nomeCliente" placeholder="Digite o nome completo">
                             </div>
 
                             <div class="form-group">
-                                <label for="cpf" class="required">CPF</label>
+                                <label for="cpf" class="required"><i class="fas fa-id-card"></i> CPF</label>
                                 <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
                             </div>
                         </div>
@@ -468,7 +469,7 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <h2>Endereço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cep" class="required">CEP</label>
+                            <label for="cep" class="required"><i class="fas fa-map-marker-alt"></i> CEP</label>
                             <div class="input-with-feedback">
                                 <input type="text" id="cep" name="cep" required placeholder="00000-000">
                                 <small id="cep-feedback" class="form-text"></small>
@@ -476,17 +477,17 @@ if (!empty($empresa['atividades_secundarias'])) {
                         </div>
 
                         <div class="form-group">
-                            <label for="rua">Rua</label>
+                            <label for="rua"><i class="fas fa-road"></i> Rua</label>
                             <input type="text" id="rua" name="rua" readonly placeholder="Endereço">
                         </div>
 
                         <div class="form-group">
-                            <label for="numero" class="required">Número</label>
+                            <label for="numero" class="required"><i class="fas fa-home"></i> Número</label>
                             <input type="text" id="numero" name="numero" required placeholder="Número">
                         </div>
 
                         <div class="form-group">
-                            <label for="complemento">Complemento</label>
+                            <label for="complemento"><i class="fas fa-info"></i> Complemento</label>
                             <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc.">
                         </div>
                     </div>
@@ -495,22 +496,22 @@ if (!empty($empresa['atividades_secundarias'])) {
                         
 
                         <div class="form-group">
-                            <label for="bairro">Bairro</label>
+                            <label for="bairro"><i class="fas fa-map"></i> Bairro</label>
                             <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro">
                         </div>
 
                         <div class="form-group">
-                            <label for="cidade">Cidade</label>
+                            <label for="cidade"><i class="fas fa-city"></i> Cidade</label>
                             <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade">
                         </div>
 
                         <div class="form-group">
-                            <label for="estado">Estado</label>
+                            <label for="estado"><i class="fas fa-flag"></i> Estado</label>
                             <input type="text" id="estado" name="estado" readonly placeholder="Estado">
                         </div>
 
                         <div class="form-group">
-                            <label for="coordenada">Coordenadas</label>
+                            <label for="coordenada"><i class="fas fa-map-pin"></i> Coordenadas</label>
                             <div class="input-with-map">
                                 <input type="text" id="coordenada" name="coordenada" readonly placeholder="Latitude, Longitude">
                             </div>
@@ -523,12 +524,12 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <h2>Contato</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="email" class="required">E-mail</label>
+                            <label for="email" class="required"><i class="fas fa-envelope"></i> E-mail</label>
                             <input type="email" id="email" name="email" required placeholder="seu@email.com">
                         </div>
 
                         <div class="form-group">
-                            <label for="celular" class="required">Celular</label>
+                            <label for="celular" class="required"><i class="fas fa-mobile-alt"></i> Celular</label>
                             <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000">
                         </div>
                     </div>
@@ -539,7 +540,7 @@ if (!empty($empresa['atividades_secundarias'])) {
                     <h2>Atividades</h2>
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label for="atividade_principal">Atividade Principal (CNAE)</label>
+                            <label for="atividade_principal"><i class="fas fa-briefcase"></i> Atividade Principal (CNAE)</label>
                             <select name="atividade_principal" id="atividade_principal" onchange="atualizarDescricaoCNAE(this)">
                                 <option value="">Selecione uma atividade principal</option>
                                 <?php foreach ($cnae_data as $cnae) { ?>

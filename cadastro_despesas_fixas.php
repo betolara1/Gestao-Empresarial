@@ -493,6 +493,43 @@ function getAnosCadastrados() {
             overflow: hidden; /* Oculta texto que excede a largura */
             text-overflow: ellipsis; /* Adiciona reticências para texto que não cabe */
         }
+
+        /* Estilos para inputs com ícones */
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 10px;
+            color: var(--secondary-color);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding-left: 35px !important;
+            width: 100%;
+        }
+
+        /* Ajuste para o ícone do select */
+        .input-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23424242' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            padding-right: 30px;
+        }
     </style>
 </head>
 <body>
@@ -508,45 +545,55 @@ function getAnosCadastrados() {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="mes" class="required">Mês</label>
-                            <select name="mes" id="mes" required>
-                                <option value="">Selecione...</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-calendar-alt"></i></span>
+                                <select name="mes" id="mes" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="01">Janeiro</option>
+                                    <option value="02">Fevereiro</option>
+                                    <option value="03">Março</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Maio</option>
+                                    <option value="06">Junho</option>
+                                    <option value="07">Julho</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label for="ano" class="required">Ano</label>
-                            <select name="ano" id="ano" required>
-                                <option value="">Selecione...</option>
-                                <?php
-                                $anoAtual = date('Y');
-                                for($i = $anoAtual - 1; $i <= $anoAtual + 1; $i++) {
-                                    echo "<option value='$i'" . ($i == $anoAtual ? " selected" : "") . ">$i</option>";
-                                }
-                                ?>
-                            </select>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-calendar-year"></i></span>
+                                <select name="ano" id="ano" required>
+                                    <option value="">Selecione...</option>
+                                    <?php
+                                    $anoAtual = date('Y');
+                                    for($i = $anoAtual - 1; $i <= $anoAtual + 1; $i++) {
+                                        echo "<option value='$i'" . ($i == $anoAtual ? " selected" : "") . ">$i</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="descricao" class="required">Descrição da despesa</label>
-                            <input type="text" name="descricao" id="descricao" required>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-file-alt"></i></span>
+                                <input type="text" name="descricao" id="descricao" required>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="valor" class="required">Valor</label>
-                            <div class="input-money">
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-dollar-sign"></i></span>
                                 <input type="number" name="valor" id="valor" step="0.01" required>
                             </div>
                         </div>

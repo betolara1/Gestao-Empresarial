@@ -4,17 +4,23 @@ require_once 'conexao.php';
 header('Content-Type: application/json');
 
 try {
-    // Verifica se o número da proposta foi fornecido
-    if (!isset($_GET['numero_proposta']) || empty($_GET['numero_proposta'])) {
-        throw new Exception('Número da proposta não fornecido');
+    // Verifica se mês e ano foram fornecidos
+    if (!isset($_GET['mes']) || !isset($_GET['ano'])) {
+        throw new Exception('Mês e ano são obrigatórios');
     }
 
-    $proposta = intval($_GET['numero_proposta']);
+    $mes = intval($_GET['mes']);
+    $ano = intval($_GET['ano']);
     
-    // Consulta SQL usando o nome correto da coluna (proposta)
-    $sql = "SELECT id, nome_despesa, valor FROM despesas WHERE proposta = ?";
+    // Consulta SQL para buscar despesas fixas do mês/ano específico
+    $sql = "SELECT id, descricao, valor 
+            FROM despesas_fixas 
+            WHERE MONTH(data) = ? 
+            AND YEAR(data) = ?
+            ORDER BY data";
+            
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $proposta);
+    $stmt->bind_param("ii", $mes, $ano);
     
     if (!$stmt->execute()) {
         throw new Exception('Erro ao executar consulta: ' . $stmt->error);
@@ -26,13 +32,13 @@ try {
     while ($row = $result->fetch_assoc()) {
         $despesas[] = array(
             'id' => $row['id'],
-            'nome_despesa' => htmlspecialchars($row['nome_despesa']),
-            'valor' => number_format($row['valor'], 2, '.', '')
+            'descricao' => htmlspecialchars($row['descricao']),
+            'valor' => number_format($row['valor'], 2, ',', '.') // Formatação BR
         );
     }
     
     // Debug
-    error_log("Proposta: " . $proposta);
+    error_log("Mês: " . $mes . ", Ano: " . $ano);
     error_log("SQL: " . $sql);
     error_log("Resultados: " . json_encode($despesas));
     
