@@ -100,7 +100,7 @@ if (!empty($empresa['atividades_secundarias'])) {
 }
 
 
-if ($empresa != 0) {
+if ($empresa === 0) {
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -216,8 +216,14 @@ if ($empresa != 0) {
                 margin-right: 0; /* Remove margem do último item */
             }
 
-            .required {
+            .required::after {
+                content: ' *';
                 color: var(--error-color);
+            }
+            
+            .required {
+                /* Remove a cor vermelha do texto */
+                color: var(--text-color);
             }
 
             .input-with-feedback {
@@ -544,57 +550,6 @@ if ($empresa != 0) {
 
             // Eventos jQuery para CEP e coordenadas
             $(document).ready(function() {
-                function buscarCoordenadas(cep) {
-                    cep = cep.replace(/[^0-9]/g, '');
-                    
-                    if (cep.length === 8) {
-                        $('#coordenada').val('Buscando coordenadas...');
-                        
-                        $.ajax({
-                            url: `https://brasilapi.com.br/api/cep/v2/${cep}`,
-                            method: 'GET',
-                            success: function(response) {
-                                if (response.location && response.location.coordinates) {
-                                    const latitude = response.location.coordinates[1];
-                                    const longitude = response.location.coordinates[0];
-                                    $('#coordenada').val(`${latitude}, ${longitude}`);
-                                    
-                                    atualizarMapa(latitude, longitude);
-                                    
-                                    $.ajax({
-                                        url: 'atualizar_coordenadas.php',
-                                        method: 'POST',
-                                        data: {
-                                            cep: cep,
-                                            coordenada: `${latitude}, ${longitude}`
-                                        },
-                                        success: function(response) {
-                                            console.log('Coordenadas salvas com sucesso');
-                                        },
-                                        error: function() {
-                                            console.log('Erro ao salvar coordenadas');
-                                        }
-                                    });
-                                } else {
-                                    $('#coordenada').val('Coordenadas não encontradas');
-                                }
-                            },
-                            error: function() {
-                                $('#coordenada').val('Erro ao buscar coordenadas');
-                            }
-                        });
-                    }
-                }
-
-                $('#cep').on('blur change', function() {
-                    buscarCoordenadas($(this).val());
-                });
-            });
-
-            // Inicialização do mapa
-            window.initMap = initMap; 
-
-            $(document).ready(function() {
                 function limpaFormularioCep() {
                     // Limpa valores do formulário de cep.
                     $("#rua").val("");
@@ -648,7 +603,6 @@ if ($empresa != 0) {
 
                 //Quando o campo cep perde o foco.
                 $("#cep").on('blur change', function() {
-                    // Nova variável "cep" somente com dígitos.
                     var cep = $(this).val().replace(/\D/g, '');
 
                     //Verifica se campo cep possui valor informado.

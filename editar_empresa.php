@@ -305,6 +305,15 @@ if (!empty($empresa['atividades_secundarias'])) {
             background-color: #f8f9fa;
             cursor: not-allowed;
         }
+
+        .required::after {
+            content: ' *';
+            color: var(--error-color);
+        }
+        
+        .required {
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -316,16 +325,16 @@ if (!empty($empresa['atividades_secundarias'])) {
             <form id="cadastroForm" action="atualizar_empresa.php" method="POST">
                 <!-- Seção: Informações Principais -->
                 <div class="form-section">
-                    <h2>Informações Principais</h2>
+                    <h2><i class="fas fa-info-circle"></i> Informações Principais</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="razao_social" class="required">Razão Social</label>
+                            <label for="razao_social" class="required"><i class="fas fa-building"></i> Razão Social</label>
                             <input type="text" id="razaoSocial" name="razaoSocial" 
                                 value="<?php echo htmlspecialchars($empresa['razao_social'] ?? ''); ?>" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="cnpj" class="required">CNPJ</label>
+                            <label for="cnpj" class="required"><i class="fas fa-id-card"></i> CNPJ</label>
                             <input type="text" id="cnpj" name="cnpj" 
                                 value="<?php echo htmlspecialchars($empresa['cnpj'] ?? ''); ?>" required>
                         </div>
@@ -333,13 +342,13 @@ if (!empty($empresa['atividades_secundarias'])) {
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="nome">Nome Fantasia</label>
+                            <label for="nome"><i class="fas fa-store"></i> Nome Fantasia</label>
                             <input type="text" id="nome" name="nome" 
                                 value="<?php echo htmlspecialchars($empresa['nome'] ?? ''); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="cpf">CPF</label>
+                            <label for="cpf"><i class="fas fa-id-badge"></i> CPF</label>
                             <input type="text" id="cpf" name="cpf" 
                                 value="<?php echo htmlspecialchars($empresa['cpf'] ?? ''); ?>">
                         </div>
@@ -348,10 +357,10 @@ if (!empty($empresa['atividades_secundarias'])) {
 
                 <!-- Seção: Endereço -->
                 <div class="form-section">
-                    <h2>Endereço</h2>
+                    <h2><i class="fas fa-map-marked-alt"></i> Endereço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cep" class="required">CEP</label>
+                            <label for="cep" class="required"><i class="fas fa-map-marker-alt"></i> CEP</label>
                             <div class="input-with-feedback">
                                 <input type="text" id="cep" name="cep" required 
                                     value="<?php echo htmlspecialchars($empresa['cep'] ?? ''); ?>">
@@ -360,18 +369,18 @@ if (!empty($empresa['atividades_secundarias'])) {
                         </div>
 
                         <div class="form-group">
-                            <label for="rua">Rua</label>
+                            <label for="rua"><i class="fas fa-road"></i> Rua</label>
                             <input type="text" id="rua" name="rua" readonly 
                                 value="<?php echo htmlspecialchars($empresa['rua'] ?? ''); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="numero" class="required">Número</label>
+                            <label for="numero" class="required"><i class="fas fa-home"></i> Número</label>
                             <input type="text" id="numero" name="numero" required 
                                 value="<?php echo htmlspecialchars($empresa['numero'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label for="complemento">Complemento</label>
+                            <label for="complemento"><i class="fas fa-info"></i> Complemento</label>
                             <input type="text" id="complemento" name="complemento" 
                                 value="<?php echo htmlspecialchars($empresa['complemento'] ?? ''); ?>">
                         </div>
@@ -379,25 +388,25 @@ if (!empty($empresa['atividades_secundarias'])) {
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="bairro">Bairro</label>
+                            <label for="bairro"><i class="fas fa-map"></i> Bairro</label>
                             <input type="text" id="bairro" name="bairro" readonly 
                                 value="<?php echo htmlspecialchars($empresa['bairro'] ?? ''); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="cidade">Cidade</label>
+                            <label for="cidade"><i class="fas fa-city"></i> Cidade</label>
                             <input type="text" id="cidade" name="cidade" readonly 
                                 value="<?php echo htmlspecialchars($empresa['cidade'] ?? ''); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="estado">Estado</label>
+                            <label for="estado"><i class="fas fa-flag"></i> Estado</label>
                             <input type="text" id="estado" name="estado" readonly 
                                 value="<?php echo htmlspecialchars($empresa['estado'] ?? ''); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="coordenada">Coordenadas</label>
+                            <label for="coordenada"><i class="fas fa-map-pin"></i> Coordenadas</label>
                             <div class="input-with-map">
                                 <input type="text" id="coordenada" name="coordenada" readonly 
                                     value="<?php echo htmlspecialchars($empresa['coordenada'] ?? ''); ?>">
@@ -408,15 +417,15 @@ if (!empty($empresa['atividades_secundarias'])) {
 
                 <!-- Seção: Contato -->
                 <div class="form-section">
-                    <h2>Contato</h2>
+                    <h2><i class="fas fa-address-book"></i> Contato</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="email" class="required">E-mail</label>
+                            <label for="email" class="required"><i class="fas fa-envelope"></i> E-mail</label>
                             <input type="email" id="email" name="email" required 
                                 value="<?php echo htmlspecialchars($empresa['email'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label for="celular" class="required">Celular</label>
+                            <label for="celular" class="required"><i class="fas fa-mobile-alt"></i> Celular</label>
                             <input type="text" id="celular" name="celular" required 
                                 value="<?php echo htmlspecialchars($empresa['celular'] ?? ''); ?>">
                         </div>
@@ -429,10 +438,10 @@ if (!empty($empresa['atividades_secundarias'])) {
 
                 <!-- Seção: Atividades -->
                 <div class="form-section">
-                    <h2>Atividades</h2>
+                    <h2><i class="fas fa-briefcase"></i> Atividades</h2>
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label for="atividade_principal" class="required">Atividade Principal (CNAE)</label>
+                            <label for="atividade_principal" class="required"><i class="fas fa-star"></i> Atividade Principal (CNAE)</label>
                             <select name="atividade_principal" id="atividade_principal" required onchange="atualizarDescricaoCNAE(this)">
                                 <option value="">Selecione uma atividade principal</option>
                                 <?php foreach ($cnae_data as $cnae) { ?>
@@ -450,10 +459,10 @@ if (!empty($empresa['atividades_secundarias'])) {
                 </div>
 
                 <div class="form-section">
-                    <h2>Atividades Secundárias</h2>
+                    <h2><i class="fas fa-tasks"></i> Atividades Secundárias</h2>
                     <div class="form-row">
                         <div class="form-group full-width">
-                            <label for="atividades_secundarias">Atividades Secundárias (CNAE)</label>
+                            <label for="atividades_secundarias"><i class="fas fa-list"></i> Atividades Secundárias (CNAE)</label>
                             <div class="cnae-selector">
                                 <select name="cnae_select" id="cnae_select">
                                     <option value="">Selecione um CNAE</option>
@@ -478,7 +487,7 @@ if (!empty($empresa['atividades_secundarias'])) {
                                         foreach ($cnaes_secundarios as $index => $cnae) {
                                             echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
                                             echo "{$cnae['id']} - {$cnae['descricao']}";
-                                            echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'><i class='fas fa-trash'></i> Remover</button>";
+                                            echo "<button type='button' class='btn btn-danger btn-sm remover-cnae'><i class='fas fa-trash'></i> </button>";
                                             echo "<input type='hidden' name='atividades_secundarias[]' value='{$cnae['id']}'>";
                                             echo "<input type='hidden' name='descricoes_secundarias[]' value='" . htmlspecialchars($descricoes_secundarias[$index]) . "'>";
                                             echo "</li>";
@@ -790,7 +799,7 @@ if (!empty($empresa['atividades_secundarias'])) {
                     li.innerHTML = `
                         ${selectedText}
                         <button type="button" class="btn btn-danger btn-sm remover-cnae">
-                            <i class="fas fa-trash"></i> Remover
+                            <i class="fas fa-trash"></i> 
                         </button>
                         <input type="hidden" name="atividades_secundarias[]" value="${selectedValue}">
                         <input type="hidden" name="descricoes_secundarias[]" value="${descricaoCnae}">

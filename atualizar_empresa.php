@@ -65,7 +65,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         echo "<script>
-                alert('Empresa atualizada com sucesso!');
                 window.location.href = 'gerenciar_empresa.php';
               </script>";
     } else {
