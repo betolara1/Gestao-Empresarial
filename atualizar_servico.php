@@ -118,7 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->commit();
         
         echo "<script>
-                alert('Serviço atualizado com sucesso!');
                 window.location.href = 'gerenciar_relatorio.php';
               </script>";
 

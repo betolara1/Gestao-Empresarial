@@ -44,7 +44,6 @@ if (isset($_GET['id'])) {
             // Confirma todas as operações
             $conn->commit();
             echo "<script>
-                    alert('Cliente e seus serviços relacionados foram excluídos com sucesso!');
                     window.location.href = 'gerenciar_clientes.php';
                   </script>";
         } else {

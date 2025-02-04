@@ -49,6 +49,9 @@ if (isset($_GET['mensagem'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -195,6 +198,20 @@ if (isset($_GET['mensagem'])) {
             text-align: center;
             color: #999;
         }
+
+        #tabelaClientes th i {
+            margin-right: 8px;
+            color: #666;
+        }
+        
+        #tabelaClientes th {
+            white-space: nowrap;
+            padding: 12px 15px;
+        }
+        
+        #tabelaClientes th:hover i {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
@@ -217,25 +234,24 @@ if (isset($_GET['mensagem'])) {
                     <table id="tabelaClientes">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Pessoa</th>
-                                <th>Nome/Razão Social</th>
-                                <th>CNPJ</th>
-                                <th>CPF</th>
-                                <th>Email</th>
-                                <th>Celular</th>
-                                <th>Cidade</th>
-                                <th>Estado</th>
-                                <th>Data Cadastro</th>
-                                <th>Ações</th>
                                 <th></th>
+                                <th><i class="fas fa-user-circle"></i> Pessoa</th>
+                                <th><i class="fas fa-building"></i> Nome/Razão Social</th>
+                                <th><i class="fas fa-briefcase"></i> CNPJ</th>
+                                <th><i class="fas fa-id-card"></i> CPF</th>
+                                <th><i class="fas fa-envelope"></i> Email</th>
+                                <th><i class="fas fa-mobile-alt"></i> Celular</th>
+                                <th><i class="fas fa-city"></i> Cidade</th>
+                                <th><i class="fas fa-map-marker-alt"></i> Estado</th>
+                                <th><i class="fas fa-calendar-alt"></i> Data Cadastro</th>
+                                <th><i class="fas fa-cogs"></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($clientes)): ?>
                                 <?php foreach ($clientes as $cliente): ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($cliente['id']); ?></td>
+                                        <td></td>
                                         <td>
                                             <?php
                                             echo htmlspecialchars(
@@ -253,10 +269,10 @@ if (isset($_GET['mensagem'])) {
                                         <td><?php echo date('d/m/Y', strtotime($cliente['data_cadastro'])); ?></td>
                                         <td>
                                             <button type="button" class="btn-editar" onclick="editarCliente(<?php echo $cliente['id']; ?>)">
-                                                <i class="fas fa-edit"></i> Editar
+                                                <i class="fas fa-edit"></i> 
                                             </button>
                                             <button type="button" class="btn-excluir" onclick="confirmarExclusao(<?php echo $cliente['id']; ?>)">
-                                                <i class="fas fa-trash"></i> Excluir
+                                                <i class="fas fa-trash"></i> 
                                             </button>
                                         </td>
                                     </tr>
@@ -318,9 +334,30 @@ if (isset($_GET['mensagem'])) {
         }
 
         function confirmarExclusao(id) {
-            if (confirm('Tem certeza que deseja excluir este cliente? Todos os serviços relacionados também serão excluídos.')) {
-                window.location.href = 'excluir_cliente.php?id=' + id;
-            }
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja excluir este cliente? Todos os serviços relacionados também serão excluídos.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Excluindo...',
+                        text: 'Aguarde enquanto o cliente é excluído',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            window.location.href = 'excluir_cliente.php?id=' + id;
+                        }
+                    });
+                }
+            });
         }
     </script>
 

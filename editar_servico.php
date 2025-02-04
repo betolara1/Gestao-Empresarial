@@ -434,6 +434,23 @@ $total_pendente = $totais['total_pendente'];
         .leaflet-control-zoom a:hover {
             background-color: #f8f9fa !important;
         }
+
+        .form-section h2 i {
+            margin-right: 10px;
+            color: #007bff;
+        }
+
+        .form-group label i {
+            margin-right: 5px;
+            color: #666;
+            width: 16px;
+        }
+
+        .form-text i {
+            margin-right: 5px;
+            color: #666;
+        }
+
     </style>
 </head>
 <body>
@@ -445,27 +462,31 @@ $total_pendente = $totais['total_pendente'];
             <div class="card">
                 <form action="atualizar_servico.php" method="POST">
                     <div class="form-section">
-                        <h2>Informações do Serviço</h2>
+                        <h2><i class="fas fa-info-circle"></i> Informações do Serviço</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="numero_proposta">Número da Proposta</label>
+                                <label for="numero_proposta">
+                                    <i class="fas fa-hashtag"></i> Número da Proposta
+                                </label>
                                 <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($servico['numero_proposta']); ?>" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="cliente">Cliente</label>
-                                <input type="text" id="cliente" name="cliente" 
-                                    value="<?php echo htmlspecialchars($tipo_pessoa === 'J' ? $razao_social : $nome_cliente); ?>" 
-                                    readonly>
+                                <label for="cliente">
+                                    <i class="fas fa-user"></i> Cliente
+                                </label>
+                                <input type="text" id="cliente" name="cliente" value="<?php echo htmlspecialchars($tipo_pessoa === 'J' ? $razao_social : $nome_cliente); ?>" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="cnpj_cpf">CNPJ/CPF</label>
+                                <label for="cnpj_cpf">
+                                    <i class="fas fa-id-card"></i> CNPJ/CPF
+                                </label>
                                 <input type="text" id="cnpj_cpf" name="cnpj_cpf" value="<?php echo htmlspecialchars($servico['cnpj_cpf']); ?>" readonly>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h2>Tipos de Serviço</h2>
+                        <h2><i class="fas fa-tools"></i> Tipos de Serviço</h2>
                         <div class="checkbox-group">
                             <?php
                             while($row = $resultTipos->fetch_assoc()) {
@@ -486,40 +507,44 @@ $total_pendente = $totais['total_pendente'];
                     </div>
                 
                     <div class="form-section">
-                        <h2>Status do Serviço</h2>
+                        <h2><i class="fas fa-tasks"></i> Status do Serviço</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="data_inicio">Data de Início</label>
-                                <input type="date" id="data_inicio" name="data_inicio" 
-                                       value="<?php echo htmlspecialchars($servico['data_inicio']); ?>" 
-                                       required class="form-control">
+                                <label for="data_inicio">
+                                    <i class="fas fa-calendar-plus"></i> Data de Início
+                                </label>
+                                <input type="date" id="data_inicio" name="data_inicio" value="<?php echo htmlspecialchars($servico['data_inicio']); ?>" required class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label for="data_termino">Data de Término</label>
-                                <input type="date" id="data_termino" name="data_termino" 
-                                       value="<?php echo htmlspecialchars($servico['data_termino']); ?>" 
-                                       class="form-control">
+                                <label for="data_termino">
+                                    <i class="fas fa-calendar-check"></i> Data de Término
+                                </label>
+                                <input type="date" id="data_termino" name="data_termino" value="<?php echo htmlspecialchars($servico['data_termino']); ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label for="status_servico">Status do Serviço</label>
-                                <input type="text" id="status_servico" name="status_servico" 
-                                       value="<?php echo htmlspecialchars($servico['status_servico']); ?>" 
-                                       readonly>
+                                <label for="status_servico">
+                                    <i class="fas fa-chart-line"></i> Status do Serviço
+                                </label>
+                                <input type="text" id="status_servico" name="status_servico" value="<?php echo htmlspecialchars($servico['status_servico']); ?>" readonly>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h2>Informações do Pagamento</h2>
+                        <h2><i class="fas fa-money-bill-wave"></i> Informações do Pagamento</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="data_pagamento">Vencimento</label>
+                                <label for="data_pagamento">
+                                    <i class="fas fa-calendar-day"></i> Vencimento
+                                </label>
                                 <input type="date" id="data_pagamento" name="data_pagamento" value="<?php echo htmlspecialchars($servico['data_pagamento']); ?>" required class="form-control">
                             </div>
                             <div class="form-group">
-                                <label for="forma_pagamento">Forma de Pagamento</label>
+                                <label for="forma_pagamento">
+                                    <i class="fas fa-credit-card"></i> Forma de Pagamento
+                                </label>
                                 <select id="forma_pagamento" name="forma_pagamento" required class="form-control">
                                     <option value="">Selecione a forma de pagamento</option>
                                     <option value="CARTÃO DE CRÉDITO" <?php echo isset($servico['forma_pagamento']) && $servico['forma_pagamento'] === 'CARTÃO DE CRÉDITO' ? 'selected' : ''; ?>>Cartão de Crédito</option>
@@ -530,103 +555,122 @@ $total_pendente = $totais['total_pendente'];
                                 </select>
                             </div>
 
-                            <div id="editarServicoForm" class="form-group">
-                                <label for="parcelamento">Quatidade de Parcelas</label>
+                            <div class="form-group">
+                                <label for="parcelamento">
+                                    <i class="fas fa-clock"></i> Quantidade de Parcelas
+                                </label>
                                 <input type="number" id="parcelamento" name="parcelamento" step="0.01" value="<?php echo htmlspecialchars($servico['parcelamento']); ?>" readonly>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="valor_total">Valor Total</label>
+                                <label for="valor_total">
+                                    <i class="fas fa-dollar-sign"></i> Valor Total
+                                </label>
                                 <input type="number" id="valor_total" name="valor_total" step="0.01" value="<?php echo htmlspecialchars($servico['valor_total']); ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label for="valor_entrada">Valor Entrada</label>
-                                <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" 
-                                    value="<?php echo isset($servico['valor_entrada']) && $servico['valor_entrada'] !== '' ? htmlspecialchars($servico['valor_entrada']) : '0'; ?>" class="form-control">
+                                <label for="valor_entrada">
+                                    <i class="fas fa-hand-holding-usd"></i> Valor Entrada
+                                </label>
+                                <input type="number" id="valor_entrada" name="valor_entrada" step="0.01" value="<?php echo isset($servico['valor_entrada']) && $servico['valor_entrada'] !== '' ? htmlspecialchars($servico['valor_entrada']) : '0'; ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label for="valor_pago">Valor Pago</label>
-                                <input type="number" id="valor_pago" name="valor_pago" step="0.01" 
-                                    value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly>
+                                <label for="valor_pago">
+                                    <i class="fas fa-check-circle"></i> Valor Pago
+                                </label>
+                                <input type="number" id="valor_pago" name="valor_pago" step="0.01" value="<?php echo number_format($total_pago, 2, '.', ''); ?>" readonly>
                             </div>
 
                             <div class="form-group">
-                                <label for="valor_pagar">Valor A Ser Pago</label>
-                                <input type="number" id="valor_pagar" name="valor_pagar" step="0.01" 
-                                    value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly>
+                                <label for="valor_pagar">
+                                    <i class="fas fa-hourglass-half"></i> Valor A Ser Pago
+                                </label>
+                                <input type="number" id="valor_pagar" name="valor_pagar" step="0.01" value="<?php echo number_format($total_pendente, 2, '.', ''); ?>" readonly>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h2>Endereço do Serviço</h2>
+                        <h2><i class="fas fa-map-marked-alt"></i> Endereço do Serviço</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cep" class="required">CEP:</label>
-                                <input type="text" id="cep" name="cep" required placeholder="00000-000" 
-                                    value="<?php echo htmlspecialchars($servico['cep']); ?>" class="form-control">
+                                <label for="cep" class="required">
+                                    <i class="fas fa-map-pin"></i> CEP:
+                                </label>
+                                <input type="text" id="cep" name="cep" required placeholder="00000-000" value="<?php echo htmlspecialchars($servico['cep']); ?>" class="form-control">
                                 <small id="cep-feedback" class="form-text"></small>
                             </div>
 
                             <div class="form-group">
-                                <label for="rua">Rua:</label>
-                                <input type="text" id="rua" name="rua" placeholder="Endereço" 
-                                    value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly>
+                                <label for="rua">
+                                    <i class="fas fa-road"></i> Rua:
+                                </label>
+                                <input type="text" id="rua" name="rua" placeholder="Endereço" value="<?php echo htmlspecialchars($servico['rua']); ?>" readonly>
                             </div>
 
                             <div class="form-group">
-                                <label for="numero" class="required">Número:</label>
-                                <input type="text" id="numero" name="numero" required placeholder="Número" 
-                                    value="<?php echo htmlspecialchars($servico['numero']); ?>" class="form-control">
+                                <label for="numero" class="required">
+                                    <i class="fas fa-home"></i> Número:
+                                </label>
+                                <input type="text" id="numero" name="numero" required placeholder="Número" value="<?php echo htmlspecialchars($servico['numero']); ?>" class="form-control">
                             </div>
 
                             <div class="form-group">
-                                <label for="complemento">Complemento:</label>
-                                <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
-                                    value="<?php echo htmlspecialchars($servico['complemento']); ?>" class="form-control">
+                                <label for="complemento">
+                                    <i class="fas fa-building"></i> Complemento:
+                                </label>
+                                <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." value="<?php echo htmlspecialchars($servico['complemento']); ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="bairro">Bairro:</label>
-                                <input type="text" id="bairro" name="bairro" placeholder="Bairro" 
-                                    value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly>
+                                <label for="bairro">
+                                    <i class="fas fa-map-marker-alt"></i> Bairro:
+                                </label>
+                                <input type="text" id="bairro" name="bairro" placeholder="Bairro" value="<?php echo htmlspecialchars($servico['bairro']); ?>" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="cidade">Cidade:</label>
-                                <input type="text" id="cidade" name="cidade" placeholder="Cidade" 
-                                    value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly>
+                                <label for="cidade">
+                                    <i class="fas fa-city"></i> Cidade:
+                                </label>
+                                <input type="text" id="cidade" name="cidade" placeholder="Cidade" value="<?php echo htmlspecialchars($servico['cidade']); ?>" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="estado">Estado:</label>
-                                <input type="text" id="estado" name="estado" placeholder="Estado" 
-                                    value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly>
+                                <label for="estado">
+                                    <i class="fas fa-map-marker-alt"></i> Estado:
+                                </label>
+                                <input type="text" id="estado" name="estado" placeholder="Estado" value="<?php echo htmlspecialchars($servico['estado']); ?>" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="coordenada">Coordenada:</label>
+                                <label for="coordenada">
+                                    <i class="fas fa-map-marker-alt"></i> Coordenada:
+                                </label>
                                 <div class="input-with-feedback">
-                                    <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
-                                        value="<?php echo htmlspecialchars($servico['coordenada']); ?>" class="form-control">
+                                    <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" value="<?php echo htmlspecialchars($servico['coordenada']); ?>" class="form-control">
                                     <small id="coordenadas-feedback" class="form-text"></small>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="responsavel_execucao">Responsável pelo Serviço</label>
+                                <label for="responsavel_execucao">
+                                    <i class="fas fa-user-tie"></i> Responsável pelo Serviço
+                                </label>
                                 <input type="text" id="responsavel_execucao" name="responsavel_execucao" value="<?php echo htmlspecialchars($servico['responsavel_execucao']); ?>" class="form-control">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Nova Seção: Mapa -->
+                    <!-- Seção: Mapa -->
                     <div class="form-section">
-                        <h2>Localização no Mapa</h2>
+                        <h2><i class="fas fa-map"></i> Localização no Mapa</h2>
                         <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 15px;"></div>
-                        <small class="form-text text-muted">Clique no mapa para atualizar as coordenadas ou arraste o marcador</small>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> Clique no mapa para atualizar as coordenadas ou arraste o marcador
+                        </small>
                     </div>
 
                     <div class="form-actions">

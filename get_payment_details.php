@@ -10,7 +10,7 @@ if (!isset($_GET['numero_proposta'])) {
 
 $numero_proposta = $_GET['numero_proposta'];
 
-$sql = "SELECT parcela_num, valor_parcela, dia_pagamento, status_pagamento 
+$sql = "SELECT parcela_num, valor_parcela, data_pagamento, status_pagamento 
         FROM pagamentos 
         WHERE numero_proposta = ?
         ORDER BY parcela_num";
@@ -25,7 +25,7 @@ while ($row = $result->fetch_assoc()) {
     $parcelas[] = [
         'parcela_num' => $row['parcela_num'],
         'valor_parcela' => number_format($row['valor_parcela'], 2, ',', '.'),
-        'dia_pagamento' => date('d/m/Y', strtotime($row['dia_pagamento'])),
+        'dia_pagamento' => date('d/m/Y', strtotime($row['data_pagamento'])),
         'status_pagamento' => $row['status_pagamento']
     ];
 }

@@ -186,6 +186,11 @@ $cnae_data = getCNAE();
             border-bottom: 2px solid #eef2f7;
         }
 
+        .form-section h2 i {
+            margin-right: 10px;
+            color: #007bff;
+        }
+
         .form-row {
             display: flex;
             flex-wrap: wrap;
@@ -207,6 +212,12 @@ $cnae_data = getCNAE();
             color: #2c3e50;
             font-weight: 500;
             font-size: 0.95rem;
+        }
+
+        .form-group label i {
+            margin-right: 5px;
+            color: #666;
+            width: 16px;
         }
 
         .form-group input,
@@ -271,6 +282,11 @@ $cnae_data = getCNAE();
             color: #7f8c8d;
             font-size: 0.85rem;
             margin-top: 0.3rem;
+        }
+
+        .form-text i {
+            margin-right: 5px;
+            color: #666;
         }
 
         /* Responsividade */
@@ -339,6 +355,16 @@ $cnae_data = getCNAE();
         .leaflet-control-zoom a:hover {
             background-color: #f8f9fa !important;
         }
+
+        /* Cores específicas para diferentes tipos de informação */
+        .fa-user-circle, .fa-user { color: #007bff; }
+        .fa-building, .fa-industry { color: #28a745; }
+        .fa-envelope { color: #dc3545; }
+        .fa-mobile-alt { color: #17a2b8; }
+        .fa-map-marked-alt, .fa-map-marker-alt { color: #fd7e14; }
+        .fa-city { color: #20c997; }
+        .fa-id-card, .fa-briefcase { color: #6610f2; }
+        .fa-info-circle { color: #6c757d; }
     </style>
 </head>
 <body>
@@ -355,18 +381,22 @@ $cnae_data = getCNAE();
 
                 <!-- Seção: Informações do Cliente -->
                 <div class="form-section">
-                    <h2>Informações do Cliente</h2>
+                    <h2><i class="fas fa-user-circle"></i> Informações do Cliente</h2>
                     
                     <div id="pessoaJuridica" class="hidden">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="razaoSocial" class="required">Razão Social:</label>
+                                <label for="razaoSocial" class="required">
+                                    <i class="fas fa-building"></i> Razão Social:
+                                </label>
                                 <input type="text" name="razao_social" id="razaoSocial" placeholder="Digite a razão social" 
                                        value="<?php echo htmlspecialchars($cliente['razao_social']); ?>">
                             </div>
                             
                             <div class="form-group">
-                                <label for="cnpj" class="required">CNPJ:</label>
+                                <label for="cnpj" class="required">
+                                    <i class="fas fa-briefcase"></i> CNPJ:
+                                </label>
                                 <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" 
                                        value="<?php echo htmlspecialchars($cliente['cnpj']); ?>">
                             </div>
@@ -374,7 +404,9 @@ $cnae_data = getCNAE();
 
                         <div class="form-row">
                             <div class="form-group full-width">
-                                <label for="atividade_principal" class="required">Atividade Principal (CNAE)</label>
+                                <label for="atividade_principal" class="required">
+                                    <i class="fas fa-industry"></i> Atividade Principal (CNAE)
+                                </label>
                                 <select name="atividade_principal" id="atividade_principal">
                                     <option value="">Selecione uma atividade</option>
                                     <?php
@@ -395,13 +427,17 @@ $cnae_data = getCNAE();
                     <div id="pessoaFisica" class="hidden">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nomeCliente" class="required">Nome do Cliente:</label>
+                                <label for="nomeCliente" class="required">
+                                    <i class="fas fa-user"></i> Nome do Cliente:
+                                </label>
                                 <input type="text" id="nomeCliente" name="nomeCliente" placeholder="Digite o nome completo" 
                                        value="<?php echo htmlspecialchars($cliente['nome']); ?>">
                             </div>
 
                             <div class="form-group">
-                                <label for="cpf" class="required">CPF:</label>
+                                <label for="cpf" class="required">
+                                    <i class="fas fa-id-card"></i> CPF:
+                                </label>
                                 <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" 
                                        value="<?php echo htmlspecialchars($cliente['cpf']); ?>">
                             </div>
@@ -411,10 +447,12 @@ $cnae_data = getCNAE();
 
                 <!-- Seção: Endereço -->
                 <div class="form-section">
-                    <h2>Endereço</h2>
+                    <h2><i class="fas fa-map-marked-alt"></i> Endereço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cep" class="required">CEP:</label>
+                            <label for="cep" class="required">
+                                <i class="fas fa-map-pin"></i> CEP:
+                            </label>
                             <div class="input-with-feedback">
                                 <input type="text" id="cep" name="cep" required placeholder="00000-000" 
                                        value="<?php echo htmlspecialchars($cliente['cep']); ?>">
@@ -423,19 +461,25 @@ $cnae_data = getCNAE();
                         </div>
 
                         <div class="form-group">
-                            <label for="rua">Rua:</label>
+                            <label for="rua">
+                                <i class="fas fa-road"></i> Rua:
+                            </label>
                             <input type="text" id="rua" name="rua" readonly placeholder="Endereço" 
                                    value="<?php echo htmlspecialchars($cliente['rua']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="numero" class="required">Número:</label>
+                            <label for="numero" class="required">
+                                <i class="fas fa-home"></i> Número:
+                            </label>
                             <input type="text" id="numero" name="numero" required placeholder="Número" 
                                    value="<?php echo htmlspecialchars($cliente['numero']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="complemento">Complemento:</label>
+                            <label for="complemento">
+                                <i class="fas fa-info-circle"></i> Complemento:
+                            </label>
                             <input type="text" id="complemento" name="complemento" placeholder="Apartamento, sala, etc." 
                                    value="<?php echo htmlspecialchars($cliente['complemento']); ?>">
                         </div>
@@ -443,25 +487,33 @@ $cnae_data = getCNAE();
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="bairro">Bairro:</label>
+                            <label for="bairro">
+                                <i class="fas fa-map"></i> Bairro:
+                            </label>
                             <input type="text" id="bairro" name="bairro" readonly placeholder="Bairro" 
                                    value="<?php echo htmlspecialchars($cliente['bairro']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="cidade">Cidade:</label>
+                            <label for="cidade">
+                                <i class="fas fa-city"></i> Cidade:
+                            </label>
                             <input type="text" id="cidade" name="cidade" readonly placeholder="Cidade" 
                                    value="<?php echo htmlspecialchars($cliente['cidade']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="estado">Estado:</label>
+                            <label for="estado">
+                                <i class="fas fa-map-marker-alt"></i> Estado:
+                            </label>
                             <input type="text" id="estado" name="estado" readonly placeholder="Estado" 
                                    value="<?php echo htmlspecialchars($cliente['estado']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="coordenada">Coordenada:</label>
+                            <label for="coordenada">
+                                <i class="fas fa-location-arrow"></i> Coordenada:
+                            </label>
                             <div class="input-with-feedback">
                                 <input type="text" id="coordenada" name="coordenada" placeholder="Latitude, Longitude" 
                                        value="<?php echo htmlspecialchars($cliente['coordenada']); ?>">
@@ -471,29 +523,35 @@ $cnae_data = getCNAE();
                     </div>
                 </div>
 
-                                <!-- Seção: Contato -->
-                                <div class="form-section">
-                    <h2>Contato</h2>
+                <!-- Seção: Contato -->
+                <div class="form-section">
+                    <h2><i class="fas fa-address-book"></i> Contato</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="email" class="required">E-mail:</label>
+                            <label for="email" class="required">
+                                <i class="fas fa-envelope"></i> E-mail:
+                            </label>
                             <input type="email" id="email" name="email" required placeholder="seu@email.com" 
                                    value="<?php echo htmlspecialchars($cliente['email']); ?>">
                         </div>
 
                         <div class="form-group">
-                            <label for="celular" class="required">Celular:</label>
+                            <label for="celular" class="required">
+                                <i class="fas fa-mobile-alt"></i> Celular:
+                            </label>
                             <input type="text" id="celular" name="celular" required placeholder="(00) 00000-0000" 
                                    value="<?php echo htmlspecialchars($cliente['celular']); ?>">
                         </div>
                     </div>
                 </div>
 
-                <!-- Nova Seção: Mapa -->
+                <!-- Seção: Mapa -->
                 <div class="form-section">
-                    <h2>Localização no Mapa</h2>
+                    <h2><i class="fas fa-map-marked"></i> Localização no Mapa</h2>
                     <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 15px;"></div>
-                    <small class="form-text text-muted">Clique no mapa para atualizar as coordenadas ou arraste o marcador</small>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Clique no mapa para atualizar as coordenadas ou arraste o marcador
+                    </small>
                 </div>
 
                 <div class="form-actions">

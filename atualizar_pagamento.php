@@ -31,31 +31,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $total_pago = $result_totais['total_pago'];
         $total_pendente = $result_totais['total_pendente'];
 
-        // Obtenha a última parcela paga
-        $sql_ultima_parcela = "SELECT dia_pagamento FROM pagamentos 
-                                WHERE numero_proposta = ? AND status_pagamento = 'Pago' 
-                                ORDER BY dia_pagamento DESC LIMIT 1";
-        $stmt_ultima_parcela = $conn->prepare($sql_ultima_parcela);
-        $stmt_ultima_parcela->bind_param("i", $numero_proposta);
-        $stmt_ultima_parcela->execute();
-        $result_ultima_parcela = $stmt_ultima_parcela->get_result();
-        $ultima_parcela = $result_ultima_parcela->fetch_assoc();
+        // Busca o próximo pagamento (primeira parcela em aberto)
+        $sql_proximo = "SELECT data_pagamento 
+                        FROM pagamentos 
+                        WHERE numero_proposta = ? 
+                        AND status_pagamento = 'Aberto'
+                        ORDER BY parcela_num ASC
+                        LIMIT 1";
+        
+        $stmt_proximo = $conn->prepare($sql_proximo);
+        $stmt_proximo->bind_param("i", $numero_proposta);
+        $stmt_proximo->execute();
+        $result_proximo = $stmt_proximo->get_result();
+        $proximo = $result_proximo->fetch_assoc();
 
-        if ($ultima_parcela) {
-            // Se houver uma última parcela paga, calcule a próxima data
-            $data_ultima_parcela = $ultima_parcela['dia_pagamento'];
-            $nova_data_pagamento = date('d/m/Y', strtotime("+1 month", strtotime($data_ultima_parcela))); // Adiciona 1 mês
-        } else {
-            // Se não houver parcelas pagas, defina uma data padrão ou lógica alternativa
-            $nova_data_pagamento = date('d/m/Y'); // Ou outra lógica
+        // Tratamento da data do próximo pagamento
+        $proximo_pagamento = null;
+        if ($proximo && isset($proximo['data_pagamento'])) {
+            $data = DateTime::createFromFormat('Y-m-d', $proximo['data_pagamento']);
+            if ($data !== false) {
+                $proximo_pagamento = $data->format('d/m/Y');
+            }
+        }
+
+        // Se ainda houver valor pendente mas não tiver próximo pagamento, 
+        // significa que precisamos verificar se há parcelas em aberto
+        if ($total_pendente > 0 && $proximo_pagamento === null) {
+            $sql_check_parcelas = "SELECT COUNT(*) as total_parcelas_abertas 
+                                  FROM pagamentos 
+                                  WHERE numero_proposta = ? 
+                                  AND status_pagamento = 'Aberto'";
+            $stmt_check = $conn->prepare($sql_check_parcelas);
+            $stmt_check->bind_param("i", $numero_proposta);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result()->fetch_assoc();
+            
+            if ($result_check['total_parcelas_abertas'] > 0) {
+                // Se houver parcelas em aberto, mas não temos uma data válida,
+                // vamos usar a data atual + 1 mês como próximo pagamento
+                $proximo_pagamento = date('d/m/Y', strtotime('+1 month'));
+            }
         }
 
         $response = [
             'success' => true,
             'total_pago' => $total_pago,
             'total_pendente' => $total_pendente,
-            'proximo_pagamento' => $nova_data_pagamento
+            'proximo_pagamento' => $proximo_pagamento
         ];
+        
         echo json_encode($response);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

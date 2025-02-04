@@ -26,7 +26,7 @@ $sql = "SELECT
             FROM pagamentos 
             WHERE numero_proposta = servicos.numero_proposta 
             AND status_pagamento = 'Aberto'
-        ) THEN 'EM ABERTO'
+        ) THEN 'ABERTO'
         ELSE 'FINALIZADO'
     END AS status_pagamento,
     (SELECT COALESCE(SUM(valor_parcela), 0) 
@@ -41,16 +41,10 @@ $sql = "SELECT
      FROM pagamentos 
      WHERE numero_proposta = servicos.numero_proposta 
        AND status_pagamento = 'Pago')) AS total_pendente,
-    (SELECT MIN(p.dia_pagamento)
+    (SELECT MIN(p.data_pagamento)
      FROM pagamentos p
      WHERE p.numero_proposta = servicos.numero_proposta
      AND p.status_pagamento = 'Aberto'
-     AND p.dia_pagamento > (
-         SELECT COALESCE(MAX(dia_pagamento), '1900-01-01')
-         FROM pagamentos
-         WHERE numero_proposta = servicos.numero_proposta
-         AND status_pagamento = 'Pago'
-     )
     ) AS proximo_pagamento
 FROM servicos
 INNER JOIN cliente ON servicos.cliente_id = cliente.id
@@ -70,7 +64,7 @@ foreach ($servicos as $servico) {
     $valor_total = isset($servico['valor_total']) ? (float) $servico['valor_total'] : 0;
     $valor_entrada = isset($servico['valor_entrada']) ? (float) $servico['valor_entrada'] : 0;
     $parcelamento = isset($servico['parcelamento']) ? (int) $servico['parcelamento'] : 1;
-    $data_pagamento_inicial = isset($servico['dia_pagamento']) ? $servico['dia_pagamento'] : date('Y-m-d');
+    $data_pagamento_inicial = isset($servico['data_pagamento']) ? $servico['data_pagamento'] : date('Y-m-d');
 
     // Busca todos os pagamentos já realizados para esta proposta
     $sql_pagamentos = "SELECT SUM(valor_parcela) as total_pago 
@@ -90,7 +84,7 @@ foreach ($servicos as $servico) {
     $parcelas = [];
 
     // Consulta para buscar todas as parcelas relacionadas ao número da proposta
-    $sql_parcelas = "SELECT parcela_num, status_pagamento, valor_parcela, dia_pagamento 
+    $sql_parcelas = "SELECT parcela_num, status_pagamento, valor_parcela, data_pagamento 
                      FROM pagamentos 
                      WHERE numero_proposta = ? 
                      ORDER BY parcela_num ASC";
@@ -106,7 +100,7 @@ foreach ($servicos as $servico) {
                 'id' => $parcela['parcela_num'],
                 'status_pagamento' => $parcela['status_pagamento'],
                 'valor_parcela' => number_format($parcela['valor_parcela'], 2, '.', ''),
-                'dia_pagamento' => date('Y-m-d', strtotime($parcela['dia_pagamento']))
+                'dia_pagamento' => date('Y-m-d', strtotime($parcela['data_pagamento']))
             ];
         }
     } else {
@@ -125,7 +119,7 @@ foreach ($servicos as $servico) {
             ];
 
             // Insere a parcela no banco de dados se ainda não existir
-            $sql_inserir_parcela = "INSERT IGNORE INTO pagamentos (numero_proposta, parcela_num, valor_parcela, dia_pagamento, status_pagamento) 
+            $sql_inserir_parcela = "INSERT IGNORE INTO pagamentos (numero_proposta, parcela_num, valor_parcela, data_pagamento, status_pagamento) 
                                     VALUES (?, ?, ?, ?, 'Aberto')";
             $stmt_inserir = $conn->prepare($sql_inserir_parcela);
             $stmt_inserir->bind_param(
@@ -173,6 +167,8 @@ foreach ($servicos as $servico) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Estilos Gerais */
         :root {
@@ -469,6 +465,38 @@ foreach ($servicos as $servico) {
             cursor: not-allowed; /* Cursor de não permitido */
             pointer-events: none; /* Desabilita eventos de clique */
         }
+
+        thead th i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        #tabelaClientes th i {
+            margin-right: 8px;
+            color: #666;
+        }
+        
+        #tabelaClientes th {
+            white-space: nowrap;
+            padding: 12px 15px;
+        }
+        
+        #tabelaClientes th:hover i {
+            color: #007bff;
+        }
+
+        /* Efeito hover */
+        thead th:hover i {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+
+        /* Alinhamento e espaçamento */
+        thead th {
+            white-space: nowrap;
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -488,25 +516,25 @@ foreach ($servicos as $servico) {
                     <table id="tabelaServicos" class="table">
                         <thead>
                             <tr>
-                                <th>Nº Proposta</th>
-                                <th>Cliente</th>
-                                <th>CNPJ/CPF</th>
-                                <th>Serviços</th>
-                                <th>Data Início</th>
-                                <th>Data Término</th>
-                                <th>Status Serviço</th>
-                                <th>Orçamento</th>
-                                <th>Entrada</th>
-                                <th>Valor Líquido</th>
-                                <th>Total Despesas</th>
-                                <th>Pagamento</th>
-                                <th>Parcelamento</th>
-                                <th>Status Pagamento</th>
-                                <th>Valor Pago</th>
-                                <th>Valor A Ser Pago</th>
-                                <th>Próximo Pagamento</th>
-                                <th>Detalhes</th>
-                                <th>Ações</th>
+                                <th><i class="fas fa-hashtag"></i> Nº Proposta</th>
+                                <th><i class="fas fa-user"></i> Cliente</th>
+                                <th><i class="fas fa-id-card"></i> CNPJ/CPF</th>
+                                <th><i class="fas fa-tools"></i> Serviços</th>
+                                <th><i class="fas fa-calendar-plus"></i> Data Início</th>
+                                <th><i class="fas fa-calendar-check"></i> Data Término</th>
+                                <th><i class="fas fa-tasks"></i> Status Serviço</th>
+                                <th><i class="fas fa-file-invoice-dollar"></i> Orçamento</th>
+                                <th><i class="fas fa-money-bill-wave"></i> Entrada</th>
+                                <th><i class="fas fa-dollar-sign"></i> Valor Líquido</th>
+                                <th><i class="fas fa-receipt"></i> Total Despesas</th>
+                                <th><i class="fas fa-hand-holding-usd"></i> Pagamento</th>
+                                <th><i class="fas fa-clock"></i> Parcelamento</th>
+                                <th><i class="fas fa-chart-pie"></i> Status Pagamento</th>
+                                <th><i class="fas fa-check-circle"></i> Valor Pago</th>
+                                <th><i class="fas fa-hourglass-half"></i> Valor A Ser Pago</th>
+                                <th><i class="fas fa-calendar-day"></i> Próximo Pagamento</th>
+                                <th><i class="fas fa-info-circle"></i> Detalhes</th>
+                                <th><i class="fas fa-cogs"></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -528,31 +556,49 @@ foreach ($servicos as $servico) {
                                         <td class="valor">R$ <?php echo number_format($servico['total_despesas'], 2, ',', '.'); ?></td>
                                         <td><?php echo htmlspecialchars($servico['forma_pagamento']); ?></td>
                                         <td><?php echo htmlspecialchars($servico['parcelamento']); ?></td>
-                                        <td class="status-cell status-<?php echo strtolower(str_replace(' ', '-', $servico['status_pagamento'])); ?>">
-                                            <?php echo htmlspecialchars($servico['status_pagamento']); ?>
+                                        <td class="status-pagamento status-<?php echo strtolower($servico['status_pagamento']); ?>" 
+                                            data-proposta="<?php echo $servico['numero_proposta']; ?>">
+                                            <?php echo $servico['status_pagamento']; ?>
                                         </td>
                                         <td class="valor valor-pago">R$ <?php echo number_format($servico['total_pago'], 2, ',', '.'); ?></td>
                                         <td class="valor valor-pendente">R$ <?php echo number_format($servico['total_pendente'], 2, ',', '.'); ?></td>
-                                        <td class="proximo-pagamento">
+                                        <td class="proximo-pagamento" data-proposta="<?php echo $servico['numero_proposta']; ?>">
                                             <?php 
                                             if ($servico['status_pagamento'] == 'FINALIZADO') {
                                                 echo '-';
                                             } else {
-                                                echo $servico['proximo_pagamento'] ? date('d/m/Y', strtotime($servico['proximo_pagamento'])) : '-';
+                                                // Busca a próxima data de pagamento em aberto
+                                                $sql_proximo = "SELECT MIN(data_pagamento) as proxima_data 
+                                                                FROM pagamentos 
+                                                                WHERE numero_proposta = ? 
+                                                                AND status_pagamento = 'Aberto'
+                                                                ORDER BY parcela_num ASC";
+                                                
+                                                $stmt_proximo = $conn->prepare($sql_proximo);
+                                                $stmt_proximo->bind_param("i", $servico['numero_proposta']);
+                                                $stmt_proximo->execute();
+                                                $result_proximo = $stmt_proximo->get_result();
+                                                $proximo = $result_proximo->fetch_assoc();
+
+                                                if ($proximo && !empty($proximo['proxima_data']) && $proximo['proxima_data'] != '0000-00-00') {
+                                                    echo date('d/m/Y', strtotime($proximo['proxima_data']));
+                                                } else {
+                                                    echo '-';
+                                                }
                                             }
                                             ?>
                                         </td>
                                         <td>
                                             <button type="button" class="btn-detalhes" onclick="verDetalhes(<?php echo $servico['numero_proposta']; ?>)">
-                                                <i class="fas fa-eye"></i> Ver
+                                                <i class="fas fa-eye"></i> 
                                             </button>
                                         </td>
                                         <td class="actions">
                                             <button type="button" class="btn-editar" onclick="window.location.href='editar_servico.php?id=<?php echo $servico['numero_proposta']; ?>'">
-                                                <i class="fas fa-edit"></i> Editar
+                                                <i class="fas fa-edit"></i> 
                                             </button>
                                             <button type="button" class="btn-excluir" onclick="confirmarExclusao(<?php echo $servico['numero_proposta']; ?>)">
-                                                <i class="fas fa-trash"></i> Excluir
+                                                <i class="fas fa-trash"></i> 
                                             </button>
                                         </td>
                                     </tr>
@@ -584,21 +630,44 @@ foreach ($servicos as $servico) {
 
     <script>
     function confirmarExclusao(numeroProposta) {
-        if (confirm('Tem certeza que deseja excluir este serviço?')) {
-            // Criar um formulário dinâmico para enviar via POST
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'excluir_servico.php';
+        Swal.fire({
+            title: 'Confirmar exclusão',
+            text: 'Tem certeza que deseja excluir este serviço?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading enquanto processa
+                Swal.fire({
+                    title: 'Excluindo...',
+                    text: 'Aguarde enquanto o serviço é excluído',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        
+                        // Criar e enviar formulário
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = 'excluir_servico.php';
 
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'numero_proposta';
-            input.value = numeroProposta;
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'numero_proposta';
+                        input.value = numeroProposta;
 
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-        }
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            }
+        });
     }
 
     function verDetalhes(numeroProposta) {
@@ -638,7 +707,7 @@ foreach ($servicos as $servico) {
                                     <td class="valor">R$ ${parcela.valor_parcela}</td>
                                     <td>
                                         <button class="btn btn-primary ${parcela.status_pagamento.toLowerCase() === 'pago' ? 'btn-disabled' : ''}" 
-                                                onclick="confirmarPagamento(${numeroProposta}, ${parcela.parcela_num}, '${parcela.valor_parcela}', '${parcela.dia_pagamento}')" 
+                                                onclick="confirmarPagamento(${numeroProposta}, ${parcela.parcela_num}, '${parcela.valor_parcela}', '${parcela.data_pagamento}')" 
                                                 ${parcela.status_pagamento.toLowerCase() === 'pago' ? 'disabled' : ''}>
                                             ${parcela.status_pagamento.toLowerCase() === 'pago' ? 'Pago' : 'Pagar'}
                                         </button>
@@ -679,62 +748,133 @@ foreach ($servicos as $servico) {
         }
     }
 
-    function confirmarPagamento(numeroProposta, parcela, valor, data) {
-        if (confirm('Confirmar o pagamento desta parcela?')) {
-            $.ajax({
-                url: 'atualizar_pagamento.php',
-                method: 'POST',
-                data: {
-                    numero_proposta: numeroProposta,
-                    parcela_num: parcela,
-                    valor_parcela: valor,
-                    data_pagamento: data
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Atualiza o status e o botão da parcela
-                        const linha = $(`button[onclick*="confirmarPagamento(${numeroProposta}, ${parcela})"]`).closest('tr');
-                        linha.find('.status-cell').removeClass('status-aberto').addClass('status-pago').text('Pago');
-                        linha.find('button').prop('disabled', true).text('Pago');
-
-                        // Atualiza os valores na tabela principal
-                        const linhaServico = $(`tr[data-proposta="${numeroProposta}"]`);
-                        linhaServico.find('.valor-pago').text(`R$ ${formatarMoeda(response.total_pago)}`);
-                        linhaServico.find('.valor-pendente').text(`R$ ${formatarMoeda(response.total_pendente)}`);
-                        
-                        // Atualiza o próximo pagamento
-                        if (response.proximo_pagamento) {
-                            linhaServico.find('.proximo-pagamento').text(response.proximo_pagamento);
-                        } else {
-                            linhaServico.find('.proximo-pagamento').text('-');
-                        }
-
-                        // Verifica se todas as parcelas foram pagas
-                        if (parseFloat(response.total_pendente) <= 0) {
-                            // Atualiza o status de pagamento para FINALIZADO
-                            const statusCell = linhaServico.find('.status-pagamento');
-                            statusCell
-                                .removeClass('status-pendente status-aberto')
-                                .addClass('status-finalizado')
-                                .text('FINALIZADO');
-
-                            // Atualiza a célula de próximo pagamento
-                            linhaServico.find('.proximo-pagamento').text('-');
-                        }
-
-                        // Recarrega os detalhes do pagamento
-                        verDetalhes(numeroProposta);
-                    } else {
-                        alert('Erro ao confirmar pagamento: ' + response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro ao processar pagamento');
+    function atualizarProximoPagamento(numeroProposta) {
+        $.ajax({
+            url: 'get_proximo_pagamento.php',
+            method: 'GET',
+            data: { numero_proposta: numeroProposta },
+            dataType: 'json',
+            success: function(response) {
+                const celula = $(`.proximo-pagamento[data-proposta="${numeroProposta}"]`);
+                if (response.success && response.proximo_pagamento) {
+                    celula.text(response.proximo_pagamento);
+                } else {
+                    celula.text('-');
                 }
-            });
-        }
+            },
+            error: function() {
+                console.error('Erro ao buscar próximo pagamento');
+            }
+        });
+    }
+
+    function atualizarStatusPagamento(numeroProposta) {
+        $.ajax({
+            url: 'get_status_pagamento.php',
+            method: 'GET',
+            data: { numero_proposta: numeroProposta },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const statusCell = $(`.status-pagamento[data-proposta="${numeroProposta}"]`);
+                    
+                    // Remove todas as classes de status existentes
+                    statusCell.removeClass('status-pendente status-aberto status-finalizado');
+                    
+                    // Adiciona a nova classe e texto
+                    if (response.status === 'FINALIZADO') {
+                        statusCell.addClass('status-finalizado').text('FINALIZADO');
+                    } else {
+                        statusCell.addClass('status-aberto').text('ABERTO');
+                    }
+                }
+            },
+            error: function() {
+                console.error('Erro ao atualizar status de pagamento');
+            }
+        });
+    }
+
+    function confirmarPagamento(numeroProposta, parcela, valor, data) {
+        Swal.fire({
+            title: 'Confirmar Pagamento',
+            text: `Deseja confirmar o pagamento da parcela ${parcela} no valor de R$ ${valor}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Sim, confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processando...',
+                    text: 'Aguarde enquanto confirmamos o pagamento',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        
+                        $.ajax({
+                            url: 'atualizar_pagamento.php',
+                            method: 'POST',
+                            data: {
+                                numero_proposta: numeroProposta,
+                                parcela_num: parcela,
+                                valor_parcela: valor,
+                                data_pagamento: data
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    // Atualiza o status e o botão da parcela
+                                    const linha = $(`button[onclick*="confirmarPagamento(${numeroProposta}, ${parcela})"]`).closest('tr');
+                                    linha.find('.status-cell').removeClass('status-aberto').addClass('status-pago').text('Pago');
+                                    linha.find('button').prop('disabled', true).text('Pago');
+
+                                    // Atualiza os valores na tabela principal
+                                    const linhaServico = $(`tr[data-proposta="${numeroProposta}"]`);
+                                    linhaServico.find('.valor-pago').text(`R$ ${formatarMoeda(response.total_pago)}`);
+                                    linhaServico.find('.valor-pendente').text(`R$ ${formatarMoeda(response.total_pendente)}`);
+                                    
+                                    // Atualiza o próximo pagamento
+                                    atualizarProximoPagamento(numeroProposta);
+                                    
+                                    // Atualiza o status de pagamento
+                                    atualizarStatusPagamento(numeroProposta);
+
+                                    // Recarrega os detalhes do pagamento
+                                    verDetalhes(numeroProposta);
+
+                                    Swal.fire({
+                                        title: 'Sucesso!',
+                                        text: 'Pagamento confirmado com sucesso',
+                                        icon: 'success',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Erro!',
+                                        text: 'Erro ao confirmar pagamento: ' + response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro na requisição:', error);
+                                Swal.fire({
+                                    title: 'Erro!',
+                                    text: 'Erro ao processar pagamento. Tente novamente.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     // Função auxiliar para formatar valores monetários

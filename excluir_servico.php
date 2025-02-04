@@ -39,7 +39,6 @@ if (isset($_POST['numero_proposta'])) {
         $conn->commit();
 
         echo "<script>
-                alert('Registro excluído com sucesso!');
                 window.location.href = 'gerenciar_relatorio.php';
               </script>";
     } catch (Exception $e) {
