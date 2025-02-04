@@ -145,86 +145,137 @@ function renderCard($card, $isFavorito) {
         }
 
         .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
             padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .cards-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 cards por linha */
+            gap: 30px;
+            padding: 20px 0;
+            overflow-x: hidden;
+        }
+
+        .cards-section::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .cards-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .cards-section::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .cards-section::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .card {
+            width: 100%;
+            max-width: none;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            position: relative;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card-link {
             display: block;
-            padding: 20px;
+            padding: 30px;
             text-decoration: none;
             color: inherit;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
         }
 
         .card-header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .card-icon {
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             background: #f8f9fa;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 20px;
         }
 
         .card-icon i {
-            font-size: 20px;
+            font-size: 28px;
             color: #007bff;
         }
 
         .card-title {
-            margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            font-weight: 600;
             color: #2c3e50;
+            margin: 0;
         }
 
         .card-content p {
-            margin: 0;
+            font-size: 1.1rem;
             color: #6c757d;
+            line-height: 1.6;
         }
 
         .card-star {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.2rem;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
             color: #ddd;
             cursor: pointer;
-            z-index: 2;
+            transition: color 0.3s ease;
         }
 
         .card-star.favorito {
             color: #ffd700;
         }
 
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin: 40px 0 20px;
+            padding-left: 20px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        #favoritos-section:empty {
+            display: none;
+        }
+
+        #favoritos-section:empty + .section-title {
+            display: none;
+        }
+
         /* Responsividade */
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
+        @media (max-width: 1200px) {
+            .cards-section {
+                grid-template-columns: repeat(2, 1fr); /* 2 cards por linha */
             }
-            .cards-container {
-                grid-template-columns: 1fr;
+        }
+
+        @media (max-width: 768px) {
+            .cards-section {
+                grid-template-columns: 1fr; /* 1 card por linha */
+            }
+            
+            .card-link {
+                padding: 20px;
             }
         }
     </style>
@@ -238,24 +289,81 @@ function renderCard($card, $isFavorito) {
         </div>
         
         <div class="cards-container">
-            <?php
-            // Renderiza cards favoritos
-            foreach ($favoritos as $card_id) {
-                if (isset($cards[$card_id])) {
-                    renderCard($cards[$card_id], true);
-                    unset($cards[$card_id]);
+            <h2 class="section-title">Favoritos</h2>
+            <div id="favoritos-section" class="cards-section">
+                <?php
+                // Renderiza cards favoritos
+                foreach ($favoritos as $card_id) {
+                    if (isset($cards[$card_id])) {
+                        renderCard($cards[$card_id], true);
+                        unset($cards[$card_id]);
+                    }
                 }
-            }
+                ?>
+            </div>
 
-            // Renderiza cards restantes
-            foreach ($cards as $card) {
-                renderCard($card, false);
-            }
-            ?>
+            <h2 class="section-title">Todos os Cards</h2>
+            <div id="todos-cards-section" class="cards-section">
+                <?php
+                // Renderiza cards restantes
+                foreach ($cards as $card) {
+                    renderCard($card, false);
+                }
+                ?>
+            </div>
         </div>
     </main>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/favoritos.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Função para atualizar favorito no banco de dados
+            function atualizarFavorito(cardId, isFavorito) {
+                return $.ajax({
+                    url: 'atualizar_favorito.php',
+                    method: 'POST',
+                    data: {
+                        card_id: cardId,
+                        is_favorito: isFavorito
+                    }
+                });
+            }
+
+            // Função para mover card entre seções
+            function moverCard(card, destino) {
+                const clone = card.clone(true);  // Clone com eventos
+                card.remove();
+                destino.prepend(clone);
+                clone.hide().fadeIn();
+            }
+
+            // Handler para clique na estrela
+            $(document).on('click', '.card-star', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const $star = $(this);
+                const $card = $star.closest('.card');
+                const cardId = $star.data('card');
+                const isFavorito = !$star.hasClass('favorito');
+                
+                atualizarFavorito(cardId, isFavorito)
+                    .done(function() {
+                        $star.toggleClass('favorito');
+                        
+                        if (isFavorito) {
+                            // Mover para seção de favoritos
+                            moverCard($card, $('#favoritos-section'));
+                        } else {
+                            // Mover para seção de todos os cards
+                            moverCard($card, $('#todos-cards-section'));
+                        }
+                    })
+                    .fail(function() {
+                        alert('Erro ao atualizar favorito. Tente novamente.');
+                    });
+            });
+        });
+    </script>
 </body>
 </html>

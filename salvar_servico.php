@@ -103,28 +103,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         for ($i = 0; $i < $parcelamento; $i++) {
             $novo_id = $i + 1;
             $data_pagamento_parcela = date('Y-m-d', strtotime("+$i month", strtotime($data_pagamento_inicial)));
+            $dia_pagamento = date('d', strtotime($data_pagamento_parcela));
             
             // Define o status do pagamento
             $status_pagamento = ($valor_total == $valor_entrada) ? 'Pago' : 'Aberto';
             
             $sql_parcela = "INSERT INTO pagamentos 
                             (numero_proposta, parcela_num, status_pagamento, valor_parcela, data_pagamento, dia_pagamento) 
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            ON DUPLICATE KEY UPDATE 
-                            status_pagamento = ?, valor_parcela = ?, data_pagamento = ?, dia_pagamento = ?";
+                            VALUES (?, ?, ?, ?, ?, ?)";
             $stmt_parcela = $conn->prepare($sql_parcela);
             $stmt_parcela->bind_param(
-                "iisdsssds", 
+                "iisdss", 
                 $numero_proposta, 
                 $novo_id, 
                 $status_pagamento,
                 $valor_parcela, 
-                $data_pagamento_parcela, 
                 $data_pagamento_parcela,
-                $status_pagamento, 
-                $valor_parcela, 
-                $data_pagamento_parcela, 
-                $data_pagamento_parcela
+                $dia_pagamento
             );
             $stmt_parcela->execute();
         }

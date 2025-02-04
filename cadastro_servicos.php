@@ -781,8 +781,8 @@ try {
 
                     const acoesTd = document.createElement('td');
                     const excluirBtn = document.createElement('button');
-                    excluirBtn.textContent = 'Excluir';
                     excluirBtn.className = 'btn-excluir';
+                    excluirBtn.innerHTML = '<i class="fa fa-trash"></i>';
                     excluirBtn.onclick = () => excluirDespesa(data.id);
                     acoesTd.appendChild(excluirBtn);
 
