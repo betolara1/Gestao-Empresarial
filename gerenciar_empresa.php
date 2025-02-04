@@ -280,25 +280,59 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .info-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .info-label {
             font-weight: bold;
-            color: #495057;
-            margin-bottom: 5px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label i {
+            color: #3498db;
+            width: 20px;
         }
 
         .info-value {
-            color: #212529;
+            color: #34495e;
+            line-height: 1.6;
+        }
+
+        .address-info, .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .address-line, .contact-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .address-line i, .contact-line i {
+            color: #7f8c8d;
+            width: 16px;
         }
 
         .table-responsive {
@@ -510,6 +544,60 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             border-radius: 4px;
             color: #495057;
         }
+
+        /* Adicionar estilos para o mapa */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaflet-popup-content h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .leaflet-popup-content p {
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Ajustar controles do mapa */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: #2c3e50 !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f8f9fa !important;
+        }
+
+        /* Adicionar animação de fade-in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-item {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Estilizar valores vazios */
+        .info-value:empty::after {
+            content: 'Não informado';
+            color: #95a5a6;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -543,68 +631,115 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
 
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-label">Razão Social</div>
-                        <div class="info-value"><?php echo htmlspecialchars($empresa['razao_social'] ?? ''); ?></div>
-                        
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">CNPJ</div>
-                        <div class="info-value"><?php echo htmlspecialchars($empresa['cnpj'] ?? ''); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">Nome Fantasia</div>
-                        <div class="info-value"><?php echo htmlspecialchars($empresa['nome'] ?? ''); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">CPF</div>
-                        <div class="info-value"><?php echo htmlspecialchars($empresa['cpf'] ?? ''); ?></div>
-                    </div>
-                </div>
-
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Endereço</div>
+                        <div class="info-label">
+                            <i class="fas fa-building"></i> Razão Social
+                        </div>
                         <div class="info-value">
-                            <?php 
-                            echo htmlspecialchars($empresa['rua'] ?? '') . ', ' . 
-                                 htmlspecialchars($empresa['numero'] ?? '') . ' - ' . 
-                                 htmlspecialchars($empresa['bairro'] ?? '') . '<br>' .
-                                 htmlspecialchars($empresa['cidade'] ?? '') . '/' . 
-                                 htmlspecialchars($empresa['estado'] ?? '') . ' - ' .
-                                 htmlspecialchars($empresa['cep'] ?? '');
-                            ?>
-                            <br>Coordenadas: <?php echo htmlspecialchars($empresa['coordenada'] ?? ''); ?>
+                            <?php echo htmlspecialchars($empresa['razao_social'] ?? 'Não informado'); ?>
                         </div>
                     </div>
 
                     <div class="info-item">
-                        <div class="info-label">Contato</div>
+                        <div class="info-label">
+                            <i class="fas fa-id-card"></i> CNPJ
+                        </div>
                         <div class="info-value">
-                            Email: <?php echo htmlspecialchars($empresa['email'] ?? ''); ?><br>
-                            Tel: <?php echo htmlspecialchars($empresa['telefone'] ?? ''); ?><br>
-                            Cel: <?php echo htmlspecialchars($empresa['celular'] ?? ''); ?>
+                            <?php echo htmlspecialchars($empresa['cnpj'] ?? 'Não informado'); ?>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-store"></i> Nome Fantasia
+                        </div>
+                        <div class="info-value">
+                            <?php echo htmlspecialchars($empresa['nome'] ?? 'Não informado'); ?>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-address-card"></i> CPF
+                        </div>
+                        <div class="info-value">
+                            <?php echo htmlspecialchars($empresa['cpf'] ?? 'Não informado'); ?>
                         </div>
                     </div>
                 </div>
 
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-label">Atividade Principal</div>
+                        <div class="info-label">
+                            <i class="fas fa-map-marked-alt"></i> Endereço
+                        </div>
+                        <div class="info-value address-info">
+                            <div class="address-line">
+                                <i class="fas fa-road"></i>
+                                <?php echo htmlspecialchars($empresa['rua'] ?? '') . ', ' . 
+                                     htmlspecialchars($empresa['numero'] ?? ''); ?>
+                            </div>
+                            <div class="address-line">
+                                <i class="fas fa-map"></i>
+                                <?php echo htmlspecialchars($empresa['bairro'] ?? ''); ?>
+                            </div>
+                            <div class="address-line">
+                                <i class="fas fa-city"></i>
+                                <?php echo htmlspecialchars($empresa['cidade'] ?? '') . '/' . 
+                                     htmlspecialchars($empresa['estado'] ?? ''); ?>
+                            </div>
+                            <div class="address-line">
+                                <i class="fas fa-mailbox"></i>
+                                CEP: <?php echo htmlspecialchars($empresa['cep'] ?? ''); ?>
+                            </div>
+                            <div class="address-line">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Coordenadas: <?php echo htmlspecialchars($empresa['coordenada'] ?? ''); ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-address-book"></i> Contato
+                        </div>
+                        <div class="info-value contact-info">
+                            <div class="contact-line">
+                                <i class="fas fa-envelope"></i>
+                                <?php echo htmlspecialchars($empresa['email'] ?? 'Não informado'); ?>
+                            </div>
+                            <div class="contact-line">
+                                <i class="fas fa-phone"></i>
+                                <?php echo htmlspecialchars($empresa['telefone'] ?? 'Não informado'); ?>
+                            </div>
+                            <div class="contact-line">
+                                <i class="fas fa-mobile-alt"></i>
+                                <?php echo htmlspecialchars($empresa['celular'] ?? 'Não informado'); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-industry"></i> Atividade Principal
+                        </div>
                         <div class="info-value">
                             <?php 
                             if (!empty($empresa['codigo_cnae']) && !empty($empresa['descricao_cnae'])) {
                                 echo htmlspecialchars($empresa['codigo_cnae']) . ' - ' . 
                                      htmlspecialchars($empresa['descricao_cnae']);
+                            } else {
+                                echo 'Não informado';
                             }
                             ?>
                         </div>
                     </div>
 
                     <div class="info-item">
-                        <div class="info-label">Atividades Secundárias</div>
+                        <div class="info-label">
+                            <i class="fas fa-tasks"></i> Atividades Secundárias
+                        </div>
                         <div class="info-value">
                             <?php 
                             if (!empty($empresa['atividades_secundarias']) && !empty($empresa['descricoes_secundarias'])) {
@@ -617,6 +752,8 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                                              htmlspecialchars($descricoes[$index]) . '<br>';
                                     }
                                 }
+                            } else {
+                                echo 'Não informado';
                             }
                             ?>
                         </div>
@@ -908,13 +1045,23 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             if (file) {
                 // Verifica o tamanho do arquivo (máximo 2MB)
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('A imagem deve ter no máximo 2MB');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Arquivo muito grande',
+                        text: 'A imagem deve ter no máximo 2MB',
+                        confirmButtonColor: '#3085d6'
+                    });
                     return;
                 }
 
                 // Verifica o tipo do arquivo
                 if (!file.type.match('image.*')) {
-                    alert('Por favor, selecione uma imagem válida');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Arquivo inválido',
+                        text: 'Por favor, selecione uma imagem válida',
+                        confirmButtonColor: '#3085d6'
+                    });
                     return;
                 }
 
@@ -933,7 +1080,16 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 }
                 reader.readAsDataURL(file);
 
-                // Upload da imagem
+                // Upload da imagem com loading
+                Swal.fire({
+                    title: 'Enviando...',
+                    text: 'Aguarde enquanto a logo é enviada',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 const formData = new FormData();
                 formData.append('logo', file);
 
@@ -944,45 +1100,108 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: 'Logo atualizada com sucesso!',
+                            confirmButtonColor: '#3085d6'
+                        }).then(() => {
+                            location.reload();
+                        });
                     } else {
-                        alert('Erro ao fazer upload da logo: ' + data.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: 'Erro ao fazer upload da logo: ' + data.message,
+                            confirmButtonColor: '#3085d6'
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    alert('Erro ao fazer upload da logo');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Erro ao fazer upload da logo',
+                        confirmButtonColor: '#3085d6'
+                    });
                 });
             }
         });
 
         // Função para remover a logo
         function removerLogo() {
-            if (confirm('Tem certeza que deseja remover a logo?')) {
-                fetch('remover_logo.php', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Erro ao remover a logo: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao remover a logo');
-                });
-            }
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você deseja remover a logo da empresa?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, remover!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Removendo...',
+                        text: 'Aguarde enquanto a logo é removida',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch('remover_logo.php', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Removida!',
+                                text: 'A logo foi removida com sucesso.',
+                                confirmButtonColor: '#3085d6'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro!',
+                                text: 'Erro ao remover a logo: ' + data.message,
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: 'Erro ao remover a logo',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    });
+                }
+            });
         }
 
-        // Adicione este trecho para lidar com o formulário
+        // Formulário de sócios
         document.getElementById('formSocio').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             
+            Swal.fire({
+                title: 'Salvando...',
+                text: 'Aguarde enquanto os dados são salvos',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             fetch('salvar_socios.php', {
                 method: 'POST',
                 body: formData
@@ -990,15 +1209,31 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Sócio cadastrado com sucesso!');
-                    location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: 'Sócio cadastrado com sucesso!',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert('Erro ao cadastrar sócio: ' + data.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Erro ao cadastrar sócio: ' + data.message,
+                        confirmButtonColor: '#3085d6'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao cadastrar sócio');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: 'Erro ao cadastrar sócio',
+                    confirmButtonColor: '#3085d6'
+                });
             });
         });
 
@@ -1067,16 +1302,24 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 const coords = e.latlng;
                 const coordStr = `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
                 
-                // Criar um elemento temporário para copiar o texto
-                const el = document.createElement('textarea');
-                el.value = coordStr;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-
-                // Mostrar mensagem de confirmação
-                alert(`Coordenadas copiadas: ${coordStr}`);
+                // Copiar para a área de transferência
+                navigator.clipboard.writeText(coordStr).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Coordenadas copiadas!',
+                        text: coordStr,
+                        confirmButtonColor: '#3085d6',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }).catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Não foi possível copiar as coordenadas',
+                        confirmButtonColor: '#3085d6'
+                    });
+                });
             });
         }
 
@@ -1084,43 +1327,5 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
         document.addEventListener('DOMContentLoaded', initMap);
     </script>
 
-    <style>
-        /* Adicionar estilos para o mapa */
-        .leaflet-popup-content-wrapper {
-            border-radius: 8px;
-            box-shadow: 0 3px 14px rgba(0,0,0,0.2);
-        }
-
-        .leaflet-popup-content {
-            margin: 0;
-            padding: 0;
-        }
-
-        .leaflet-popup-content h3 {
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        .leaflet-popup-content p {
-            color: #666;
-            line-height: 1.4;
-        }
-
-        /* Ajustar controles do mapa */
-        .leaflet-control-zoom {
-            border: none !important;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
-        }
-
-        .leaflet-control-zoom a {
-            background-color: white !important;
-            color: #2c3e50 !important;
-        }
-
-        .leaflet-control-zoom a:hover {
-            background-color: #f8f9fa !important;
-        }
-    </style>
 </body>
 </html>
