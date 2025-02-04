@@ -436,6 +436,8 @@ try {
             background-color: #c0392b;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -756,6 +758,15 @@ try {
             const valor = document.getElementById('valor_despesa').value;
             const numeroProposta = document.getElementById('numero_proposta').value;
 
+            if (!numeroProposta) {
+                Swal.fire({
+                    title: 'Atenção!',
+                    text: 'Por favor, informe o número da proposta primeiro.',
+                    icon: 'warning'
+                });
+                return;
+            }
+
             const formData = new FormData();
             formData.append('nome_despesa', nome);
             formData.append('valor_despesa', valor);
@@ -771,7 +782,7 @@ try {
                     // Adicionar despesa à tabela
                     const tbody = document.getElementById('tabelaDespesas').querySelector('tbody');
                     const novaLinha = document.createElement('tr');
-                    novaLinha.id = `despesa-${data.id}`;
+                    novaLinha.id = `row-${data.id}`; // Alterado para manter consistência com a exclusão
 
                     const nomeTd = document.createElement('td');
                     nomeTd.textContent = data.nome_despesa;
@@ -781,57 +792,113 @@ try {
 
                     const acoesTd = document.createElement('td');
                     const excluirBtn = document.createElement('button');
-                    excluirBtn.className = 'btn-excluir';
+                    excluirBtn.className = 'btn btn-excluir';
                     excluirBtn.innerHTML = '<i class="fa fa-trash"></i>';
-                    excluirBtn.onclick = () => excluirDespesa(data.id);
+                    excluirBtn.onclick = (event) => excluirDespesa(data.id, event);
                     acoesTd.appendChild(excluirBtn);
 
                     novaLinha.appendChild(nomeTd);
                     novaLinha.appendChild(valorTd);
                     novaLinha.appendChild(acoesTd);
 
+                    // Remove a mensagem "Nenhuma despesa cadastrada" se existir
+                    if (tbody.querySelector('tr td[colspan="3"]')) {
+                        tbody.innerHTML = '';
+                    }
+                    
                     tbody.appendChild(novaLinha);
 
-                    // Fechar popup
+                    // Fechar popup e mostrar mensagem de sucesso
                     closePopup();
                     document.getElementById('despesaForm').reset();
+                    
+                    Swal.fire({
+                        title: 'Sucesso!',
+                        text: 'Despesa cadastrada com sucesso!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 } else {
-                    alert(data.message || 'Erro ao cadastrar despesa.');
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: data.message || 'Erro ao cadastrar despesa.',
+                        icon: 'error'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao cadastrar despesa. Por favor, tente novamente.');
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Erro ao cadastrar despesa. Por favor, tente novamente.',
+                    icon: 'error'
+                });
             });
         }
 
         // Função para excluir despesa
-        function excluirDespesa(id) {
-            if (confirm('Tem certeza que deseja excluir este registro?')) {
-                $.ajax({
-                    url: 'excluir_despesa.php',
-                    type: 'POST',
-                    data: { id_despesa: id },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Remove a linha da tabela com animação
-                            $('#row-' + id).fadeOut(400, function() {
-                                $(this).remove();
+        function excluirDespesa(id, event) {
+            // Previne qualquer propagação do evento
+            event.preventDefault();
+            event.stopPropagation();
+            
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja excluir este registro?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'excluir_despesa.php',
+                        type: 'POST',
+                        data: { id_despesa: id },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                // Remove a linha da tabela com animação
+                                $('#row-' + id).fadeOut(400, function() {
+                                    $(this).remove();
+                                    
+                                    // Verifica se a tabela ficou vazia
+                                    const tbody = document.getElementById('despesasBody');
+                                    if (!tbody.hasChildNodes()) {
+                                        tbody.innerHTML = '<tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>';
+                                    }
+                                });
+                                
+                                // Mostra mensagem de sucesso
+                                Swal.fire({
+                                    title: 'Sucesso!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Erro!',
+                                    text: response.message,
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erro:', error);
+                            Swal.fire({
+                                title: 'Erro!',
+                                text: 'Erro ao excluir o registro. Tente novamente.',
+                                icon: 'error'
                             });
-                            
-                            // Mostra mensagem de sucesso
-                            alert(response.message);
-                        } else {
-                            alert(response.message);
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erro:', error);
-                        alert('Erro ao excluir o registro. Tente novamente.');
-                    }
-                });
-            }
+                    });
+                }
+            });
         }
 
         // Adicionar evento de submit ao formulário
@@ -976,42 +1043,43 @@ try {
                     if (response.existe) {
                         feedback.text('Número da proposta já existe!');
                         feedback.css('color', 'red');
+                        // Buscar despesas existentes para esta proposta
+                        buscarDespesas(numero);
                     } else {
                         feedback.text('Número da proposta disponível');
                         feedback.css('color', 'green');
+                        // Limpar tabela de despesas
+                        const tbody = document.getElementById('despesasBody');
+                        tbody.innerHTML = '<tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>';
                     }
                 }
             });
         }
 
-        // Adiciona o evento assim que o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', function() {
-            const numeroPropostaInput = document.getElementById('numero_proposta');
-            
-            // Carrega as despesas iniciais usando o valor atual do número da proposta
-            const numeroPropostaInicial = numeroPropostaInput.value;
-            if (numeroPropostaInicial) {
-                buscarDespesas(numeroPropostaInicial);
-            }
-            
-            // Adiciona o evento de input para detectar mudanças em tempo real
-            numeroPropostaInput.addEventListener('input', function() {
-                const numeroProposta = this.value;
-                if (numeroProposta) {
-                    buscarDespesas(numeroProposta);
-                }
-            });
-        });
-
         function buscarDespesas(numeroProposta) {
-            console.log('Buscando despesas para proposta:', numeroProposta); // Debug
-            fetch(`buscar_despesas.php?numero_proposta=${numeroProposta}`)
-                .then(response => response.json())
+            if (!numeroProposta) {
+                console.log('Número da proposta não fornecido');
+                const tbody = document.getElementById('despesasBody');
+                tbody.innerHTML = '<tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>';
+                return;
+            }
+
+            console.log('Buscando despesas para proposta:', numeroProposta);
+
+            fetch(`buscar_despesas.php?numero_proposta=${encodeURIComponent(numeroProposta)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.message || 'Erro na resposta do servidor');
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    console.log('Despesas encontradas:', data); // Debug
+                    console.log('Resposta do servidor:', data);
                     const tbody = document.getElementById('despesasBody');
                     
-                    if (data && data.length > 0) {
+                    if (Array.isArray(data) && data.length > 0) {
                         let html = '';
                         data.forEach(despesa => {
                             html += `
@@ -1019,8 +1087,8 @@ try {
                                     <td>${despesa.nome_despesa}</td>
                                     <td>R$ ${despesa.valor}</td>
                                     <td>
-                                        <button type="button" class="btn btn-excluir" onclick="excluirDespesa(${despesa.id})">
-                                            <i class="fa fa-trash"></i> 
+                                        <button type="button" class="btn btn-excluir" onclick="excluirDespesa(${despesa.id}, event)">
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -1033,10 +1101,37 @@ try {
                 })
                 .catch(error => {
                     console.error('Erro ao buscar despesas:', error);
-                    document.getElementById('despesasBody').innerHTML = 
-                        '<tr><td colspan="3">Erro ao carregar despesas</td></tr>';
+                    const tbody = document.getElementById('despesasBody');
+                    tbody.innerHTML = '<tr><td colspan="3">Nenhuma despesa cadastrada</td></tr>';
+                    
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: error.message || 'Erro ao carregar despesas',
+                        icon: 'error'
+                    });
                 });
         }
+
+        // Evento para carregar despesas quando o número da proposta mudar
+        document.addEventListener('DOMContentLoaded', function() {
+            const numeroPropostaInput = document.getElementById('numero_proposta');
+            
+            if (numeroPropostaInput) {
+                // Carregar despesas quando o valor mudar
+                numeroPropostaInput.addEventListener('change', function() {
+                    const numeroProposta = this.value.trim();
+                    if (numeroProposta) {
+                        buscarDespesas(numeroProposta);
+                    }
+                });
+
+                // Carregar despesas iniciais se já houver um número
+                const numeroPropostaInicial = numeroPropostaInput.value.trim();
+                if (numeroPropostaInicial) {
+                    buscarDespesas(numeroPropostaInicial);
+                }
+            }
+        });
     </script>
 </body>
 </html>
