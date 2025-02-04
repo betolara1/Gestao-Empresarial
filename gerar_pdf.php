@@ -28,7 +28,11 @@ $exportType = $_POST['exportType'];
 $exportMonth = $_POST['exportMonth'] ?? null;
 $exportYear = $_POST['exportYear'] ?? null;
 
-$query = "SELECT DATE_FORMAT(data, '%Y-%m') as mes_ano, descricao, valor FROM despesas_fixas";
+// Query principal para obter os meses
+$query = "SELECT DISTINCT 
+            DATE_FORMAT(data, '%Y-%m') as mes_ano,
+            DATE_FORMAT(data, '%m/%Y') as mes_ano_formatado
+          FROM despesas_fixas";
 
 if ($exportType == 'month') {
     $query .= " WHERE YEAR(data) = ? AND MONTH(data) = ?";
@@ -38,55 +42,70 @@ if ($exportType == 'month') {
     $query .= " WHERE YEAR(data) = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $exportYear);
-} else {
-    $stmt = $conn->prepare($query);
 }
 
+$query .= " ORDER BY mes_ano";
+$stmt = isset($stmt) ? $stmt : $conn->prepare($query);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$currentMonth = '';
-$totalMonth = 0;
-$totalYear = 0;
-$grandTotal = 0;
+$totalGeral = 0;
 
 while ($row = $result->fetch_assoc()) {
-    $mesAno = $row['mes_ano'];
-    list($ano, $mes) = explode('-', $mesAno);
+    // Cabeçalho do mês
+    $pdf->SetFont('Arial', 'B', 14);
+    $pdf->Cell(0, 10, 'Mes: ' . $row['mes_ano_formatado'], 0, 1);
     
-    if ($mesAno != $currentMonth) {
-        if ($currentMonth != '') {
-            $pdf->Cell(0, 10, 'Total do mes: R$ ' . number_format($totalMonth, 2, ',', '.'), 0, 1);
-            $pdf->Ln(5);
-        }
-        $pdf->SetFont('Arial', 'B', 14);
-        $pdf->Cell(0, 10, 'Mes: ' . $mes . '/' . $ano, 0, 1);
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(100, 10, 'Descricao', 1);
-        $pdf->Cell(90, 10, 'Valor (R$)', 1, 1);
-        $currentMonth = $mesAno;
-        $totalMonth = 0;
+    // Cabeçalho da tabela de despesas
+    $pdf->SetFont('Arial', 'B', 12);
+    $pdf->Cell(120, 10, 'Descricao', 1);
+    $pdf->Cell(70, 10, 'Valor', 1, 1, 'R');
+    
+    // Buscar despesas do mês
+    $queryDespesas = "SELECT descricao, valor 
+                      FROM despesas_fixas 
+                      WHERE DATE_FORMAT(data, '%Y-%m') = ?
+                      ORDER BY descricao";
+    
+    $stmtDespesas = $conn->prepare($queryDespesas);
+    $stmtDespesas->bind_param("s", $row['mes_ano']);
+    $stmtDespesas->execute();
+    $resultDespesas = $stmtDespesas->get_result();
+    
+    $totalMes = 0;
+    $pdf->SetFont('Arial', '', 12);
+    
+    while ($despesa = $resultDespesas->fetch_assoc()) {
+        $pdf->Cell(120, 10, utf8_decode($despesa['descricao']), 1);
+        $pdf->Cell(70, 10, 'R$ ' . number_format($despesa['valor'], 2, ',', '.'), 1, 1, 'R');
+        $totalMes += $despesa['valor'];
     }
-
-    $pdf->Cell(100, 10, $row['descricao'], 1);
-    $pdf->Cell(90, 10, 'R$ ' . number_format($row['valor'], 2, ',', '.'), 1, 1);
     
-    $totalMonth += $row['valor'];
-    $totalYear += $row['valor'];
-    $grandTotal += $row['valor'];
+    // Total do mês
+    $pdf->SetFont('Arial', 'B', 12);
+    $pdf->Cell(120, 10, 'Total do Mes:', 1);
+    $pdf->Cell(70, 10, 'R$ ' . number_format($totalMes, 2, ',', '.'), 1, 1, 'R');
+    
+    $totalGeral += $totalMes;
+    $pdf->Ln(10);
+    
+    $stmtDespesas->close();
 }
 
-$pdf->Cell(0, 10, 'Total do mes: R$ ' . number_format($totalMonth, 2, ',', '.'), 0, 1);
-$pdf->Ln(5);
+// Total Geral
+$pdf->SetFont('Arial', 'B', 14);
+$pdf->Cell(120, 10, 'Total Geral:', 0);
+$pdf->Cell(70, 10, 'R$ ' . number_format($totalGeral, 2, ',', '.'), 0, 1, 'R');
 
-if ($exportType == 'year' || $exportType == 'total') {
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Total do Ano: R$ ' . number_format($totalYear, 2, ',', '.'), 0, 1);
-}
-
-if ($exportType == 'total') {
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(0, 10, 'Total Geral: R$ ' . number_format($grandTotal, 2, ',', '.'), 0, 1);
+// Adicionar informações do período
+$pdf->Ln(10);
+$pdf->SetFont('Arial', 'I', 10);
+if ($exportType == 'month') {
+    $pdf->Cell(0, 10, "Período: {$exportMonth}/{$exportYear}", 0, 1);
+} elseif ($exportType == 'year') {
+    $pdf->Cell(0, 10, "Período: Ano {$exportYear}", 0, 1);
+} else {
+    $pdf->Cell(0, 10, "Período: Todos os registros", 0, 1);
 }
 
 $pdf->Output('D', 'relatorio_despesas.pdf');

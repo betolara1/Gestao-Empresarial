@@ -1,5 +1,19 @@
 <?php 
 include 'conexao.php';
+
+function getAnosCadastrados() {
+    global $conn;
+    $query = "SELECT DISTINCT YEAR(data) as ano FROM despesas_fixas ORDER BY ano DESC";
+    $result = $conn->query($query);
+    
+    $anos = array();
+    if ($result && $result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $anos[] = $row['ano'];
+        }
+    }
+    return $anos;
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,6 +25,7 @@ include 'conexao.php';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -489,7 +504,7 @@ include 'conexao.php';
             <!-- Seção de Cadastro -->
             <div class="form-section">
                 <h2>Cadastro de Despesas Fixas</h2>
-                <form action="salvar_despesa_fixa.php" method="POST">
+                <form id="formDespesaFixa" onsubmit="return salvarDespesa(event)">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="mes" class="required">Mês</label>
@@ -589,8 +604,14 @@ include 'conexao.php';
                         </div>
                         <div class="form-group" id="exportYearGroup">
                             <label for="exportYear">Ano</label>
-                            <select name="exportYear" id="exportYear">
-                                <!-- Preenchido via JavaScript -->
+                            <select name="exportYear" id="exportYear" class="form-control">
+                                <option value="">Selecione o ano...</option>
+                                <?php
+                                $anosCadastrados = getAnosCadastrados();
+                                foreach($anosCadastrados as $ano) {
+                                    echo "<option value='{$ano}'>{$ano}</option>";
+                                }
+                                ?>
                             </select>
                         </div>
                     </div>
@@ -609,7 +630,7 @@ include 'conexao.php';
         <div class="popup-content">
             <h2>Replicar Despesa</h2>
             <p>Selecione os meses para replicar:</p>
-            <form id="replicarForm">
+            <form id="replicarForm" onsubmit="return false;">
                 <div class="meses-container">
                     <label><input type="checkbox" name="meses[]" value="Janeiro"> Janeiro</label>
                     <label><input type="checkbox" name="meses[]" value="Fevereiro"> Fevereiro</label>
@@ -626,7 +647,7 @@ include 'conexao.php';
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-danger" onclick="closePopup('replicarDespesaPopup')">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarReplicacao()">Confirmar</button>
                 </div>
             </form>
         </div>
@@ -647,37 +668,51 @@ include 'conexao.php';
                             mes: mes,
                             ano: ano 
                         },
-                        success: function(despesas) {
+                        success: function(response) {
                             let html = '';
                             let total = 0;
                             
-                            if (despesas.length > 0) {
-                                despesas.forEach(function(despesa) {
-                                    total += parseFloat(despesa.valor);
-                                    html += `
-                                        <tr id="linha-${despesa.id}">
-                                            <td>${despesa.descricao}</td>
-                                            <td class="valor-despesa">R$ ${parseFloat(despesa.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                            <td>
-                                                <div class="btn-actions">
-                                                    <button type="button" class="btn-replicar" onclick="abrirModalReplicar(${despesa.id})">
-                                                        <i class="fas fa-copy"></i> 
-                                                    </button>
-                                                    <button type="button" class="btn btn-danger" onclick="excluirDespesa(${despesa.id})">
-                                                        <i class="fas fa-trash"></i> 
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `;
-                                });
-                            } else {
-                                html = '<tr><td colspan="5">Nenhuma despesa encontrada para o período selecionado.</td></tr>';
+                            try {
+                                // Verifica se response já é um objeto (não precisa fazer parse)
+                                const despesas = typeof response === 'string' ? JSON.parse(response) : response;
+                                
+                                if (Array.isArray(despesas) && despesas.length > 0) {
+                                    despesas.forEach(function(despesa) {
+                                        // Converter o valor para número, removendo R$ e trocando , por .
+                                        const valorNumerico = parseFloat(despesa.valor.replace('R$', '').replace('.', '').replace(',', '.'));
+                                        total += valorNumerico;
+                                        
+                                        html += `
+                                            <tr id="linha-${despesa.id}">
+                                                <td>${despesa.descricao}</td>
+                                                <td class="valor-despesa">R$ ${despesa.valor}</td>
+                                                <td>
+                                                    <div class="btn-actions">
+                                                        <button type="button" class="btn-replicar" onclick="abrirModalReplicar(${despesa.id})">
+                                                            <i class="fas fa-copy"></i> 
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger" onclick="excluirDespesa(${despesa.id})">
+                                                            <i class="fas fa-trash"></i> 
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    });
+                                } else {
+                                    html = '<tr><td colspan="3">Nenhuma despesa encontrada para o período selecionado.</td></tr>';
+                                }
+                                
+                                $('#tabelaDespesas tbody').html(html);
+                                $('#total-despesas').text(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
+                            } catch (e) {
+                                console.error('Erro ao processar resposta:', e);
+                                console.error('Resposta recebida:', response);
+                                alert('Erro ao processar os dados das despesas.');
                             }
-                            $('table tbody').html(html);
-                            $('#total-despesas').text(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`);
                         },
-                        error: function() {
+                        error: function(xhr, status, error) {
+                            console.error('Erro na requisição:', error);
                             alert('Erro ao buscar as despesas.');
                         }
                     });
@@ -686,6 +721,11 @@ include 'conexao.php';
 
             // Atualiza a tabela quando mês ou ano são alterados
             $('#mes, #ano').change(buscarDespesas);
+            
+            // Busca inicial se já houver mês e ano selecionados
+            if ($('#mes').val() && $('#ano').val()) {
+                buscarDespesas();
+            }
 
             // Preencher o select de meses
             const meses = [
@@ -709,14 +749,40 @@ include 'conexao.php';
                 $exportMonth.append(new Option(mes.text, mes.value));
             });
 
-            // Inicializar o select de anos
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
-                $('#exportYear').append($('<option>', {
-                    value: i,
-                    text: i
-                }));
+            // Atualizar anos disponíveis quando uma nova despesa for cadastrada
+            function atualizarAnosDisponiveis() {
+                $.ajax({
+                    url: 'buscar_anos.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(anos) {
+                        const selectAno = $('#exportYear');
+                        selectAno.empty();
+                        selectAno.append($('<option>', {
+                            value: '',
+                            text: 'Selecione o ano...'
+                        }));
+                        
+                        anos.forEach(function(ano) {
+                            selectAno.append($('<option>', {
+                                value: ano,
+                                text: ano
+                            }));
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao buscar anos:', error);
+                    }
+                });
             }
+
+            // Chamar a função inicialmente
+            atualizarAnosDisponiveis();
+
+            // Atualizar anos após salvar uma nova despesa
+            $(document).on('despesaSalva', function() {
+                atualizarAnosDisponiveis();
+            });
 
             // Setar mês e ano atuais como padrão
             const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
@@ -729,11 +795,16 @@ include 'conexao.php';
 
         function abrirModalReplicar(despesaId) {
             despesaParaReplicar = despesaId;
+            // Limpar checkboxes anteriores
+            document.querySelectorAll('.meses-container input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Exibir o modal
             document.getElementById('replicarDespesaPopup').style.display = 'flex';
         }
 
-        function fecharModal() {
-            document.getElementById('replicarDespesaPopup').style.display = 'none';
+        function closePopup(id) {
+            document.getElementById(id).style.display = 'none';
             despesaParaReplicar = null;
         }
 
@@ -744,9 +815,19 @@ include 'conexao.php';
             });
 
             if (mesesSelecionados.length === 0) {
-                alert('Selecione pelo menos um mês para replicar.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Selecione pelo menos um mês para replicar.',
+                    confirmButtonColor: '#3085d6'
+                });
                 return;
             }
+
+            // Adicionar console.log para debug
+            console.log('Despesa ID:', despesaParaReplicar);
+            console.log('Meses selecionados:', mesesSelecionados);
+            console.log('Ano:', $('#ano').val());
 
             $.ajax({
                 url: 'replicar_despesa.php',
@@ -759,43 +840,85 @@ include 'conexao.php';
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert(response.message);
-                        fecharModal();
-                        buscarDespesas(); // Atualiza a lista
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: response.message,
+                            confirmButtonColor: '#3085d6'
+                        }).then((result) => {
+                            closePopup('replicarDespesaPopup');
+                            buscarDespesas();
+                        });
                     } else {
-                        alert('Erro: ' + (response.error || 'Erro ao replicar despesa'));
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: response.error || 'Erro ao replicar despesa',
+                            confirmButtonColor: '#3085d6'
+                        });
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Erro na requisição:', xhr.responseText);
-                    alert('Erro ao replicar a despesa. Verifique o console para mais detalhes.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Erro ao replicar a despesa. Verifique o console para mais detalhes.',
+                        confirmButtonColor: '#3085d6'
+                    });
                 }
             });
         }
+        
         function excluirDespesa(despesaId) {
-            $.ajax({
-                url: 'excluir_despesa_fixa.php',
-                type: 'POST',
-                data: { id: despesaId },
-                success: function(response) {
-                    const data = JSON.parse(response); // Certifique-se de que a resposta seja analisada corretamente
-                    if (data.success) {
-                        // Remover a linha da tabela
-                        $(`#linha-${despesaId}`).remove(); // Supondo que você tenha um ID de linha
-
-                        // Atualizar o total
-                        atualizarTotalDespesas();
-                        alert(data.message); // Exibir mensagem de sucesso
-                    } else {
-                        alert('Erro ao excluir despesa: ' + data.message);
-                    }
-                },
-                error: function() {
-                    alert('Erro ao realizar a requisição.');
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: "Você tem certeza que deseja excluir esta despesa?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'excluir_despesa_fixa.php',
+                        type: 'POST',
+                        data: { id: despesaId },
+                        success: function(response) {
+                            const data = typeof response === 'string' ? JSON.parse(response) : response;
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Sucesso!',
+                                    text: data.message,
+                                    confirmButtonColor: '#3085d6'
+                                }).then(() => {
+                                    $(`#linha-${despesaId}`).remove();
+                                    atualizarTotalDespesas();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Erro!',
+                                    text: 'Erro ao excluir despesa: ' + data.message,
+                                    confirmButtonColor: '#3085d6'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro!',
+                                text: 'Erro ao realizar a requisição.',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    });
                 }
             });
         }
-
 
         // Add this new function for PDF export
         function exportToPDF() {
@@ -853,14 +976,83 @@ include 'conexao.php';
             $('#total-despesas').text('R$ ' + total.toFixed(2).replace('.', ','));
         }
 
-        function openPopup(id) {
-            const popup = document.getElementById(id);
-            popup.style.display = 'flex'; // Exibe o popup
-        }
+        function salvarDespesa(event) {
+            event.preventDefault();
 
-        function closePopup(id) {
-            const popup = document.getElementById(id);
-            popup.style.display = 'none'; // Esconde o popup
+            // Validação básica
+            const form = document.getElementById('formDespesaFixa');
+            if (!form.checkValidity()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Por favor, preencha todos os campos obrigatórios.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return false;
+            }
+
+            // Mostrar loading
+            Swal.fire({
+                title: 'Salvando...',
+                text: 'Por favor, aguarde.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Enviar dados via AJAX
+            $.ajax({
+                url: 'salvar_despesa_fixa.php',
+                type: 'POST',
+                data: {
+                    mes: $('#mes').val(),
+                    ano: $('#ano').val(),
+                    descricao: $('#descricao').val(),
+                    valor: $('#valor').val()
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: response.message || 'Despesa salva com sucesso!',
+                            confirmButtonColor: '#3085d6'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Limpar formulário
+                                form.reset();
+                                // Atualizar a lista de despesas
+                                buscarDespesas();
+                                // Disparar evento de despesa salva
+                                $(document).trigger('despesaSalva');
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: response.error || 'Erro ao salvar despesa.',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro na requisição:', xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Erro ao salvar a despesa. Por favor, tente novamente.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                }
+            });
+
+            return false;
         }
     </script>
 

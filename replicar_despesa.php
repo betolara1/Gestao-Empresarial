@@ -15,18 +15,40 @@ try {
     }
 
     $despesa_id = intval($_POST['despesa_id']);
-    $meses = $_POST['meses'];
+    $meses = $_POST['meses']; // Array com nomes dos meses
     $ano = intval($_POST['ano']);
 
-    // Validar ano e meses
+    // Validar ano
     if ($ano < 1900 || $ano > 2100) {
         throw new Exception('Ano inválido');
     }
 
+    // Array de conversão de nomes de meses para números
+    $mesesNumeros = [
+        'Janeiro' => '01',
+        'Fevereiro' => '02',
+        'Março' => '03',
+        'Abril' => '04',
+        'Maio' => '05',
+        'Junho' => '06',
+        'Julho' => '07',
+        'Agosto' => '08',
+        'Setembro' => '09',
+        'Outubro' => '10',
+        'Novembro' => '11',
+        'Dezembro' => '12'
+    ];
+
     // Buscar informações da despesa original
     $stmt = $conn->prepare("SELECT descricao, valor FROM despesas_fixas WHERE id = ?");
+    if (!$stmt) {
+        throw new Exception("Erro na preparação da query: " . $conn->error);
+    }
+    
     $stmt->bind_param("i", $despesa_id);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        throw new Exception("Erro ao executar a query: " . $stmt->error);
+    }
     
     $result = $stmt->get_result();
     $despesa_original = $result->fetch_assoc();
@@ -39,43 +61,57 @@ try {
     
     // Preparar statement para inserção
     $insert_stmt = $conn->prepare("INSERT INTO despesas_fixas (descricao, valor, data) VALUES (?, ?, ?)");
-    
-    // Preparar statement para verificação
-    $check_stmt = $conn->prepare("SELECT COUNT(*) as count FROM despesas_fixas WHERE descricao = ? AND DATE_FORMAT(data, '%Y-%m') = ?");
+    if (!$insert_stmt) {
+        throw new Exception("Erro na preparação da query de inserção: " . $conn->error);
+    }
 
     // Iniciar transação
     $conn->begin_transaction();
 
-    foreach ($meses as $mes) {
-        // Garantir que o mês está no formato correto (dois dígitos)
-        $mes = str_pad($mes, 2, '0', STR_PAD_LEFT);
-        
-        // Validar mês
-        if ($mes < '01' || $mes > '12') {
-            throw new Exception('Mês inválido: ' . $mes);
+    foreach ($meses as $mesNome) {
+        if (!isset($mesesNumeros[$mesNome])) {
+            throw new Exception('Mês inválido: ' . $mesNome);
         }
 
-        // Criar data no formato YYYY-MM-DD
-        $data = sprintf('%04d-%02d-01', $ano, intval($mes));
+        $mesNumero = $mesesNumeros[$mesNome];
+        $data = sprintf('%04d-%02d-01', $ano, intval($mesNumero));
         
-        // Verificar mês/ano
-        $check_date = "$ano-$mes";
-        $check_stmt->bind_param("ss", $despesa_original['descricao'], $check_date);
+        // Verificar se já existe uma despesa igual neste mês/ano
+        $check_stmt = $conn->prepare("SELECT COUNT(*) as count FROM despesas_fixas 
+                                    WHERE descricao = ? 
+                                    AND MONTH(data) = ? 
+                                    AND YEAR(data) = ?");
+        if (!$check_stmt) {
+            throw new Exception("Erro na preparação da query de verificação: " . $conn->error);
+        }
+
+        // Corrigido: Criar variáveis para bind_param
+        $mes_numero = intval($mesNumero);
+        $descricao = $despesa_original['descricao'];
+        
+        $check_stmt->bind_param("sii", $descricao, $mes_numero, $ano);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
         $count = $check_result->fetch_assoc()['count'];
 
         if ($count == 0) {
+            // Corrigido: Criar variáveis para bind_param
+            $valor = $despesa_original['valor'];
+            
             $insert_stmt->bind_param("sds", 
-                $despesa_original['descricao'],
-                $despesa_original['valor'],
+                $descricao,
+                $valor,
                 $data
             );
             
             if ($insert_stmt->execute()) {
                 $replicatedCount++;
+            } else {
+                throw new Exception("Erro ao inserir despesa para o mês $mesNome: " . $insert_stmt->error);
             }
         }
+
+        $check_stmt->close();
     }
 
     // Commit da transação
@@ -97,3 +133,9 @@ try {
         'error' => $e->getMessage()
     ]);
 }
+
+// Fechar conexões
+if (isset($stmt)) $stmt->close();
+if (isset($insert_stmt)) $insert_stmt->close();
+$conn->close();
+?>
