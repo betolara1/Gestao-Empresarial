@@ -179,6 +179,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Empresa</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -719,47 +720,6 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     </div>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="fas fa-industry"></i> Atividade Principal
-                        </div>
-                        <div class="info-value">
-                            <?php 
-                            if (!empty($empresa['codigo_cnae']) && !empty($empresa['descricao_cnae'])) {
-                                echo htmlspecialchars($empresa['codigo_cnae']) . ' - ' . 
-                                     htmlspecialchars($empresa['descricao_cnae']);
-                            } else {
-                                echo 'Não informado';
-                            }
-                            ?>
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="fas fa-tasks"></i> Atividades Secundárias
-                        </div>
-                        <div class="info-value">
-                            <?php 
-                            if (!empty($empresa['atividades_secundarias']) && !empty($empresa['descricoes_secundarias'])) {
-                                $atividades = explode(',', $empresa['atividades_secundarias']);
-                                $descricoes = explode('|||', $empresa['descricoes_secundarias']);
-                                
-                                foreach ($atividades as $index => $atividade) {
-                                    if (isset($descricoes[$index])) {
-                                        echo htmlspecialchars($atividade) . ' - ' . 
-                                             htmlspecialchars($descricoes[$index]) . '<br>';
-                                    }
-                                }
-                            } else {
-                                echo 'Não informado';
-                            }
-                            ?>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="btn-group">
                     <a href="editar_empresa.php" class="btn btn-primary">
                         <i class="fas fa-edit"></i> Editar Informações
@@ -792,7 +752,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                                             </a>
                                             <a href="excluir_socio.php?id=<?php echo $socio['id']; ?>" 
                                                class="btn btn-danger"
-                                               onclick="return confirm('Tem certeza que deseja excluir este sócio?')">
+                                               onclick="return excluirSocio(<?php echo $socio['id']; ?>)">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -819,7 +779,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     <div class="info-item">
                         <h3>Áreas de Atuação</h3>
                         <div class="table-responsive">
-                            <table>
+                            <table id="areasTable">
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -827,25 +787,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($result_atuacao->num_rows > 0): ?>
-                                        <?php while($area = $result_atuacao->fetch_assoc()): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($area['nome']); ?></td>
-                                                <td>
-                                                    <form method="post" style="display:inline;">
-                                                        <input type="hidden" name="id" value="<?php echo $area['id']; ?>">
-                                                        <button type="submit" name="delete_area" class="btn btn-danger">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="2">Nenhuma área cadastrada</td>
-                                        </tr>
-                                    <?php endif; ?>
+                                    <!-- Dados serão carregados dinamicamente -->
                                 </tbody>
                             </table>
                         </div>
@@ -857,7 +799,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     <div class="info-item">
                         <h3>Tipos de Serviços</h3>
                         <div class="table-responsive">
-                            <table>
+                            <table id="servicosTable">
                                 <thead>
                                     <tr>
                                         <th>Tipo</th>
@@ -865,25 +807,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($result->num_rows > 0): ?>
-                                        <?php while($servico = $result->fetch_assoc()): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($servico['tipo_servico']); ?></td>
-                                                <td>
-                                                    <form method="post" style="display:inline;">
-                                                        <input type="hidden" name="id" value="<?php echo $servico['id']; ?>">
-                                                        <button type="submit" name="delete" class="btn btn-danger">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="2">Nenhum serviço cadastrado</td>
-                                        </tr>
-                                    <?php endif; ?>
+                                    <!-- Dados serão carregados dinamicamente -->
                                 </tbody>
                             </table>
                         </div>
@@ -906,13 +830,13 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
     <div id="addAreaPopup" class="popup">
         <div class="popup-content">
             <h3>Nova Área de Atuação</h3>
-            <form method="post">
+            <form id="formArea">
                 <div class="form-group">
                     <label for="nome">Nome da Área:</label>
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" name="addArea" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Salvar
                     </button>
                     <button type="button" class="btn btn-danger" onclick="closePopup('addAreaPopup')">
@@ -926,13 +850,13 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
     <div id="addServicoPopup" class="popup">
         <div class="popup-content">
             <h3>Novo Tipo de Serviço</h3>
-            <form method="post">
+            <form id="formServico">
                 <div class="form-group">
                     <label for="tipo_servico">Tipo de Serviço:</label>
                     <input type="text" id="tipo_servico" name="tipo_servico" required>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" name="addTipo" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Salvar
                     </button>
                     <button type="button" class="btn btn-danger" onclick="closePopup('addServicoPopup')">
@@ -1000,6 +924,8 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         function openPopup(id) {
             const popup = document.getElementById(id);
@@ -1045,23 +971,13 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             if (file) {
                 // Verifica o tamanho do arquivo (máximo 2MB)
                 if (file.size > 2 * 1024 * 1024) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Arquivo muito grande',
-                        text: 'A imagem deve ter no máximo 2MB',
-                        confirmButtonColor: '#3085d6'
-                    });
+                    alert('A imagem deve ter no máximo 2MB');
                     return;
                 }
 
                 // Verifica o tipo do arquivo
                 if (!file.type.match('image.*')) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Arquivo inválido',
-                        text: 'Por favor, selecione uma imagem válida',
-                        confirmButtonColor: '#3085d6'
-                    });
+                    alert('Por favor, selecione uma imagem válida');
                     return;
                 }
 
@@ -1080,16 +996,7 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 }
                 reader.readAsDataURL(file);
 
-                // Upload da imagem com loading
-                Swal.fire({
-                    title: 'Enviando...',
-                    text: 'Aguarde enquanto a logo é enviada',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
+                // Upload da imagem
                 const formData = new FormData();
                 formData.append('logo', file);
 
@@ -1100,31 +1007,14 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Sucesso!',
-                            text: 'Logo atualizada com sucesso!',
-                            confirmButtonColor: '#3085d6'
-                        }).then(() => {
-                            location.reload();
-                        });
+                        location.reload();
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Erro!',
-                            text: 'Erro ao fazer upload da logo: ' + data.message,
-                            confirmButtonColor: '#3085d6'
-                        });
+                        alert('Erro ao fazer upload da logo: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro!',
-                        text: 'Erro ao fazer upload da logo',
-                        confirmButtonColor: '#3085d6'
-                    });
+                    alert('Erro ao fazer upload da logo');
                 });
             }
         });
@@ -1132,25 +1022,16 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
         // Função para remover a logo
         function removerLogo() {
             Swal.fire({
-                title: 'Tem certeza?',
-                text: "Você deseja remover a logo da empresa?",
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja remover a logo?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, remover!',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, remover',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Removendo...',
-                        text: 'Aguarde enquanto a logo é removida',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
                     fetch('remover_logo.php', {
                         method: 'POST'
                     })
@@ -1158,50 +1039,40 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                     .then(data => {
                         if (data.success) {
                             Swal.fire({
+                                title: 'Sucesso!',
+                                text: 'Logo removida com sucesso',
                                 icon: 'success',
-                                title: 'Removida!',
-                                text: 'A logo foi removida com sucesso.',
-                                confirmButtonColor: '#3085d6'
+                                timer: 1500,
+                                showConfirmButton: false
                             }).then(() => {
                                 location.reload();
                             });
                         } else {
                             Swal.fire({
-                                icon: 'error',
                                 title: 'Erro!',
                                 text: 'Erro ao remover a logo: ' + data.message,
-                                confirmButtonColor: '#3085d6'
+                                icon: 'error'
                             });
                         }
                     })
                     .catch(error => {
                         console.error('Erro:', error);
                         Swal.fire({
-                            icon: 'error',
                             title: 'Erro!',
                             text: 'Erro ao remover a logo',
-                            confirmButtonColor: '#3085d6'
+                            icon: 'error'
                         });
                     });
                 }
             });
         }
 
-        // Formulário de sócios
+        // Adicione este trecho para lidar com o formulário
         document.getElementById('formSocio').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             
-            Swal.fire({
-                title: 'Salvando...',
-                text: 'Aguarde enquanto os dados são salvos',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
             fetch('salvar_socios.php', {
                 method: 'POST',
                 body: formData
@@ -1210,29 +1081,32 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
             .then(data => {
                 if (data.success) {
                     Swal.fire({
-                        icon: 'success',
                         title: 'Sucesso!',
                         text: 'Sócio cadastrado com sucesso!',
-                        confirmButtonColor: '#3085d6'
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
                     }).then(() => {
                         location.reload();
                     });
                 } else {
                     Swal.fire({
-                        icon: 'error',
                         title: 'Erro!',
                         text: 'Erro ao cadastrar sócio: ' + data.message,
-                        confirmButtonColor: '#3085d6'
+                        icon: 'error',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
                     });
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
                 Swal.fire({
-                    icon: 'error',
                     title: 'Erro!',
                     text: 'Erro ao cadastrar sócio',
-                    confirmButtonColor: '#3085d6'
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
                 });
             });
         });
@@ -1302,29 +1176,281 @@ $cnaes = $gerenciador->processarCNAEs($empresa);
                 const coords = e.latlng;
                 const coordStr = `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`;
                 
-                // Copiar para a área de transferência
-                navigator.clipboard.writeText(coordStr).then(() => {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Coordenadas copiadas!',
-                        text: coordStr,
-                        confirmButtonColor: '#3085d6',
-                        timer: 2000,
-                        timerProgressBar: true
-                    });
-                }).catch(() => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro!',
-                        text: 'Não foi possível copiar as coordenadas',
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
+                // Criar um elemento temporário para copiar o texto
+                const el = document.createElement('textarea');
+                el.value = coordStr;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+
+                // Mostrar mensagem de confirmação
+                alert(`Coordenadas copiadas: ${coordStr}`);
             });
         }
 
         // Inicializar o mapa quando a página carregar
         document.addEventListener('DOMContentLoaded', initMap);
+
+        function excluirSocio(id) {
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja excluir este sócio?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'excluir_socio.php?id=' + id;
+                }
+            });
+            return false;
+        }
+
+        // Função para carregar as áreas
+        function carregarAreas() {
+            fetch('buscar_areas.php')
+                .then(response => response.json())
+                .then(areas => {
+                    const tbody = document.querySelector('#areasTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    if (areas.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="2">Nenhuma área cadastrada</td></tr>';
+                        return;
+                    }
+
+                    areas.forEach(area => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${area.nome}</td>
+                                <td>
+                                    <button onclick="excluirArea(${area.id})" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Erro ao carregar áreas',
+                        icon: 'error'
+                    });
+                });
+        }
+
+        // Função para excluir área
+        function excluirArea(id) {
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja excluir esta área?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('id', id);
+
+                    fetch('excluir_area.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Sucesso!',
+                                text: 'Área excluída com sucesso!',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            carregarAreas();
+                        } else {
+                            throw new Error(data.message || 'Erro ao excluir área');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: error.message,
+                            icon: 'error'
+                        });
+                    });
+                }
+            });
+        }
+
+        // Manipular o formulário de adicionar área
+        document.getElementById('formArea').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('salvar_area.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Sucesso!',
+                        text: 'Área cadastrada com sucesso!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    this.reset();
+                    closePopup('addAreaPopup');
+                    carregarAreas();
+                } else {
+                    throw new Error(data.message || 'Erro ao cadastrar área');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: error.message,
+                    icon: 'error'
+                });
+            });
+        });
+
+        // Carregar áreas quando a página carregar
+        document.addEventListener('DOMContentLoaded', carregarAreas);
+
+        // Função para carregar os serviços
+        function carregarServicos() {
+            fetch('buscar_servicos.php')
+                .then(response => response.json())
+                .then(servicos => {
+                    const tbody = document.querySelector('#servicosTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    if (servicos.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="2">Nenhum serviço cadastrado</td></tr>';
+                        return;
+                    }
+
+                    servicos.forEach(servico => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${servico.tipo_servico}</td>
+                                <td>
+                                    <button onclick="excluirServico(${servico.id})" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Erro ao carregar serviços',
+                        icon: 'error'
+                    });
+                });
+        }
+
+        // Função para excluir serviço
+        function excluirServico(id) {
+            Swal.fire({
+                title: 'Confirmar exclusão',
+                text: 'Tem certeza que deseja excluir este serviço?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('id', id);
+
+                    fetch('excluir_tipo_servico.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Sucesso!',
+                                text: 'Serviço excluído com sucesso!',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            carregarServicos();
+                        } else {
+                            throw new Error(data.message || 'Erro ao excluir serviço');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: error.message,
+                            icon: 'error'
+                        });
+                    });
+                }
+            });
+        }
+
+        // Manipular o formulário de adicionar serviço
+        document.getElementById('formServico').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('salvar_tipo_servico.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Sucesso!',
+                        text: 'Serviço cadastrado com sucesso!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    this.reset();
+                    closePopup('addServicoPopup');
+                    carregarServicos();
+                } else {
+                    throw new Error(data.message || 'Erro ao cadastrar serviço');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: error.message,
+                    icon: 'error'
+                });
+            });
+        });
+
+        // Carregar serviços quando a página carregar
+        document.addEventListener('DOMContentLoaded', carregarServicos);
     </script>
 
 </body>

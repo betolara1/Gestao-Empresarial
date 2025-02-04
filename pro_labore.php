@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'conexao.php';
 
 $socio_id = $_GET['id'] ?? null;
@@ -25,11 +26,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("idsiis", $socio_id, $valor, $tipo, $mes, $ano, $data);
     
     if ($stmt->execute()) {
-        $mensagem = "Pró-labore registrado com sucesso!";
+        $_SESSION['mensagem'] = "Pró-labore registrado com sucesso!";
     } else {
-        $mensagem = "Erro ao registrar pró-labore: " . $conn->error;
+        $_SESSION['mensagem'] = "Erro ao registrar pró-labore: " . $conn->error;
     }
+    
+    // Redireciona após o POST para evitar resubmissão
+    header("Location: pro_labore.php?id=" . $socio_id);
+    exit();
 }
+
+// Adicione esta parte para processar a exclusão
+if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['registro_id'])) {
+    $registro_id = $_GET['registro_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM retiradas_socios WHERE id = ? AND socio_id = ?");
+    $stmt->bind_param("ii", $registro_id, $socio_id);
+    
+    if ($stmt->execute()) {
+        $_SESSION['mensagem'] = "Registro excluído com sucesso!";
+    } else {
+        $_SESSION['mensagem'] = "Erro ao excluir registro: " . $conn->error;
+    }
+    
+    header("Location: pro_labore.php?id=" . $socio_id);
+    exit();
+}
+
+// Recupera a mensagem da sessão
+$mensagem = $_SESSION['mensagem'] ?? '';
+unset($_SESSION['mensagem']); // Limpa a mensagem da sessão
 
 // Busca histórico de pró-labore
 $stmt = $conn->prepare("SELECT * FROM retiradas_socios WHERE socio_id = ? AND tipo = 'LABORE' ORDER BY data_retirada DESC");
@@ -44,6 +70,8 @@ $historico = $stmt->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Pró-Labore</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -221,6 +249,13 @@ $historico = $stmt->get_result();
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
     </style>
 </head>
 <body>
@@ -257,6 +292,7 @@ $historico = $stmt->get_result();
                         <th>Data</th>
                         <th>Valor</th>
                         <th>Mês/Ano</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -265,6 +301,12 @@ $historico = $stmt->get_result();
                             <td><?php echo date('d/m/Y', strtotime($row['data_retirada'])); ?></td>
                             <td>R$ <?php echo number_format($row['valor'], 2, ',', '.'); ?></td>
                             <td><?php echo $row['mes'] . '/' . $row['ano']; ?></td>
+                            <td>
+                                <button onclick="excluirRegistro(<?php echo $row['id']; ?>)" 
+                                        class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
@@ -275,5 +317,25 @@ $historico = $stmt->get_result();
             </a>
         </div>
     </div>
+
+    <!-- Adicione este script antes do fechamento do body -->
+    <script>
+    function excluirRegistro(registroId) {
+        Swal.fire({
+            title: 'Confirmar exclusão',
+            text: 'Tem certeza que deseja excluir este registro?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `pro_labore.php?id=<?php echo $socio_id; ?>&action=delete&registro_id=${registroId}`;
+            }
+        });
+    }
+    </script>
 </body>
 </html> 

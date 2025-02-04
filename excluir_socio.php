@@ -29,7 +29,6 @@ try {
     $conn->commit();
 
     echo "<script>
-            alert('Sócio excluído com sucesso!');
             window.location.href = 'gerenciar_empresa.php';
           </script>";
 
