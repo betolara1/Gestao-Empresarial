@@ -356,6 +356,31 @@ $cnae_data = getCNAE();
             background-color: #f8f9fa !important;
         }
 
+        /* Adicione estes estilos CSS */
+        .form-group label.required:after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .required-tooltip {
+            position: relative;
+        }
+
+        .required-tooltip:hover:after {
+            content: "Campo obrigatório";
+            position: absolute;
+            background: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            bottom: 100%;
+            left: 0;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
+
     </style>
 </head>
 <body>

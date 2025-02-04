@@ -451,6 +451,31 @@ $total_pendente = $totais['total_pendente'];
             color: #666;
         }
 
+        /* Adicione estes estilos CSS */
+        .form-group label.required:after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .required-tooltip {
+            position: relative;
+        }
+
+        .required-tooltip:hover:after {
+            content: "Campo obrigatório";
+            position: absolute;
+            background: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            bottom: 100%;
+            left: 0;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -510,7 +535,7 @@ $total_pendente = $totais['total_pendente'];
                         <h2><i class="fas fa-tasks"></i> Status do Serviço</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="data_inicio">
+                                <label for="data_inicio" class="required">
                                     <i class="fas fa-calendar-plus"></i> Data de Início
                                 </label>
                                 <input type="date" id="data_inicio" name="data_inicio" value="<?php echo htmlspecialchars($servico['data_inicio']); ?>" required class="form-control">
@@ -536,13 +561,13 @@ $total_pendente = $totais['total_pendente'];
                         <h2><i class="fas fa-money-bill-wave"></i> Informações do Pagamento</h2>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="data_pagamento">
+                                <label for="data_pagamento" class="required">
                                     <i class="fas fa-calendar-day"></i> Vencimento
                                 </label>
                                 <input type="date" id="data_pagamento" name="data_pagamento" value="<?php echo htmlspecialchars($servico['data_pagamento']); ?>" required class="form-control">
                             </div>
                             <div class="form-group">
-                                <label for="forma_pagamento">
+                                <label for="forma_pagamento" class="required">
                                     <i class="fas fa-credit-card"></i> Forma de Pagamento
                                 </label>
                                 <select id="forma_pagamento" name="forma_pagamento" required class="form-control">
@@ -565,10 +590,10 @@ $total_pendente = $totais['total_pendente'];
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="valor_total">
+                                <label for="valor_total" class="required">
                                     <i class="fas fa-dollar-sign"></i> Valor Total
                                 </label>
-                                <input type="number" id="valor_total" name="valor_total" step="0.01" value="<?php echo htmlspecialchars($servico['valor_total']); ?>" class="form-control">
+                                <input type="number" id="valor_total" name="valor_total" step="0.01" value="<?php echo htmlspecialchars($servico['valor_total']); ?>" required class="form-control">
                             </div>
 
                             <div class="form-group">

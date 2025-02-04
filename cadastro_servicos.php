@@ -435,6 +435,31 @@ try {
         .btn-excluir:hover {
             background-color: #c0392b;
         }
+
+        /* Adicione estes estilos CSS */
+        .form-group label.required:after {
+            content: "*";
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+
+        .required-tooltip {
+            position: relative;
+        }
+
+        .required-tooltip:hover:after {
+            content: "Campo obrigatório";
+            position: absolute;
+            background: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            bottom: 100%;
+            left: 0;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -453,8 +478,8 @@ try {
                     <h2>Informações do Serviço</h2>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="numero_proposta"><i class="fas fa-file-alt"></i> Número da Proposta</label>
-                            <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($numero_proposta); ?>" onchange="verificarNumeroProposta(this.value)">
+                            <label for="numero_proposta" class="required"><i class="fas fa-file-alt"></i> Número da Proposta</label>
+                            <input type="text" id="numero_proposta" name="numero_proposta" value="<?php echo htmlspecialchars($numero_proposta); ?>" required onchange="verificarNumeroProposta(this.value)">
                             <small id="numero_proposta_feedback" style="display: none;"></small>
                         </div>
                         <div class="form-group">
@@ -484,13 +509,13 @@ try {
                     <div class="checkbox-group">
                         <?php foreach ($tipos_servico as $servico): ?>
                             <div class='form-check'>
-                                <input class='form-check-input' type='checkbox' 
+                                <input class='form-check-input' type='checkbox' required
                                     name='tipo_servico[]' 
                                     id='servico_<?php echo htmlspecialchars($servico['id']); ?>' 
-                                    value='<?php echo htmlspecialchars($servico['id']); ?>'>
+                                    value='<?php echo htmlspecialchars($servico['id']); ?>' >
                                 <label class='form-check-label' 
                                     for='servico_<?php echo htmlspecialchars($servico['id']); ?>'>
-                                    <?php echo htmlspecialchars($servico['tipo_servico']); ?>
+                                    <?php echo htmlspecialchars($servico['tipo_servico']); ?> 
                                 </label>
                             </div>
                         <?php endforeach; ?>
