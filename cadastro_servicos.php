@@ -509,7 +509,7 @@ try {
                     <div class="checkbox-group">
                         <?php foreach ($tipos_servico as $servico): ?>
                             <div class='form-check'>
-                                <input class='form-check-input' type='checkbox' required
+                                <input class='form-check-input' type='checkbox'
                                     name='tipo_servico[]' 
                                     id='servico_<?php echo htmlspecialchars($servico['id']); ?>' 
                                     value='<?php echo htmlspecialchars($servico['id']); ?>' >

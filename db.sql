@@ -1,8 +1,9 @@
-CREATE DATABASE dbmanager;
+CREATE DATABASE IF NOT EXISTS dbmanager;
 
 USE dbmanager;
 
-CREATE TABLE cliente (
+
+CREATE TABLE IF NOT EXISTS cliente (
     id INT PRIMARY KEY AUTO_INCREMENT,
     tipo_pessoa ENUM('F', 'J') NOT NULL,
     razao_social VARCHAR(100),
@@ -29,7 +30,7 @@ CREATE TABLE cliente (
 );
 
 
-CREATE TABLE servicos (
+CREATE TABLE IF NOT EXISTS servicos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_proposta INT,
     cliente_id INT NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE servicos (
 
 
 
-CREATE TABLE pagamentos (
+CREATE TABLE IF NOT EXISTS pagamentos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_proposta INT NOT NULL,
     parcela_num INT NOT NULL,
@@ -72,7 +73,7 @@ CREATE TABLE pagamentos (
 
 
 
-CREATE TABLE despesas (
+CREATE TABLE IF NOT EXISTS despesas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     proposta INT,
     nome_despesa VARCHAR(100) NOT NULL,
@@ -81,12 +82,12 @@ CREATE TABLE despesas (
 );
 
 
-CREATE TABLE tipos_servicos (
+CREATE TABLE IF NOT EXISTS tipos_servicos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo_servico VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE servico_tipo_servico (
+CREATE TABLE IF NOT EXISTS servico_tipo_servico (
     id INT AUTO_INCREMENT PRIMARY KEY,
     servico_id INT NOT NULL,
     tipo_servico_id INT NOT NULL,
@@ -96,13 +97,13 @@ CREATE TABLE servico_tipo_servico (
 );
 
 
-CREATE TABLE areas_atuacao (
+CREATE TABLE IF NOT EXISTS areas_atuacao (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL
 );
 
 
-CREATE TABLE empresa (
+CREATE TABLE IF NOT EXISTS empresa (
     id INT PRIMARY KEY AUTO_INCREMENT,
     razao_social VARCHAR(100),
     cnpj VARCHAR(20),
@@ -120,22 +121,22 @@ CREATE TABLE empresa (
     celular VARCHAR(25),
     email VARCHAR(100),
     logo MEDIUMBLOB,
-    atividades_secundarias TEXT;
-    descricoes_secundarias TEXT;
+    atividades_secundarias TEXT,
+    descricoes_secundarias TEXT,
     codigo_cnae VARCHAR(255),
     descricao_cnae TEXT,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
-CREATE TABLE despesas_fixas (
+CREATE TABLE IF NOT EXISTS despesas_fixas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(255) NOT NULL,
     valor DECIMAL(10, 2) NOT NULL,
     data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE logos (
+CREATE TABLE IF NOT EXISTS logos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     image_data MEDIUMBLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -162,7 +163,7 @@ CREATE TABLE IF NOT EXISTS retiradas_socios (
     FOREIGN KEY (socio_id) REFERENCES socios(id)
 );
 
-CREATE TABLE favoritos (
+CREATE TABLE IF NOT EXISTS favoritos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     card_id VARCHAR(50) NOT NULL,

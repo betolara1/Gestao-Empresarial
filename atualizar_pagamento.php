@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Atualiza o status da parcela para "Pago"
         $sql_update = "UPDATE pagamentos 
-                       SET status_pagamento = 'Pago', valor_pago = valor_parcela, valor_pagar = 0 
+                       SET status_pagamento = 'Pago'
                        WHERE numero_proposta = ? AND parcela_num = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param("ii", $numero_proposta, $parcela_num);

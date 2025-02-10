@@ -333,19 +333,23 @@ foreach ($servicos as $servico) {
             left: 0;
             top: 0;
             width: 100%;
-            height: 100%;
+            height: 100vh; /* Altura total da viewport */
             background-color: rgba(0,0,0,0.5);
+            overflow: hidden; /* Previne scroll no background */
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: 5% auto;
+            margin: 20px auto; /* Reduz a margem superior */
             padding: 0;
             border: 1px solid #888;
             width: 80%;
             max-width: 800px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 90vh; /* Altura máxima de 90% da viewport */
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
@@ -354,13 +358,16 @@ foreach ($servicos as $servico) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #007bff; /* Cor do cabeçalho do modal */
-            color: white; /* Cor do texto do cabeçalho do modal */
+            background-color: #007bff;
+            color: white;
             border-radius: 8px 8px 0 0;
+            flex-shrink: 0; /* Previne o header de encolher */
         }
 
         .modal-body {
             padding: 20px;
+            overflow-y: auto; /* Adiciona scrollbar vertical quando necessário */
+            flex-grow: 1; /* Permite que o corpo cresça */
         }
 
         .close {

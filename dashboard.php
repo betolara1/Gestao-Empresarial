@@ -36,11 +36,11 @@ $saldo = $totalRecebido - $totalDespesas;
 // Despesas mensais fixas
 $sqlDespesasMensaisFixas = "
     SELECT 
-        mes, 
+        MONTH(data) as mes, 
         SUM(valor) AS total_despesas 
     FROM despesas_fixas 
-    GROUP BY mes
-    ORDER BY FIELD(mes, '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12')";
+    GROUP BY MONTH(data)
+    ORDER BY MONTH(data)";
 $resultDespesasMensaisFixas = $conn->query($sqlDespesasMensaisFixas);
 $despesasMensaisFixas = [];
 while ($row = $resultDespesasMensaisFixas->fetch_assoc()) {
@@ -49,8 +49,6 @@ while ($row = $resultDespesasMensaisFixas->fetch_assoc()) {
 
 // Projeção financeira
 $projecaoFinanceira = ($totalEntrada - ($totalDespesasFixas + $totalDespesasGerais)) + $totalRecebido;
-
-
 
 // Quantidade de serviços por status
 $sqlServicosStatus = "
@@ -82,11 +80,11 @@ $resultEntradasMensais = $conn->query($sqlEntradasMensais);
 // Despesas mensais
 $sqlDespesasMensais = "
     SELECT 
-        mes, 
+        MONTH(data) as mes, 
         SUM(valor) AS total_despesas 
     FROM despesas_fixas 
-    GROUP BY mes
-    ORDER BY FIELD(mes, '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12')";
+    GROUP BY MONTH(data)
+    ORDER BY MONTH(data)";
 $resultDespesasMensais = $conn->query($sqlDespesasMensais);
 
 // Organizar os dados
@@ -320,43 +318,42 @@ $intervalo = $resultIntervalo->fetch_assoc();
 $anoInicial = $intervalo['ano_inicial'];
 $anoFinal = $intervalo['ano_final'];
 
+// Primeiro, criar uma CTE (Common Table Expression) para gerar a sequência de anos
+// $anoInicial = 2020; // Defina o ano inicial desejado
+$anoAtual = date('Y');
+
 $sqlTodosAnos = "
     WITH RECURSIVE anos AS (
         SELECT $anoInicial as ano
         UNION ALL
-        SELECT ano + 1
-        FROM anos
-        WHERE ano < $anoFinal
-    )
-    SELECT * FROM anos";
+        SELECT ano + 1 FROM anos WHERE ano < $anoAtual
+    )";
 
 $sqlServicosAnuais = "
     SELECT 
-        a.ano,
+        YEAR(s.data_inicio) as ano,
         COUNT(s.id) as total_servicos,
         COALESCE(SUM(s.valor_total), 0) as valor_total_servicos,
         COALESCE((
             SELECT SUM(d.valor)
             FROM despesas d
-            WHERE YEAR(d.data) = a.ano
+            WHERE YEAR(d.data) = YEAR(s.data_inicio)
         ), 0) as total_despesas,
         COALESCE((
             SELECT SUM(df.valor)
             FROM despesas_fixas df
-            WHERE YEAR(df.data) = a.ano
+            WHERE YEAR(df.data) = YEAR(s.data_inicio)
         ), 0) as total_despesas_fixas
-    FROM ($sqlTodosAnos) a
-    LEFT JOIN servicos s ON YEAR(s.data_inicio) = a.ano
-    GROUP BY a.ano
-    ORDER BY a.ano";
+    FROM servicos s
+    GROUP BY YEAR(s.data_inicio)
+    ORDER BY ano";
 
 $resultServicosAnuais = $conn->query($sqlServicosAnuais);
 $servicosAnuais = [];
+
 while ($row = $resultServicosAnuais->fetch_assoc()) {
     $servicosAnuais[$row['ano']] = $row;
 }
-
-
 
 // Consultar as coordenadas da empresa (você pode filtrar por id ou outro critério)
 $stmt = $conn->query("SELECT coordenada FROM empresa WHERE id = 1"); // Exemplo de filtro pelo ID
@@ -1134,7 +1131,7 @@ $conn->close();
                                     <option value="">Selecione o Ano</option>
                                     <?php 
                                     $anoAtual = date('Y');
-                                    for($ano = $anoAtual; $ano >= 2024; $ano--) {
+                                    for($ano = $anoAtual; $ano >= 2025; $ano--) {
                                         echo "<option value='$ano'" . ($ano == $anoAtual ? " selected" : "") . ">$ano</option>";
                                     }
                                     ?>
@@ -1831,6 +1828,7 @@ $conn->close();
             if (tipoVisualizacao === 'geral') {
                 datasets = [
                     {
+                        
                         label: 'Pró-Labore Retirado',
                         data: socios.map(s => s.pro_labore_retirado),
                         backgroundColor: 'rgba(231, 76, 60, 0.7)',
@@ -1936,6 +1934,32 @@ $conn->close();
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
+                        // Atualizar o select de anos se necessário
+                        if (data.anos_disponiveis && data.anos_disponiveis.length > 0) {
+                            const anoSelect = document.getElementById('anoSelectSocios');
+                            // Guardar o ano selecionado atual
+                            const anoAtual = anoSelect.value;
+                            
+                            // Limpar opções existentes
+                            anoSelect.innerHTML = '';
+                            
+                            // Adicionar novas opções
+                            data.anos_disponiveis.forEach(ano => {
+                                const option = document.createElement('option');
+                                option.value = ano;
+                                option.textContent = ano;
+                                anoSelect.appendChild(option);
+                            });
+                            
+                            // Tentar restaurar o ano selecionado anteriormente
+                            if (data.anos_disponiveis.includes(parseInt(anoAtual))) {
+                                anoSelect.value = anoAtual;
+                            } else {
+                                // Se o ano anterior não estiver disponível, selecionar o primeiro ano disponível
+                                anoSelect.value = data.anos_disponiveis[0];
+                            }
+                        }
+
                         criarGraficoSocios(data);
                         document.getElementById('faturamentoTotal').textContent = 
                             data.periodo.faturamento_total.toLocaleString('pt-BR', {

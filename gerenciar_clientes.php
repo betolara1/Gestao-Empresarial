@@ -19,7 +19,6 @@ $sql = "SELECT
             bairro,
             cidade,
             estado,
-            telefone,
             celular,
             email,
             codigo_cnae,
